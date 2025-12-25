@@ -1,0 +1,40 @@
+# ===== Java / Maven =====
+/target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# ===== Spring Tool Suite / Eclipse =====
+.classpath
+.project
+.settings/
+.factorypath
+.springBeans
+
+# ===== IntelliJ IDEA (por si acaso) =====
+.idea/
+*.iml
+out/
+
+# ===== VS Code =====
+.vscode/
+
+# ===== OS files =====
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ===== Windows =====
+*.lnk
+
+# ===== Env / Secrets =====
+.env
+*.local
+application-dev.properties
+application-prod.properties
