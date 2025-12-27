@@ -14,8 +14,8 @@ spring.datasource.hikari.connection-timeout=30000
 spring.datasource.hikari.idle-timeout=600000
 spring.datasource.hikari.max-lifetime=1800000
 
-# JPA/Hibernate
-spring.jpa.hibernate.ddl-auto=update
+# JPA/Hibernate (Flyway)
+spring.jpa.hibernate.ddl-auto=validate
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 
@@ -29,3 +29,7 @@ logging.level.org.hibernate.orm.jdbc.bind=TRACE
 # Swagger-UI
 springdoc.swagger-ui.enabled=true
 springdoc.api-docs.enabled=true
+
+# Configuration flyway
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration

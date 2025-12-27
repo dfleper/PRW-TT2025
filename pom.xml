@@ -2,8 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
-  
+
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
@@ -20,7 +21,13 @@
   <description>Project Turbo Taller 2025</description>
 
   <properties>
+    <!-- Java -->
     <java.version>17</java.version>
+    <maven.compiler.release>17</maven.compiler.release>
+
+    <!-- Encoding (SOLUCIÓN al MalformedInputException) -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- Por defecto (local/STS): tomcat embebido -->
     <tomcat.scope>compile</tomcat.scope>
@@ -76,6 +83,25 @@
       <scope>runtime</scope>
     </dependency>
 
+    <!-- Flyway (Spring Boot 3.x) -->
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+    </dependency>
+
+    <!-- Soporte MariaDB/MySQL para Flyway -->
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-mysql</artifactId>
+    </dependency>
+
+    <!-- Swagger-UI -->
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <version>2.8.14</version>
+    </dependency>
+
     <!-- Devtools (solo útil en local) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -84,18 +110,11 @@
       <optional>true</optional>
     </dependency>
 
-    <!-- Tests (solo este) -->
+    <!-- Tests -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
-    </dependency>
-    
-     <!-- Swagger-UI -->
-    <dependency>
-  	  <groupId>org.springdoc</groupId>
-  	  <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-      <version>2.8.14</version>
     </dependency>
 
   </dependencies>
@@ -104,18 +123,31 @@
     <!-- Esto fuerza el nombre del WAR -->
     <finalName>TT2025</finalName>
 
+    <!-- Importante: asegurar encoding en resources -->
     <plugins>
+
+      <!-- Resources plugin (SOLUCIÓN al MalformedInputException) -->
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <configuration>
+          <encoding>${project.build.sourceEncoding}</encoding>
+        </configuration>
+      </plugin>
+
+      <!-- Spring Boot -->
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
 
+      <!-- WAR -->
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
         <configuration>
           <failOnMissingWebXml>false</failOnMissingWebXml>
         </configuration>
       </plugin>
+
     </plugins>
   </build>
 
