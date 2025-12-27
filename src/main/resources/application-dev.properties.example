@@ -1,0 +1,31 @@
+# ==============================
+# DEV (LOCAL) - MariaDB
+# ==============================
+
+spring.datasource.url=jdbc:mariadb://localhost:3306/tt2025
+spring.datasource.username=YOUR_USER
+spring.datasource.password=YOUR_PASSWORD
+spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
+
+# Hikari (local)
+spring.datasource.hikari.maximum-pool-size=10
+spring.datasource.hikari.minimum-idle=2
+spring.datasource.hikari.connection-timeout=30000
+spring.datasource.hikari.idle-timeout=600000
+spring.datasource.hikari.max-lifetime=1800000
+
+# JPA/Hibernate
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+# Thymeleaf (dev)
+spring.thymeleaf.cache=false
+
+# Logs
+logging.level.org.hibernate.SQL=DEBUG
+logging.level.org.hibernate.orm.jdbc.bind=TRACE
+
+# Swagger-UI
+springdoc.swagger-ui.enabled=true
+springdoc.api-docs.enabled=true
