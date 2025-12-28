@@ -8,5 +8,9 @@
 <body>
 	<h1>TT2025 OK</h1>
 	<p>Si ves esto, tu controlador y Thymeleaf funcionan.</p>
+	<form th:action="@{/logout}" method="post">
+	  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	  <button type="submit">Salir</button>
+	</form>
 </body>
 </html>

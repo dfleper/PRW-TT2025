@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>403 | Acceso denegado</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; background:#0b1220; color:#e5e7eb; margin:0; }
+    .wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; text-align:center; }
+    .card { width:100%; max-width:520px; background:#111827; border:1px solid #1f2937; border-radius:16px; padding:22px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    h1 { margin:0; font-size:36px; letter-spacing:1px; }
+    p { margin:10px 0 18px 0; color:#9ca3af; }
+    a { display:inline-block; margin:6px; padding:10px 14px; border-radius:10px; text-decoration:none; font-weight:600; }
+    .home { background:#2563eb; color:white; }
+    .home:hover { background:#1d4ed8; }
+    .login { border:1px solid #374151; color:#e5e7eb; }
+    .login:hover { background:#0b1220; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>403</h1>
+    <p>No tienes permisos para acceder a esta página.</p>
+
+    <a class="home" th:href="@{/}">Ir al inicio</a>
+    <a class="login" th:href="@{/login}">Iniciar sesión</a>
+  </div>
+</div>
+</body>
+</html>
