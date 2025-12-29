@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="navbar"
+     style="background:#0b1220;border-bottom:1px solid #1f2937;color:#e5e7eb;">
+  <div style="max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:14px;">
+
+    <!-- Marca -->
+    <a th:href="@{/}" style="color:#e5e7eb;text-decoration:none;font-weight:700;">
+      Turbo Taller
+    </a>
+
+    <!-- NO autenticado: Home + Login -->
+    <div th:if="${#authorization.expression('!isAuthenticated()')}" style="display:flex;gap:14px;">
+      <a th:href="@{/}" style="color:#93c5fd;text-decoration:none;">Home</a>
+      <a th:href="@{/login}" style="color:#93c5fd;text-decoration:none;">Login</a>
+    </div>
+
+    <!-- CLIENTE: Cliente + Logout -->
+    <div th:if="${#authorization.expression('hasAuthority(''CLIENTE'') or hasAuthority(''ROLE_CLIENTE'')')}"
+         style="display:flex;gap:14px;">
+      <a th:href="@{/cliente}" style="color:#93c5fd;text-decoration:none;">Cliente</a>
+    </div>
+
+    <!-- Personal: Backoffice + Logout -->
+    <div th:if="${#authorization.expression(
+        'hasAnyAuthority(''RECEPCION'',''ROLE_RECEPCION'',''MECANICO'',''ROLE_MECANICO'',''JEFE_TALLER'',''ROLE_JEFE_TALLER'',''ADMIN'',''ROLE_ADMIN'')'
+      )}"
+         style="display:flex;gap:14px;">
+      <a th:href="@{/backoffice}" style="color:#93c5fd;text-decoration:none;">Backoffice</a>
+    </div>
+
+    <!-- Logout (si está autenticado) -->
+    <div style="margin-left:auto;">
+      <form th:if="${#authorization.expression('isAuthenticated()')}"
+            th:action="@{/logout}" method="post" style="display:inline;">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit"
+                style="cursor:pointer;border:0;background:#2563eb;color:white;padding:8px 10px;border-radius:10px;font-weight:700;">
+          Logout
+        </button>
+      </form>
+    </div>
+
+  </div>
+</nav>
+</body>
+</html>

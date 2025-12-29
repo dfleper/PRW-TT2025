@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title th:text="${title} ?: 'Turbo Taller'">Turbo Taller</title>
+
+  <!-- CSS propio -->
+  <link rel="stylesheet" th:href="@{/css/app.css}" />
+
+  <!-- (Opcional) favicon -->
+  <!-- <link rel="icon" th:href="@{/img/favicon.ico}" /> -->
+</head>
+</html>

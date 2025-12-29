@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      th:fragment="html(pageTitle, content)">
+
+<head th:replace="~{fragments/head :: head(title=${pageTitle})}"></head>
+
+<body>
+  <header th:replace="~{fragments/navbar :: navbar}"></header>
+
+  <main style="max-width:1100px;margin:0 auto;padding:18px 16px;">
+    <section th:replace="${content}"></section>
+  </main>
+
+  <footer style="border-top:1px solid #1f2937;padding:16px;text-align:center;color:#9ca3af;">
+    <small>© <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2025</span> Turbo Taller</small>
+  </footer>
+</body>
+</html>
