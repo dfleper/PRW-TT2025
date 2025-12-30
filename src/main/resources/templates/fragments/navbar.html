@@ -11,10 +11,11 @@
     </a>
 
     <!-- NO autenticado: Home + Login -->
-    <div th:if="${#authorization.expression('!isAuthenticated()')}" style="display:flex;gap:14px;">
-      <a th:href="@{/}" style="color:#93c5fd;text-decoration:none;">Home</a>
-      <a th:href="@{/login}" style="color:#93c5fd;text-decoration:none;">Login</a>
-    </div>
+	<div th:if="${#authorization.expression('!isAuthenticated()')}" style="display:flex;gap:14px;">
+	  <a th:href="@{/}" style="color:#93c5fd;text-decoration:none;">Home</a>
+	  <a th:href="@{/login}" style="color:#93c5fd;text-decoration:none;">Login</a>
+	  <a th:href="@{/register}" style="color:#93c5fd;text-decoration:none;">Register</a>
+	</div>
 
     <!-- CLIENTE: Cliente + Logout -->
     <div th:if="${#authorization.expression('hasAuthority(''CLIENTE'') or hasAuthority(''ROLE_CLIENTE'')')}"

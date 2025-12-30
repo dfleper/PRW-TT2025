@@ -16,4 +16,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
         WHERE u.email = :email
     """)
     Optional<UserEntity> findByEmailWithRoles(@Param("email") String email);
+    
+    boolean existsByEmailIgnoreCase(String email);
+
 }
