@@ -121,14 +121,38 @@ Ejemplos:
 ## Estructura del proyecto (orientativa)
 
 ```text
-src/
- └─ main/
-    ├─ java/
-    │   └─ ... (controllers / services / repositories / model)
-    └─ resources/
-        ├─ templates/   (Thymeleaf)
-        ├─ static/      (css/js/img)
-        └─ application*.properties
+es.prw
+ ├─ Tt2025Application.java
+ ├─ config
+ │   ├─ security
+ │   ├─ openapi
+ │   └─ web
+ ├─ common
+ │   ├─ exception
+ │   ├─ util
+ │   └─ constants
+ └─ features
+     ├─ cliente
+     │   ├─ vehiculos
+     │   │   ├─ web
+     │   │   ├─ dto
+     │   │   ├─ domain
+     │   │   ├─ repository
+     │   │   ├─ service
+     │   │   └─ validation
+     │   ├─ servicios
+     │   │   ├─ web
+     │   │   ├─ dto
+     │   │   ├─ domain
+     │   │   ├─ repository
+     │   │   ├─ service
+     │   │   └─ validation
+     │   └─ citas
+     │       └─ ...
+     ├─ empleado
+     │   └─ ...
+     └─ admin
+         └─ ...
 ```
 
 ---
