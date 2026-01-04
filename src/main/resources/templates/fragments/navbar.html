@@ -10,20 +10,38 @@
       Turbo Taller
     </a>
 
-    <!-- NO autenticado: Home + Login -->
-	<div th:if="${#authorization.expression('!isAuthenticated()')}" style="display:flex;gap:14px;">
-	  <a th:href="@{/}" style="color:#93c5fd;text-decoration:none;">Home</a>
-	  <a th:href="@{/login}" style="color:#93c5fd;text-decoration:none;">Login</a>
-	  <a th:href="@{/register}" style="color:#93c5fd;text-decoration:none;">Register</a>
-	</div>
+    <!-- COMÚN: Home + Servicios (Servicios cambia según rol) -->
+    <div style="display:flex;gap:14px;">
+      <a th:href="@{/}" style="color:#93c5fd;text-decoration:none;">Home</a>
 
-    <!-- CLIENTE: Cliente + Logout -->
-    <div th:if="${#authorization.expression('hasAuthority(''CLIENTE'') or hasAuthority(''ROLE_CLIENTE'')')}"
+      <!-- Si es CLIENTE -> /cliente/servicios (con selección) -->
+      <a th:if="${#authorization.expression('hasAnyAuthority(''CLIENTE'',''ROLE_CLIENTE'')')}"
+         th:href="@{/cliente/servicios}"
+         style="color:#93c5fd;text-decoration:none;">
+        Servicios
+      </a>
+
+      <!-- Si NO es CLIENTE -> /servicios (catálogo público) -->
+      <a th:unless="${#authorization.expression('hasAnyAuthority(''CLIENTE'',''ROLE_CLIENTE'')')}"
+         th:href="@{/servicios}"
+         style="color:#93c5fd;text-decoration:none;">
+        Servicios
+      </a>
+    </div>
+
+    <!-- NO autenticado: Login/Register -->
+    <div th:if="${#authorization.expression('!isAuthenticated()')}" style="display:flex;gap:14px;">
+      <a th:href="@{/login}" style="color:#93c5fd;text-decoration:none;">Login</a>
+      <a th:href="@{/register}" style="color:#93c5fd;text-decoration:none;">Register</a>
+    </div>
+
+    <!-- CLIENTE: Cliente -->
+    <div th:if="${#authorization.expression('hasAnyAuthority(''CLIENTE'',''ROLE_CLIENTE'')')}"
          style="display:flex;gap:14px;">
       <a th:href="@{/cliente}" style="color:#93c5fd;text-decoration:none;">Cliente</a>
     </div>
 
-    <!-- Personal: Backoffice + Logout -->
+    <!-- Personal: Backoffice -->
     <div th:if="${#authorization.expression(
         'hasAnyAuthority(''RECEPCION'',''ROLE_RECEPCION'',''MECANICO'',''ROLE_MECANICO'',''JEFE_TALLER'',''ROLE_JEFE_TALLER'',''ADMIN'',''ROLE_ADMIN'')'
       )}"
