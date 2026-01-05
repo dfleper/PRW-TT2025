@@ -23,6 +23,9 @@ public class SecurityConfig {
         // Públicos
         .requestMatchers("/", "/index", "/servicios", "/servicios/**", "/login", "/register", "/error", "/error/**", "/css/**", "/js/**", "/img/**").permitAll()
 
+        // API pública (validación disponibilidad)
+        .requestMatchers("/api/availability").permitAll()
+
         // Reglas por rol (soporta "ROL" y "ROLE_ROL" para evitar líos de prefijos)
         .requestMatchers("/cliente/**").hasAnyAuthority("CLIENTE", "ROLE_CLIENTE")
 
