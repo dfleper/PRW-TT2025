@@ -36,6 +36,7 @@ Proyecto DAW TT2025 – Turbo Taller: aplicación web Spring Boot (Java 17) con 
 Crea una base de datos en MariaDB:
 
 ```sql
+DROP DATABASE IF EXISTS tt2025;
 CREATE DATABASE tt2025 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
