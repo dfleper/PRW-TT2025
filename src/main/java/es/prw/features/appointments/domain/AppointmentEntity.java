@@ -7,6 +7,8 @@ import es.prw.features.cliente.vehiculos.domain.VehicleEntity;
 import es.prw.features.iam.domain.CustomerEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,12 +30,6 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "appointments")
 public class AppointmentEntity {
-
-    public static final String ESTADO_PENDIENTE = "pendiente";
-    public static final String ESTADO_CONFIRMADA = "confirmada";
-    public static final String ESTADO_EN_CURSO = "en_curso";
-    public static final String ESTADO_FINALIZADA = "finalizada";
-    public static final String ESTADO_CANCELADA = "cancelada";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -64,8 +60,9 @@ public class AppointmentEntity {
     @Column(name = "fin", nullable = false)
     private LocalDateTime fin;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 20)
-    private String estado = ESTADO_PENDIENTE;
+    private AppointmentStatus estado = AppointmentStatus.pendiente;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -78,7 +75,7 @@ public class AppointmentEntity {
         LocalDateTime now = LocalDateTime.now();
         if (this.createdAt == null) this.createdAt = now;
         if (this.updatedAt == null) this.updatedAt = now;
-        if (this.estado == null || this.estado.trim().isEmpty()) this.estado = ESTADO_PENDIENTE;
+        if (this.estado == null) this.estado = AppointmentStatus.pendiente;
     }
 
     @PreUpdate
@@ -110,8 +107,8 @@ public class AppointmentEntity {
     public LocalDateTime getFin() { return fin; }
     public void setFin(LocalDateTime fin) { this.fin = fin; }
 
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
+    public AppointmentStatus getEstado() { return estado; }
+    public void setEstado(AppointmentStatus estado) { this.estado = estado; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

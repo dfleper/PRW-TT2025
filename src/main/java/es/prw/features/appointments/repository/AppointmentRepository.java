@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import es.prw.features.appointments.domain.AppointmentEntity;
+import es.prw.features.appointments.domain.AppointmentStatus;
 
 
 public interface AppointmentRepository extends JpaRepository<AppointmentEntity, Long> {
@@ -30,6 +31,6 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
     List<AppointmentEntity> findOverlaps(
         @Param("requestedStart") LocalDateTime requestedStart,
         @Param("requestedEnd") LocalDateTime requestedEnd,
-        @Param("ignoredStates") List<String> ignoredStates
+        @Param("ignoredStates") List<AppointmentStatus> ignoredStates
     );
 }

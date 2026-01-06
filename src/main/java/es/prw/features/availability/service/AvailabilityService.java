@@ -8,10 +8,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import es.prw.features.appointments.domain.AppointmentEntity;
 import es.prw.features.appointments.repository.AppointmentRepository;
 import es.prw.features.catalog.domain.ServiceEntity;
 import es.prw.features.catalog.repository.ServiceRepository;
+
+import es.prw.features.appointments.domain.AppointmentStatus;
 
 @Service
 public class AvailabilityService {
@@ -57,10 +58,8 @@ public class AvailabilityService {
 
         if (!passesOptionalRules(startDateTime, endDateTime)) return false;
 
-        List<String> ignored = List.of(AppointmentEntity.ESTADO_CANCELADA);
-        // Si en tu negocio quieres que 'finalizada' NO bloquee, añade:
-        // List<String> ignored = List.of(AppointmentEntity.ESTADO_CANCELADA, AppointmentEntity.ESTADO_FINALIZADA);
-
+        List<AppointmentStatus> ignored = List.of(AppointmentStatus.cancelada);
+       
         return appointmentRepository.findOverlaps(startDateTime, endDateTime, ignored).isEmpty();
     }
 
