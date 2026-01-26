@@ -35,7 +35,7 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     @Transactional(readOnly = true)
     public List<VehicleDto> listForClient(String userEmail) {
-        CustomerEntity customer = getCustomerByEmail(userEmail);
+        CustomerEntity customer = getOrCreateCustomerByEmail(userEmail);
 
         return vehicleRepository
                 .findByCustomer_IdCustomerAndActivoTrueOrderByMarcaAscModeloAscMatriculaAsc(customer.getIdCustomer())
@@ -47,7 +47,7 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     @Transactional(readOnly = true)
     public VehicleDto getForEdit(String userEmail, Long idVehicle) {
-        CustomerEntity customer = getCustomerByEmail(userEmail);
+        CustomerEntity customer = getOrCreateCustomerByEmail(userEmail);
 
         VehicleEntity v = vehicleRepository
                 .findByIdVehicleAndCustomer_IdCustomer(idVehicle, customer.getIdCustomer())
@@ -58,7 +58,7 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public void create(String userEmail, VehicleDto dto) {
-        CustomerEntity customer = getCustomerByEmail(userEmail);
+        CustomerEntity customer = getOrCreateCustomerByEmail(userEmail);
 
         String matriculaNorm = normalizeMatricula(dto.getMatricula());
         if (vehicleRepository.existsByMatriculaIgnoreCase(matriculaNorm)) {
@@ -70,7 +70,7 @@ public class VehicleServiceImpl implements VehicleService {
         v.setMatricula(matriculaNorm);
         v.setMarca(dto.getMarca().trim());
         v.setModelo(dto.getModelo().trim());
-        v.setAnio(dto.getAnio() == null ? null : dto.getAnio().shortValue()); // Integer -> Short
+        v.setAnio(dto.getAnio() == null ? null : dto.getAnio().shortValue());
         v.setCombustible(trimToNull(dto.getCombustible()));
         v.setNotas(trimToNull(dto.getNotas()));
         v.setActivo(true);
@@ -80,7 +80,7 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public void update(String userEmail, Long idVehicle, VehicleDto dto) {
-        CustomerEntity customer = getCustomerByEmail(userEmail);
+        CustomerEntity customer = getOrCreateCustomerByEmail(userEmail);
 
         VehicleEntity v = vehicleRepository
                 .findByIdVehicleAndCustomer_IdCustomer(idVehicle, customer.getIdCustomer())
@@ -94,7 +94,7 @@ public class VehicleServiceImpl implements VehicleService {
         v.setMatricula(matriculaNorm);
         v.setMarca(dto.getMarca().trim());
         v.setModelo(dto.getModelo().trim());
-        v.setAnio(dto.getAnio() == null ? null : dto.getAnio().shortValue()); // Integer -> Short
+        v.setAnio(dto.getAnio() == null ? null : dto.getAnio().shortValue());
         v.setCombustible(trimToNull(dto.getCombustible()));
         v.setNotas(trimToNull(dto.getNotas()));
 
@@ -103,23 +103,33 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public void delete(String userEmail, Long idVehicle) {
-        CustomerEntity customer = getCustomerByEmail(userEmail);
+        CustomerEntity customer = getOrCreateCustomerByEmail(userEmail);
 
         VehicleEntity v = vehicleRepository
                 .findByIdVehicleAndCustomer_IdCustomer(idVehicle, customer.getIdCustomer())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        v.setActivo(false); // soft delete
+        v.setActivo(false);
         vehicleRepository.save(v);
     }
 
     // ---------- helpers ----------
-    private CustomerEntity getCustomerByEmail(String email) {
+    /**
+     * Si el usuario existe pero todavía no tiene fila en customers, la crea automáticamente.
+     * Evita 403 falsos en el área cliente.
+     */
+    private CustomerEntity getOrCreateCustomerByEmail(String email) {
         UserEntity user = userRepository.findByEmailWithRoles(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
         return customerRepository.findByUser_IdUser(user.getIdUser())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
+                .orElseGet(() -> createCustomerForUser(user));
+    }
+
+    private CustomerEntity createCustomerForUser(UserEntity user) {
+        CustomerEntity c = new CustomerEntity();
+        c.setUser(user);
+        return customerRepository.save(c);
     }
 
     private VehicleDto toDto(VehicleEntity v) {
@@ -128,7 +138,7 @@ public class VehicleServiceImpl implements VehicleService {
         dto.setMatricula(v.getMatricula());
         dto.setMarca(v.getMarca());
         dto.setModelo(v.getModelo());
-        dto.setAnio(v.getAnio() == null ? null : v.getAnio().intValue()); // Short -> Integer
+        dto.setAnio(v.getAnio() == null ? null : v.getAnio().intValue());
         dto.setCombustible(v.getCombustible());
         dto.setNotas(v.getNotas());
         return dto;

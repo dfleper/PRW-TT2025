@@ -14,7 +14,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/cliente/vehiculos")
-@PreAuthorize("hasAnyAuthority('ROLE_CLIENTE','CLIENTE','ROLE_CLIENT','CLIENT')")
 public class VehicleController {
 
     private final VehicleService vehicleService;
