@@ -37,7 +37,7 @@ public class UserEntity {
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
 
-    // Auditoría (self-FK -> users.id_user)
+    // Auditoría (self-FK -> users.id_user) - NULL permitido
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "created_by_user", referencedColumnName = "id_user")
     private UserEntity createdByUser;
@@ -46,7 +46,7 @@ public class UserEntity {
     @JoinColumn(name = "updated_by_user", referencedColumnName = "id_user")
     private UserEntity updatedByUser;
 
-    // Estos campos los gestiona la BD (DEFAULT CURRENT_TIMESTAMP / ON UPDATE)
+    // Gestionados por la BD (DEFAULT CURRENT_TIMESTAMP / ON UPDATE CURRENT_TIMESTAMP)
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -93,11 +93,9 @@ public class UserEntity {
     public UserEntity getUpdatedByUser() { return updatedByUser; }
     public void setUpdatedByUser(UserEntity updatedByUser) { this.updatedByUser = updatedByUser; }
 
+    // Solo lectura: los rellena la BD
     public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
     public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     public Set<RoleEntity> getRoles() { return roles; }
     public void setRoles(Set<RoleEntity> roles) { this.roles = roles; }

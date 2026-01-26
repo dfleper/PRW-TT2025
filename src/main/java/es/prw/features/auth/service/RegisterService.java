@@ -1,8 +1,10 @@
 package es.prw.features.auth.service;
 
 import es.prw.features.auth.dto.RegisterRequest;
+import es.prw.features.iam.domain.CustomerEntity;
 import es.prw.features.iam.domain.RoleEntity;
 import es.prw.features.iam.domain.UserEntity;
+import es.prw.features.iam.repository.CustomerRepository;
 import es.prw.features.iam.repository.RoleRepository;
 import es.prw.features.iam.repository.UserRepository;
 
@@ -11,20 +13,21 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-
 @Service
 public class RegisterService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
 
     public RegisterService(UserRepository userRepository,
                            RoleRepository roleRepository,
+                           CustomerRepository customerRepository,
                            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.customerRepository = customerRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -52,14 +55,21 @@ public class RegisterService {
         u.setPasswordHash(passwordEncoder.encode(req.getPassword()));
         u.setActivo(true);
 
-        // Por si tus columnas son NOT NULL (aunque tengan default)
-        u.setCreatedAt(LocalDateTime.now());
-        u.setUpdatedAt(LocalDateTime.now());
+        // NO setear auditoría: lo gestiona la BD (DEFAULT CURRENT_TIMESTAMP)
+        // u.setCreatedAt(...)
+        // u.setUpdatedAt(...)
 
         u.getRoles().add(roleCliente);
 
         try {
-            userRepository.save(u);
+            UserEntity savedUser = userRepository.save(u);
+
+            // ✅ Crear perfil customer asociado (Tarea 7)
+            // Evita 403 futuros en módulos que dependen de CustomerEntity (vehículos, citas, etc.)
+            CustomerEntity c = new CustomerEntity();
+            c.setUser(savedUser);
+            customerRepository.save(c);
+
         } catch (DataIntegrityViolationException ex) {
             // Por si te cuelan un email duplicado por carrera/condición
             throw new IllegalArgumentException("EMAIL_EXISTS");
