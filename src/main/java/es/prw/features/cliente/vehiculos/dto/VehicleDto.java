@@ -30,6 +30,10 @@ public class VehicleDto {
     @Size(max = 20, message = "Máximo 20 caracteres")
     private String combustible;
 
+    // ✅ VIN (opcional)
+    @Size(max = 20, message = "Máximo 20 caracteres")
+    private String vin;
+
     @Size(max = 2000, message = "Máximo 2000 caracteres")
     private String notas;
 
@@ -50,6 +54,9 @@ public class VehicleDto {
 
     public String getCombustible() { return combustible; }
     public void setCombustible(String combustible) { this.combustible = combustible; }
+
+    public String getVin() { return vin; }
+    public void setVin(String vin) { this.vin = vin; }
 
     public String getNotas() { return notas; }
     public void setNotas(String notas) { this.notas = notas; }

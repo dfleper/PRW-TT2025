@@ -1,5 +1,7 @@
 package es.prw.features.cliente.vehiculos.domain;
 
+import java.time.LocalDateTime;
+
 import es.prw.features.iam.domain.CustomerEntity;
 import jakarta.persistence.*;
 
@@ -27,18 +29,34 @@ public class VehicleEntity {
 
     @Column(name = "modelo", length = 60)
     private String modelo;
-    
+
     @Column(name = "anio")
     private Short anio;
 
     @Column(name = "combustible", length = 20)
     private String combustible;
 
+    @Column(name = "vin", length = 20)
+    private String vin;
+
     @Column(name = "notas", columnDefinition = "TEXT")
     private String notas;
 
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;
+
+    // Auditoría (existe en BD; no se usa en el CRUD)
+    @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false, insertable = false, updatable = false)
+    private LocalDateTime updatedAt;
+
+    @Column(name = "created_by_user", insertable = false, updatable = false)
+    private Long createdByUser;
+
+    @Column(name = "updated_by_user", insertable = false, updatable = false)
+    private Long updatedByUser;
 
     public Long getIdVehicle() { return idVehicle; }
     public void setIdVehicle(Long idVehicle) { this.idVehicle = idVehicle; }
@@ -61,9 +79,18 @@ public class VehicleEntity {
     public String getCombustible() { return combustible; }
     public void setCombustible(String combustible) { this.combustible = combustible; }
 
+    public String getVin() { return vin; }
+    public void setVin(String vin) { this.vin = vin; }
+
     public String getNotas() { return notas; }
     public void setNotas(String notas) { this.notas = notas; }
 
     public Boolean getActivo() { return activo; }
     public void setActivo(Boolean activo) { this.activo = activo; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    public Long getCreatedByUser() { return createdByUser; }
+    public Long getUpdatedByUser() { return updatedByUser; }
 }

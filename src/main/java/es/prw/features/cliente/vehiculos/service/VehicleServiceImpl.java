@@ -72,6 +72,7 @@ public class VehicleServiceImpl implements VehicleService {
         v.setModelo(dto.getModelo().trim());
         v.setAnio(dto.getAnio() == null ? null : dto.getAnio().shortValue());
         v.setCombustible(trimToNull(dto.getCombustible()));
+        v.setVin(trimToNull(dto.getVin()));
         v.setNotas(trimToNull(dto.getNotas()));
         v.setActivo(true);
 
@@ -96,6 +97,7 @@ public class VehicleServiceImpl implements VehicleService {
         v.setModelo(dto.getModelo().trim());
         v.setAnio(dto.getAnio() == null ? null : dto.getAnio().shortValue());
         v.setCombustible(trimToNull(dto.getCombustible()));
+        v.setVin(trimToNull(dto.getVin()));
         v.setNotas(trimToNull(dto.getNotas()));
 
         vehicleRepository.save(v);
@@ -140,6 +142,7 @@ public class VehicleServiceImpl implements VehicleService {
         dto.setModelo(v.getModelo());
         dto.setAnio(v.getAnio() == null ? null : v.getAnio().intValue());
         dto.setCombustible(v.getCombustible());
+        dto.setVin(v.getVin());
         dto.setNotas(v.getNotas());
         return dto;
     }
