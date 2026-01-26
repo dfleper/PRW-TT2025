@@ -3,8 +3,8 @@ package es.prw.config.security;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -19,11 +19,32 @@ public class SecurityConfig {
     http.authorizeHttpRequests(auth -> auth
         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
 
-        .requestMatchers("/", "/index", "/servicios", "/servicios/**", "/login", "/register",
-                "/error", "/error/**", "/css/**", "/js/**", "/img/**").permitAll()
+        // ✅ Swagger / OpenAPI -> SOLO ADMIN
+        .requestMatchers(
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/v3/api-docs/**"
+        ).hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
+        // ✅ Actuator -> SOLO ADMIN
+        .requestMatchers("/actuator/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+
+        // ✅ Dev tools -> SOLO ADMIN
+        .requestMatchers("/dev/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+
+        // Público
+        .requestMatchers(
+            "/", "/index",
+            "/servicios", "/servicios/**",
+            "/login", "/register",
+            "/error", "/error/**",
+            "/css/**", "/js/**", "/img/**"
+        ).permitAll()
+
+        // Público (si lo quieres así)
         .requestMatchers("/api/availability").permitAll()
 
+        // Zonas protegidas
         .requestMatchers("/cliente/**").hasAnyAuthority("CLIENTE", "ROLE_CLIENTE")
 
         .requestMatchers("/backoffice/**").hasAnyAuthority(
