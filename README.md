@@ -6,7 +6,7 @@ Turbo Taller (TT2025) digitaliza la gestión de un taller de mecánica rápida. 
 
 ## STACK
 
-Proyecto DAW TT2025 – Turbo Taller: aplicación web Spring Boot (Java 17) con Thymeleaf + HTML/CSS/JS y MariaDB, orientada a la gestión de citas, agenda interna, órdenes de trabajo, historial y notificaciones.
+Proyecto TT2025 – Turbo Taller: aplicación web Spring Boot (Java 17) con Thymeleaf + HTML/CSS/JS y MariaDB, orientada a la gestión de citas, agenda interna, órdenes de trabajo, historial y notificaciones.
 
 ---
 
@@ -72,10 +72,131 @@ mvnw.cmd spring-boot:run
 
 ---
 
-## Roles (idea base)
-- **CLIENTE:** gestiona perfil, vehículos y citas.
-- **PERSONAL / TALLER:** gestiona agenda, estados, órdenes de trabajo.
-- **ADMIN:** administración del sistema (si aplica).
+## Accesos y herramientas de desarrollo
+
+### Swagger (OpenAPI)
+
+El proyecto expone una **API REST** para catálogo, vehículos y citas, documentada mediante **Swagger / OpenAPI.**
+
+- **URL:**
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
+- **Acceso:**  
+🔐 **Solo usuarios con rol ADMIN**
+
+Swagger documenta únicamente endpoints REST (`@RestController`).
+Las rutas MVC (`@Controller` + Thymeleaf) no aparecen en Swagger.
+
+En producción, Swagger puede deshabilitarse mediante configuración por perfil.
+
+---
+
+### Actuator (monitorización)
+
+Se utiliza **Spring Boot Actuator** para inspección técnica en entorno de desarrollo.
+
+- Endpoints disponibles (según configuración):
+```
+/actuator
+/actuator/health
+/actuator/mappings
+```
+
+- **Acceso:**  
+🔐 **Solo usuarios con rol ADMIN**
+
+Actuator permite visualizar mappings, beans y estado de la aplicación.  
+Por seguridad, no debe exponerse públicamente en producción.
+
+---
+
+### Dev mappings (rutas MVC + REST)
+
+Para facilitar el desarrollo y depuración, el proyecto incluye una **vista HTML propia** que lista **todas las rutas registradas en Spring** (MVC y REST).
+
+- **URL:**
+```
+http://localhost:8080/dev/mappings
+```
+
+- **Incluye:**
+  - Rutas `@Controller` (Thymeleaf)
+  - Rutas `@RestController`
+  - Método HTTP y handler
+
+- **Acceso:**  
+🔐 **Solo usuarios con rol ADMIN**
+
+- **Disponibilidad:**  
+✔️ Solo en perfil `dev` (`@Profile("dev")`)
+
+Esta vista es una alternativa visual a `/actuator/mappings`, pensada para desarrollo local.
+
+---
+
+## Seguridad y roles
+
+El proyecto utiliza **Spring Security** con autenticación basada en formulario (`formLogin`) y control de acceso por roles.
+
+### Roles principales
+
+**CLIENTE**
+- Perfil
+- Vehículos
+- Citas
+
+**PERSONAL / TALLER**
+- Agenda
+- Órdenes de trabajo
+- Estados de servicio
+
+**ADMIN**
+- Acceso a Swagger
+- Acceso a Actuator
+- Acceso a `/dev/mappings`
+- Funciones de administración del sistema
+
+---
+
+## Zonas protegidas (resumen)
+
+**Control de acceso por rutas**
+<table>
+  <thead>
+    <tr>
+      <th>Ruta</th>
+      <th>Acceso</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>/swagger-ui/**</code>, <code>/v3/api-docs/**</code></td>
+      <td style="padding-left:90px;">ADMIN</td>
+    </tr>
+    <tr>
+      <td><code>/actuator/**</code></td>
+      <td style="padding-left:90px;">ADMIN</td>
+    </tr>
+    <tr>
+      <td><code>/dev/**</code></td>
+      <td style="padding-left:90px;">ADMIN</td>
+    </tr>
+    <tr>
+      <td><code>/cliente/**</code></td>
+      <td style="padding-left:90px;">CLIENTE</td>
+    </tr>
+    <tr>
+      <td><code>/backoffice/**</code></td>
+      <td style="padding-left:90px;">PERSONAL / ADMIN</td>
+    </tr>
+    <tr>
+      <td><code>/admin/**</code></td>
+      <td style="padding-left:90px;">ADMIN</td>
+    </tr>
+  </tbody>
+</table>
 
 ---
 
@@ -160,9 +281,11 @@ es.prw
 
 ## Estado del proyecto
 
-En desarrollo (DAW 2025).  
+En desarrollo.  
 Las tareas se gestionan en GitHub Projects (Backlog → Ready → In Progress → In Review → Done).
 
+---
+
 ## Legal
-- Véase AVISO.md. Todos los derechos reservados.
-- See NOTICE.md. All rights reserved.
+- Véase 📄 **[AVISO.md](AVISO.md).** Todos los derechos reservados.
+- See 📄 **[NOTICE.md](NOTICE.md).** All rights reserved.
