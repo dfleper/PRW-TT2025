@@ -36,6 +36,7 @@ Proyecto DAW TT2025 – Turbo Taller: aplicación web Spring Boot (Java 17) con 
 Crea una base de datos en MariaDB:
 
 ```sql
+DROP DATABASE IF EXISTS tt2025;
 CREATE DATABASE tt2025 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
@@ -121,14 +122,38 @@ Ejemplos:
 ## Estructura del proyecto (orientativa)
 
 ```text
-src/
- └─ main/
-    ├─ java/
-    │   └─ ... (controllers / services / repositories / model)
-    └─ resources/
-        ├─ templates/   (Thymeleaf)
-        ├─ static/      (css/js/img)
-        └─ application*.properties
+es.prw
+ ├─ Tt2025Application.java
+ ├─ config
+ │   ├─ security
+ │   ├─ openapi
+ │   └─ web
+ ├─ common
+ │   ├─ exception
+ │   ├─ util
+ │   └─ constants
+ └─ features
+     ├─ cliente
+     │   ├─ vehiculos
+     │   │   ├─ web
+     │   │   ├─ dto
+     │   │   ├─ domain
+     │   │   ├─ repository
+     │   │   ├─ service
+     │   │   └─ validation
+     │   ├─ servicios
+     │   │   ├─ web
+     │   │   ├─ dto
+     │   │   ├─ domain
+     │   │   ├─ repository
+     │   │   ├─ service
+     │   │   └─ validation
+     │   └─ citas
+     │       └─ ...
+     ├─ empleado
+     │   └─ ...
+     └─ admin
+         └─ ...
 ```
 
 ---
@@ -137,3 +162,7 @@ src/
 
 En desarrollo (DAW 2025).  
 Las tareas se gestionan en GitHub Projects (Backlog → Ready → In Progress → In Review → Done).
+
+## Legal
+- Véase AVISO.md. Todos los derechos reservados.
+- See NOTICE.md. All rights reserved.
