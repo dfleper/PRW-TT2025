@@ -2,9 +2,9 @@ package es.prw.features.cliente.vehiculos.web;
 
 import es.prw.features.cliente.vehiculos.dto.VehicleDto;
 import es.prw.features.cliente.vehiculos.exception.DuplicateMatriculaException;
+import es.prw.features.cliente.vehiculos.exception.DuplicateVinException;
 import es.prw.features.cliente.vehiculos.service.VehicleService;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -56,6 +56,10 @@ public class VehicleController {
             br.rejectValue("matricula", "duplicate", ex.getMessage());
             model.addAttribute("mode", "create");
             return "cliente/vehiculos/form";
+        } catch (DuplicateVinException ex) {
+            br.rejectValue("vin", "duplicate", ex.getMessage());
+            model.addAttribute("mode", "create");
+            return "cliente/vehiculos/form";
         }
     }
 
@@ -88,9 +92,12 @@ public class VehicleController {
             br.rejectValue("matricula", "duplicate", ex.getMessage());
             model.addAttribute("mode", "edit");
             return "cliente/vehiculos/form";
+        } catch (DuplicateVinException ex) {
+            br.rejectValue("vin", "duplicate", ex.getMessage());
+            model.addAttribute("mode", "edit");
+            return "cliente/vehiculos/form";
         }
     }
-
 
     @PostMapping("/{id}/eliminar")
     public String delete(Authentication auth, @PathVariable Long id, RedirectAttributes ra) {

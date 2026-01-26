@@ -3,6 +3,7 @@ package es.prw.features.cliente.vehiculos.service;
 import es.prw.features.cliente.vehiculos.domain.VehicleEntity;
 import es.prw.features.cliente.vehiculos.dto.VehicleDto;
 import es.prw.features.cliente.vehiculos.exception.DuplicateMatriculaException;
+import es.prw.features.cliente.vehiculos.exception.DuplicateVinException;
 import es.prw.features.cliente.vehiculos.repository.VehicleRepository;
 import es.prw.features.iam.domain.CustomerEntity;
 import es.prw.features.iam.domain.UserEntity;
@@ -65,6 +66,11 @@ public class VehicleServiceImpl implements VehicleService {
             throw new DuplicateMatriculaException("Ya existe un vehículo con esa matrícula");
         }
 
+        String vinNorm = normalizeVin(dto.getVin());
+        if (vinNorm != null && vehicleRepository.existsByVinIgnoreCase(vinNorm)) {
+            throw new DuplicateVinException("Ya existe un vehículo con ese VIN");
+        }
+
         VehicleEntity v = new VehicleEntity();
         v.setCustomer(customer);
         v.setMatricula(matriculaNorm);
@@ -72,7 +78,7 @@ public class VehicleServiceImpl implements VehicleService {
         v.setModelo(dto.getModelo().trim());
         v.setAnio(dto.getAnio() == null ? null : dto.getAnio().shortValue());
         v.setCombustible(trimToNull(dto.getCombustible()));
-        v.setVin(trimToNull(dto.getVin()));
+        v.setVin(vinNorm);
         v.setNotas(trimToNull(dto.getNotas()));
         v.setActivo(true);
 
@@ -92,12 +98,17 @@ public class VehicleServiceImpl implements VehicleService {
             throw new DuplicateMatriculaException("Ya existe un vehículo con esa matrícula");
         }
 
+        String vinNorm = normalizeVin(dto.getVin());
+        if (vinNorm != null && vehicleRepository.existsByVinIgnoreCaseAndIdVehicleNot(vinNorm, idVehicle)) {
+            throw new DuplicateVinException("Ya existe un vehículo con ese VIN");
+        }
+
         v.setMatricula(matriculaNorm);
         v.setMarca(dto.getMarca().trim());
         v.setModelo(dto.getModelo().trim());
         v.setAnio(dto.getAnio() == null ? null : dto.getAnio().shortValue());
         v.setCombustible(trimToNull(dto.getCombustible()));
-        v.setVin(trimToNull(dto.getVin()));
+        v.setVin(vinNorm);
         v.setNotas(trimToNull(dto.getNotas()));
 
         vehicleRepository.save(v);
@@ -151,6 +162,12 @@ public class VehicleServiceImpl implements VehicleService {
         if (raw == null) return null;
         String s = raw.trim().toUpperCase();
         return s.replace(" ", "").replace("-", "");
+    }
+
+    private String normalizeVin(String raw) {
+        if (raw == null) return null;
+        String t = raw.trim().toUpperCase();
+        return t.isEmpty() ? null : t;
     }
 
     private String trimToNull(String s) {

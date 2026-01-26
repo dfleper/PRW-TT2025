@@ -16,4 +16,9 @@ public interface VehicleRepository extends JpaRepository<VehicleEntity, Long> {
     boolean existsByMatriculaIgnoreCase(String matricula);
 
     boolean existsByMatriculaIgnoreCaseAndIdVehicleNot(String matricula, Long idVehicle);
+
+    // VIN único (si se informa)
+    boolean existsByVinIgnoreCase(String vin);
+
+    boolean existsByVinIgnoreCaseAndIdVehicleNot(String vin, Long idVehicle);
 }
