@@ -162,3 +162,7 @@ es.prw
 
 En desarrollo (DAW 2025).  
 Las tareas se gestionan en GitHub Projects (Backlog → Ready → In Progress → In Review → Done).
+
+## Legal
+- Véase AVISO.md. Todos los derechos reservados.
+- See NOTICE.md. All rights reserved.
