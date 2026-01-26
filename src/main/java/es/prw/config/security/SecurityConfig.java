@@ -17,16 +17,13 @@ public class SecurityConfig {
   SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
     http.authorizeHttpRequests(auth -> auth
-        // Estáticos (classpath:/static, /public, etc.)
         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
 
-        // Públicos
-        .requestMatchers("/", "/index", "/servicios", "/servicios/**", "/login", "/register", "/error", "/error/**", "/css/**", "/js/**", "/img/**").permitAll()
+        .requestMatchers("/", "/index", "/servicios", "/servicios/**", "/login", "/register",
+                "/error", "/error/**", "/css/**", "/js/**", "/img/**").permitAll()
 
-        // API pública (validación disponibilidad)
         .requestMatchers("/api/availability").permitAll()
 
-        // Reglas por rol (soporta "ROL" y "ROLE_ROL" para evitar líos de prefijos)
         .requestMatchers("/cliente/**").hasAnyAuthority("CLIENTE", "ROLE_CLIENTE")
 
         .requestMatchers("/backoffice/**").hasAnyAuthority(
@@ -38,19 +35,18 @@ public class SecurityConfig {
 
         .requestMatchers("/admin/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
-        // Todo lo demás requiere login
         .anyRequest().authenticated()
     );
 
     http.formLogin(form -> form
-        .loginPage("/login")          // GET /login (tu página)
-        .loginProcessingUrl("/login") // POST /login (procesa credenciales)
+        .loginPage("/login")
+        .loginProcessingUrl("/login")
         .defaultSuccessUrl("/", true)
         .permitAll()
     );
 
     http.logout(logout -> logout
-        .logoutUrl("/logout")               // POST /logout por defecto (recomendado)
+        .logoutUrl("/logout")
         .logoutSuccessUrl("/login?logout")
         .invalidateHttpSession(true)
         .deleteCookies("JSESSIONID")

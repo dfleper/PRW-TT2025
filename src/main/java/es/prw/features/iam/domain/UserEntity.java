@@ -33,10 +33,24 @@ public class UserEntity {
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;
 
-    @Column(name = "created_at", nullable = false)
+    // LOPDGDD
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
+
+    // Auditoría (self-FK -> users.id_user)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "created_by_user", referencedColumnName = "id_user")
+    private UserEntity createdByUser;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "updated_by_user", referencedColumnName = "id_user")
+    private UserEntity updatedByUser;
+
+    // Estos campos los gestiona la BD (DEFAULT CURRENT_TIMESTAMP / ON UPDATE)
+    @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at", nullable = false, insertable = false, updatable = false)
     private LocalDateTime updatedAt;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -46,6 +60,8 @@ public class UserEntity {
             inverseJoinColumns = @JoinColumn(name = "id_role")
     )
     private Set<RoleEntity> roles = new HashSet<>();
+
+    // ===== Getters / Setters =====
 
     public Long getIdUser() { return idUser; }
     public void setIdUser(Long idUser) { this.idUser = idUser; }
@@ -67,6 +83,15 @@ public class UserEntity {
 
     public Boolean getActivo() { return activo; }
     public void setActivo(Boolean activo) { this.activo = activo; }
+
+    public LocalDateTime getLastLoginAt() { return lastLoginAt; }
+    public void setLastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }
+
+    public UserEntity getCreatedByUser() { return createdByUser; }
+    public void setCreatedByUser(UserEntity createdByUser) { this.createdByUser = createdByUser; }
+
+    public UserEntity getUpdatedByUser() { return updatedByUser; }
+    public void setUpdatedByUser(UserEntity updatedByUser) { this.updatedByUser = updatedByUser; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
