@@ -1,18 +1,16 @@
-package es.prw.features.availability.service;
+package es.prw.features.appointments.service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import es.prw.features.appointments.domain.AppointmentStatus;
 import es.prw.features.appointments.repository.AppointmentRepository;
 import es.prw.features.catalog.domain.ServiceEntity;
 import es.prw.features.catalog.repository.ServiceRepository;
-
-import es.prw.features.appointments.domain.AppointmentStatus;
 
 @Service
 public class AvailabilityService {
@@ -38,29 +36,43 @@ public class AvailabilityService {
         this.serviceRepository = serviceRepository;
     }
 
-    /**
-     * Comprueba si hay disponibilidad para un servicio en una fecha/hora de inicio.
-     * Calcula el fin sumando los minutos estimados del servicio.
-     */
+    // ====== API “de cliente”: elige servicio + hora, calculamos fin ======
     public boolean isAvailable(Long serviceId, LocalDateTime startDateTime) {
         if (serviceId == null || startDateTime == null) return false;
 
         ServiceEntity service = serviceRepository.findById(serviceId).orElse(null);
         if (service == null || !service.isActivo()) return false;
 
-        long durationMin = 60;
+        long durationMin = 60L;
         if (service.getMinutosEstimados() != null) {
             durationMin = service.getMinutosEstimados().longValue();
-            if (durationMin <= 0) durationMin = 60;
+            if (durationMin <= 0) durationMin = 60L;
         }
 
         LocalDateTime endDateTime = startDateTime.plusMinutes(durationMin);
 
         if (!passesOptionalRules(startDateTime, endDateTime)) return false;
 
-        List<AppointmentStatus> ignored = List.of(AppointmentStatus.cancelada);
-       
-        return appointmentRepository.findOverlaps(startDateTime, endDateTime, ignored).isEmpty();
+        return !appointmentRepository.existsOverlap(
+                startDateTime,
+                endDateTime,
+                AppointmentStatus.CANCELADA
+        );
+    }
+
+    // ====== API “técnica”: si ya tienes inicio/fin calculados ======
+    public boolean isAvailable(LocalDateTime inicio, LocalDateTime fin) {
+        if (inicio == null || fin == null) return false;
+        if (!passesOptionalRules(inicio, fin)) return false;
+
+        return !appointmentRepository.existsOverlap(inicio, fin, AppointmentStatus.CANCELADA);
+    }
+
+    public boolean isAvailableForEmployee(Long employeeId, LocalDateTime inicio, LocalDateTime fin) {
+        if (employeeId == null || inicio == null || fin == null) return false;
+        if (!passesOptionalRules(inicio, fin)) return false;
+
+        return !appointmentRepository.existsOverlapForEmployee(employeeId, inicio, fin, AppointmentStatus.CANCELADA);
     }
 
     private boolean passesOptionalRules(LocalDateTime start, LocalDateTime end) {

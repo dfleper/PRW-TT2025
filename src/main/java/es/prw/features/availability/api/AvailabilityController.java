@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import es.prw.features.availability.service.AvailabilityService;
+import es.prw.features.appointments.service.AvailabilityService;
+
 
 @RestController
 @RequestMapping("/api")
