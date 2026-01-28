@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Nueva cita</title>
+</head>
+<body>
+
+<h1>Nueva cita</h1>
+
+<div th:if="${errorDisponibilidad}" style="color:red" th:text="${errorDisponibilidad}"></div>
+<div th:if="${success}" style="color:green" th:text="${success}"></div>
+
+<form th:action="@{/cliente/citas}" th:object="${dto}" method="post">
+  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+  <!-- vehicleId -->
+  <label>Vehículo</label>
+  <select th:field="*{vehicleId}">
+    <option value="">-- Selecciona --</option>
+    <option th:each="v : ${vehicles}"
+            th:value="${v.idVehicle}"
+            th:text="${v.marca + ' ' + v.modelo + ' (' + v.matricula + ')'}">
+    </option>
+  </select>
+
+  <!-- serviceId -->
+  <label>Servicio</label>
+  <select th:field="*{serviceId}">
+    <option value="">-- Selecciona --</option>
+    <option th:each="s : ${services}" th:value="${s.id}" th:text="${s.nombre}"></option>
+  </select>
+
+  <!-- startDateTime -->
+  <label>Fecha y hora</label>
+  <input type="datetime-local" th:field="*{startDateTime}"/>
+
+  <button type="submit">Reservar</button>
+</form>
+
+</body>
+</html>
