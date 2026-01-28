@@ -52,21 +52,37 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public Long createAppointment(AppointmentCreateDto dto) {
 
-        // ===== CHECK 2: vehículo pertenece al cliente =====
+        if (dto == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Solicitud inválida");
+        }
+
+        // Seguridad extra: aunque el DTO tenga @NotNull, aquí aseguramos 400 si llega mal
+        if (dto.getVehicleId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes seleccionar un vehículo");
+        }
+        if (dto.getServiceId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes seleccionar un servicio");
+        }
+        if (dto.getStartDateTime() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes indicar fecha y hora");
+        }
+
+        // ===== CHECK: vehículo pertenece al cliente =====
         Long customerId = getCurrentCustomerIdOrThrow();
 
         VehicleEntity vehicle = vehicleRepository.findById(dto.getVehicleId())
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Vehículo no encontrado"));
 
-        if (vehicle.getCustomer() == null
-                || vehicle.getCustomer().getIdCustomer() == null
-                || !vehicle.getCustomer().getIdCustomer().equals(customerId)) {
+        Long vehicleCustomerId = (vehicle.getCustomer() != null) ? vehicle.getCustomer().getIdCustomer() : null;
+
+        if (vehicleCustomerId == null || !vehicleCustomerId.equals(customerId)) {
+            // 403 válido (tu checklist permite 403 o 404)
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN, "El vehículo no pertenece al cliente");
         }
 
-        // ===== CHECK 3: calcular fin =====
+        // ===== CHECK: calcular fin =====
         ServiceEntity service = serviceRepository.findById(dto.getServiceId())
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Servicio no encontrado"));
@@ -76,23 +92,23 @@ public class AppointmentServiceImpl implements AppointmentService {
                     HttpStatus.BAD_REQUEST, "El servicio no está activo");
         }
 
-        Short durationMinutesShort = service.getMinutosEstimados();
-        long durationMinutes = 60L; // valor por defecto
-        if (durationMinutesShort != null && durationMinutesShort > 0) {
-            durationMinutes = durationMinutesShort.longValue();
+        long durationMinutes = 60L; // default seguro
+        Short minutosEstimados = service.getMinutosEstimados();
+        if (minutosEstimados != null && minutosEstimados > 0) {
+            durationMinutes = minutosEstimados.longValue();
         }
 
         LocalDateTime startDateTime = dto.getStartDateTime();
         LocalDateTime endDateTime = startDateTime.plusMinutes(durationMinutes);
 
-        // ===== CHECK 4: disponibilidad =====
+        // ===== CHECK: disponibilidad =====
         boolean available = availabilityService.isAvailable(startDateTime, endDateTime);
         if (!available) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT, "No hay disponibilidad para esa franja horaria");
         }
 
-        // ===== CHECK 5: guardar cita con estado inicial =====
+        // ===== CHECK: guardar cita con estado inicial =====
         AppointmentEntity appointment = new AppointmentEntity();
         appointment.setCustomer(vehicle.getCustomer()); // ya validado
         appointment.setVehicle(vehicle);
@@ -100,6 +116,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setInicio(startDateTime);
         appointment.setFin(endDateTime);
         appointment.setEstado(AppointmentStatus.PENDIENTE);
+
+        // (Opcional) Auditoría: si quieres guardar el usuario creador/modificador.
+        // OJO: tu AppointmentEntity tiene createdByUser/updatedByUser, pero no debe ser obligatorio.
+        // UserEntity currentUser = getCurrentUserOrThrow();
+        // appointment.setCreatedByUser(currentUser);
+        // appointment.setUpdatedByUser(currentUser);
 
         AppointmentEntity saved = appointmentRepository.save(appointment);
         return saved.getId();
@@ -110,8 +132,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()
                 || "anonymousUser".equals(auth.getPrincipal())) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "No autenticado");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No autenticado");
         }
 
         String email = auth.getName();
@@ -126,4 +147,22 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         return customer.getIdCustomer();
     }
+
+    // Si luego quieres usar auditoría en AppointmentEntity, activa este helper.
+    /*
+    private UserEntity getCurrentUserOrThrow() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()
+                || "anonymousUser".equals(auth.getPrincipal())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No autenticado");
+        }
+
+        String email = auth.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "Usuario no válido"));
+    }
+    */
 }

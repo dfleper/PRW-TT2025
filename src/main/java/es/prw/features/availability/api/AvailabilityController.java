@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import es.prw.features.appointments.service.AvailabilityService;
 
-
 @RestController
 @RequestMapping("/api")
 public class AvailabilityController {
@@ -22,18 +21,16 @@ public class AvailabilityController {
     }
 
     /**
-     * GET /api/availability?serviceId=1&start=2025-12-28T10:00
+     * GET /api/availability?serviceId=1&startDateTime=2026-01-28T10:00
      * Respuesta: { "available": true }
      */
     @GetMapping("/availability")
     public AvailabilityResponse check(
-            @RequestParam Long serviceId,
-            @RequestParam
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start
+            @RequestParam(name = "serviceId") Long serviceId,
+            @RequestParam(name = "startDateTime")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDateTime
     ) {
-        boolean available = availabilityService.isAvailable(serviceId, start);
+        boolean available = availabilityService.isAvailable(serviceId, startDateTime);
         return new AvailabilityResponse(available);
     }
-
-    public record AvailabilityResponse(boolean available) {}
 }

@@ -1,11 +1,39 @@
 <!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
-      th:replace="layout/base :: html (pageTitle='Cliente - Dashboard', content=~{::content})">
+      th:replace="~{layout/base :: html(pageTitle='Cliente - Dashboard', content=~{::content})}">
 
 <section th:fragment="content">
-  <h1>Cliente</h1>
-  <p>En construcción.</p>
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1">Área de cliente</h1>
+      <div class="text-muted small">Gestiona tus vehículos y reserva tus citas.</div>
+    </div>
+
+    <a class="btn btn-primary" th:href="@{/cliente/citas/nueva}">Nueva cita</a>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-md-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <div class="fw-semibold mb-1">Vehículos</div>
+          <div class="text-muted small mb-3">CRUD de vehículos asociados a tu cuenta.</div>
+          <a class="btn btn-outline-primary" th:href="@{/cliente/vehiculos}">Ver vehículos</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <div class="fw-semibold mb-1">Servicios</div>
+          <div class="text-muted small mb-3">Consulta y selecciona servicios.</div>
+          <a class="btn btn-outline-primary" th:href="@{/cliente/servicios}">Ver servicios</a>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
 </html>

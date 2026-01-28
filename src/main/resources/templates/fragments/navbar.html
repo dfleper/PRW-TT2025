@@ -1,66 +1,68 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <body>
-<nav th:fragment="navbar"
-     style="background:#0b1220;border-bottom:1px solid #1f2937;color:#e5e7eb;">
-  <div style="max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:14px;">
-
-    <!-- Marca -->
-    <a th:href="@{/}" style="color:#e5e7eb;text-decoration:none;font-weight:700;">
+<nav th:fragment="navbar" class="navbar navbar-expand-lg tt-navbar border-bottom">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-white" th:href="@{/}">
       Turbo Taller
     </a>
 
-    <!-- COMÚN: Home + Servicios (Servicios cambia según rol) -->
-    <div style="display:flex;gap:14px;">
-      <a th:href="@{/}" style="color:#93c5fd;text-decoration:none;">Home</a>
+    <button class="navbar-toggler tt-navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#ttNavbar"
+            aria-controls="ttNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-      <!-- Si es CLIENTE -> /cliente/servicios (con selección) -->
-      <a th:if="${#authorization.expression('hasAnyAuthority(''CLIENTE'',''ROLE_CLIENTE'')')}"
-         th:href="@{/cliente/servicios}"
-         style="color:#93c5fd;text-decoration:none;">
-        Servicios
-      </a>
+    <div class="collapse navbar-collapse" id="ttNavbar">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-      <!-- Si NO es CLIENTE -> /servicios (catálogo público) -->
-      <a th:unless="${#authorization.expression('hasAnyAuthority(''CLIENTE'',''ROLE_CLIENTE'')')}"
-         th:href="@{/servicios}"
-         style="color:#93c5fd;text-decoration:none;">
-        Servicios
-      </a>
+        <li class="nav-item">
+          <a class="nav-link tt-navlink" th:href="@{/}">Home</a>
+        </li>
+
+        <!-- Si es CLIENTE -> /cliente/servicios -->
+        <li class="nav-item"
+            th:if="${#authorization.expression('hasAnyAuthority(''CLIENTE'',''ROLE_CLIENTE'')')}">
+          <a class="nav-link tt-navlink" th:href="@{/cliente/servicios}">Servicios</a>
+        </li>
+
+        <!-- Si NO es CLIENTE -> /servicios -->
+        <li class="nav-item"
+            th:unless="${#authorization.expression('hasAnyAuthority(''CLIENTE'',''ROLE_CLIENTE'')')}">
+          <a class="nav-link tt-navlink" th:href="@{/servicios}">Servicios</a>
+        </li>
+
+        <!-- CLIENTE -->
+        <li class="nav-item"
+            th:if="${#authorization.expression('hasAnyAuthority(''CLIENTE'',''ROLE_CLIENTE'')')}">
+          <a class="nav-link tt-navlink" th:href="@{/cliente}">Cliente</a>
+        </li>
+
+        <!-- Personal -->
+        <li class="nav-item"
+            th:if="${#authorization.expression(
+              'hasAnyAuthority(''RECEPCION'',''ROLE_RECEPCION'',''MECANICO'',''ROLE_MECANICO'',''JEFE_TALLER'',''ROLE_JEFE_TALLER'',''ADMIN'',''ROLE_ADMIN'')'
+            )}">
+          <a class="nav-link tt-navlink" th:href="@{/backoffice}">Backoffice</a>
+        </li>
+      </ul>
+
+      <!-- Derecha -->
+      <div class="d-flex gap-2 align-items-center">
+
+        <!-- NO autenticado -->
+        <div th:if="${#authorization.expression('!isAuthenticated()')}" class="d-flex gap-2">
+          <a class="btn btn-outline-light btn-sm" th:href="@{/login}">Login</a>
+          <a class="btn btn-primary btn-sm" th:href="@{/register}">Registro</a>
+        </div>
+
+        <!-- Logout (autenticado) -->
+        <form th:if="${#authorization.expression('isAuthenticated()')}"
+              th:action="@{/logout}" method="post" class="m-0">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button type="submit" class="btn btn-primary btn-sm">Logout</button>
+        </form>
+      </div>
     </div>
-
-    <!-- NO autenticado: Login/Register -->
-    <div th:if="${#authorization.expression('!isAuthenticated()')}" style="display:flex;gap:14px;">
-      <a th:href="@{/login}" style="color:#93c5fd;text-decoration:none;">Login</a>
-      <a th:href="@{/register}" style="color:#93c5fd;text-decoration:none;">Register</a>
-    </div>
-
-    <!-- CLIENTE: Cliente -->
-    <div th:if="${#authorization.expression('hasAnyAuthority(''CLIENTE'',''ROLE_CLIENTE'')')}"
-         style="display:flex;gap:14px;">
-      <a th:href="@{/cliente}" style="color:#93c5fd;text-decoration:none;">Cliente</a>
-    </div>
-
-    <!-- Personal: Backoffice -->
-    <div th:if="${#authorization.expression(
-        'hasAnyAuthority(''RECEPCION'',''ROLE_RECEPCION'',''MECANICO'',''ROLE_MECANICO'',''JEFE_TALLER'',''ROLE_JEFE_TALLER'',''ADMIN'',''ROLE_ADMIN'')'
-      )}"
-         style="display:flex;gap:14px;">
-      <a th:href="@{/backoffice}" style="color:#93c5fd;text-decoration:none;">Backoffice</a>
-    </div>
-
-    <!-- Logout (si está autenticado) -->
-    <div style="margin-left:auto;">
-      <form th:if="${#authorization.expression('isAuthenticated()')}"
-            th:action="@{/logout}" method="post" style="display:inline;">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-        <button type="submit"
-                style="cursor:pointer;border:0;background:#2563eb;color:white;padding:8px 10px;border-radius:10px;font-weight:700;">
-          Logout
-        </button>
-      </form>
-    </div>
-
   </div>
 </nav>
 </body>

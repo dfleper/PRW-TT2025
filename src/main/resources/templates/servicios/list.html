@@ -1,50 +1,44 @@
 <!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: html(pageTitle='Servicios', content=~{::section})}">
+      th:replace="~{layout/base :: html(pageTitle='Servicios', content=~{::content})}">
 
-<section>
-  <h1 style="margin:0 0 8px;">Catálogo de servicios</h1>
-  <p style="margin:0 0 16px;color:#6b7280;">
-    Consulta nuestros servicios de mecánica rápida.
-  </p>
+<section th:fragment="content">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1">Catálogo de servicios</h1>
+      <p class="text-muted mb-0">Consulta nuestros servicios de mecánica rápida.</p>
+    </div>
 
-  <!-- Botón FUTURO -->
-  <a th:href="@{/login}"
-     style="display:inline-block;margin-bottom:14px;background:#2563eb;color:white;text-decoration:none;padding:10px 12px;border-radius:12px;font-weight:700;">
-    Reservar
-  </a>
+    <a class="btn btn-primary" th:href="@{/login}">Reservar</a>
+  </div>
 
-  <div th:if="${#lists.isEmpty(services)}"
-       style="background:#fff7ed;border:1px solid #fed7aa;padding:12px;border-radius:12px;color:#9a3412;">
+  <div th:if="${#lists.isEmpty(services)}" class="alert alert-warning">
     No hay servicios disponibles ahora mismo.
   </div>
 
-  <div th:if="${!#lists.isEmpty(services)}"
-       style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:12px;">
+  <div class="row g-3" th:if="${!#lists.isEmpty(services)}">
+    <div class="col-md-6 col-lg-4" th:each="s : ${services}">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="fw-semibold" th:text="${s.nombre}">Servicio</div>
+          <div class="text-muted small" th:text="${s.codigo}">SRV-000</div>
 
-    <article th:each="s : ${services}"
-             style="background:white;border:1px solid #e5e7eb;border-radius:16px;padding:14px;">
-      <div style="font-weight:800;" th:text="${s.nombre}">Servicio</div>
-      <div style="color:#6b7280;font-size:12px;" th:text="${s.codigo}">SRV-000</div>
+          <p class="mt-2 mb-3 small text-secondary"
+             th:text="${(s.descripcion != null and !#strings.isEmpty(s.descripcion)) ? s.descripcion : 'Sin descripción.'}">
+          </p>
 
-      <p style="margin:10px 0 12px;color:#374151;font-size:14px;"
-         th:text="${(s.descripcion != null and !#strings.isEmpty(s.descripcion)) ? s.descripcion : 'Sin descripción.'}">
-        Descripción
-      </p>
+          <div class="d-flex gap-2 flex-wrap">
+            <span class="badge text-bg-secondary" th:if="${s.minutosEstimados != null}"
+                  th:text="${s.minutosEstimados} + ' min'">30 min</span>
 
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <span th:if="${s.minutosEstimados != null}"
-              style="background:#111827;color:#e5e7eb;border-radius:999px;padding:6px 10px;font-size:12px;"
-              th:text="${s.minutosEstimados} + ' min'">30 min</span>
-
-        <span th:if="${s.precioBase != null}"
-              style="background:#16a34a;color:white;border-radius:999px;padding:6px 10px;font-size:12px;"
-              th:text="${#numbers.formatDecimal(s.precioBase, 1, 'COMMA', 2, 'POINT')} + ' €'">
-          0,00 €
-        </span>
+            <span class="badge text-bg-success" th:if="${s.precioBase != null}"
+                  th:text="${#numbers.formatDecimal(s.precioBase, 1, 'COMMA', 2, 'POINT')} + ' €'">0,00 €</span>
+          </div>
+        </div>
       </div>
-    </article>
+    </div>
   </div>
 </section>
+
 </html>

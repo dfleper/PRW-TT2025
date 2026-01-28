@@ -1,60 +1,78 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>Vehículo</title></head>
-<body>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: html(pageTitle='Vehículo', content=~{::content})}">
 
-<h1 th:text="${mode == 'edit'} ? 'Editar vehículo' : 'Nuevo vehículo'"></h1>
+<section th:fragment="content">
 
-<form th:action="${mode == 'edit'} ? @{/cliente/vehiculos/{id}(id=${vehicle.id})} : @{/cliente/vehiculos}"
-      th:object="${vehicle}" method="post">
-
-  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
-  <div>
-    <label>Matrícula</label>
-    <input type="text" th:field="*{matricula}" maxlength="12">
-    <div th:if="${#fields.hasErrors('matricula')}" th:errors="*{matricula}" style="color:red"></div>
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h4 mb-0" th:text="${mode == 'edit'} ? 'Editar vehículo' : 'Nuevo vehículo'"></h1>
+    <a class="btn btn-outline-secondary btn-sm" th:href="@{/cliente/vehiculos}">Volver</a>
   </div>
 
-  <div>
-    <label>Marca</label>
-    <input type="text" th:field="*{marca}" maxlength="60">
-    <div th:if="${#fields.hasErrors('marca')}" th:errors="*{marca}" style="color:red"></div>
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+
+      <form th:action="${mode == 'edit'} ? @{/cliente/vehiculos/{id}(id=${vehicle.id})} : @{/cliente/vehiculos}"
+            th:object="${vehicle}" method="post" novalidate>
+
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+        <div class="row g-3">
+
+          <div class="col-md-4">
+            <label class="form-label">Matrícula</label>
+            <input class="form-control" type="text" th:field="*{matricula}" maxlength="12">
+            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('matricula')}" th:errors="*{matricula}"></div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Marca</label>
+            <input class="form-control" type="text" th:field="*{marca}" maxlength="60">
+            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('marca')}" th:errors="*{marca}"></div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Modelo</label>
+            <input class="form-control" type="text" th:field="*{modelo}" maxlength="60">
+            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('modelo')}" th:errors="*{modelo}"></div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Año</label>
+            <input class="form-control" type="number" th:field="*{anio}" min="1900" max="2100">
+            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('anio')}" th:errors="*{anio}"></div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Combustible</label>
+            <input class="form-control" type="text" th:field="*{combustible}" maxlength="20">
+            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('combustible')}" th:errors="*{combustible}"></div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">VIN (opcional)</label>
+            <input class="form-control" type="text" th:field="*{vin}" maxlength="20" placeholder="Opcional (20 caracteres)">
+            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('vin')}" th:errors="*{vin}"></div>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Notas</label>
+            <textarea class="form-control" th:field="*{notas}" rows="3"></textarea>
+            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('notas')}" th:errors="*{notas}"></div>
+          </div>
+
+        </div>
+
+        <div class="d-grid d-sm-flex justify-content-sm-end gap-2 mt-4">
+          <a class="btn btn-outline-secondary" th:href="@{/cliente/vehiculos}">Cancelar</a>
+          <button class="btn btn-primary" type="submit">Guardar</button>
+        </div>
+
+      </form>
+
+    </div>
   </div>
 
-  <div>
-    <label>Modelo</label>
-    <input type="text" th:field="*{modelo}" maxlength="60">
-    <div th:if="${#fields.hasErrors('modelo')}" th:errors="*{modelo}" style="color:red"></div>
-  </div>
-
-  <div>
-    <label>Año</label>
-    <input type="number" th:field="*{anio}" min="1900" max="2100">
-    <div th:if="${#fields.hasErrors('anio')}" th:errors="*{anio}" style="color:red"></div>
-  </div>
-
-  <div>
-    <label>Combustible</label>
-    <input type="text" th:field="*{combustible}" maxlength="20">
-    <div th:if="${#fields.hasErrors('combustible')}" th:errors="*{combustible}" style="color:red"></div>
-  </div>
-
-  <div>
-    <label>VIN</label>
-    <input type="text" th:field="*{vin}" maxlength="20" placeholder="Opcional (20 caracteres)">
-    <div th:if="${#fields.hasErrors('vin')}" th:errors="*{vin}" style="color:red"></div>
-  </div>
-
-  <div>
-    <label>Notas</label>
-    <textarea th:field="*{notas}"></textarea>
-    <div th:if="${#fields.hasErrors('notas')}" th:errors="*{notas}" style="color:red"></div>
-  </div>
-
-  <button type="submit">Guardar</button>
-  <a th:href="@{/cliente/vehiculos}">Cancelar</a>
-</form>
-
-</body>
+</section>
 </html>

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
-      th:replace="layout/base :: html (pageTitle='Backoffice - Dashboard', content=~{::content})">
+      th:replace="~{layout/base :: html(pageTitle='Backoffice - Dashboard', content=~{::content})}">
 
 <section th:fragment="content">
-  <h1>Backoffice</h1>
-  <p>En construcción.</p>
+  <h1 class="h4 mb-2">Backoffice</h1>
+  <p class="text-muted mb-0">Zona interna del taller (en construcción).</p>
 </section>
 
 </html>

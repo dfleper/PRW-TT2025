@@ -6,13 +6,13 @@ import java.time.LocalDateTime;
 
 public class AppointmentCreateDto {
 
-    @NotNull(message = "vehicleId es requerido")
+    @NotNull(message = "Debes seleccionar un vehículo")
     private Long vehicleId;
 
-    @NotNull(message = "serviceId es requerido")
+    @NotNull(message = "Debes seleccionar un servicio")
     private Long serviceId;
 
-    @NotNull(message = "startDateTime es requerido")
+    @NotNull(message = "Debes indicar fecha y hora")
     private LocalDateTime startDateTime;
 
     public AppointmentCreateDto() {}

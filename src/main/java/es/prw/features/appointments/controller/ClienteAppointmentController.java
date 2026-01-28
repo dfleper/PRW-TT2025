@@ -54,7 +54,7 @@ public class ClienteAppointmentController {
         this.appointmentRepository = appointmentRepository;
     }
 
-    // ========= CHECK 6 =========
+    // ========= CHECK: form nueva cita =========
     @GetMapping("/nueva")
     public String nuevaCitaForm(Model model) {
 
@@ -66,17 +66,21 @@ public class ClienteAppointmentController {
         List<ServiceEntity> services =
                 serviceRepository.findByActivoTrueOrderByNombreAsc();
 
-        model.addAttribute("dto", new AppointmentCreateDto());
+        // 🔥 IMPORTANTE: el nombre debe coincidir con th:object en el template
+        if (!model.containsAttribute("appointment")) {
+            model.addAttribute("appointment", new AppointmentCreateDto());
+        }
+
         model.addAttribute("vehicles", vehicles);
         model.addAttribute("services", services);
 
         return "cliente/citas/form";
     }
 
-    // ========= CHECK 7 =========
+    // ========= CHECK: crear cita =========
     @PostMapping
     public String crearCita(
-            @Valid @ModelAttribute("dto") AppointmentCreateDto dto,
+            @Valid @ModelAttribute("appointment") AppointmentCreateDto appointment,
             BindingResult bindingResult,
             Model model,
             RedirectAttributes redirectAttributes
@@ -89,13 +93,26 @@ public class ClienteAppointmentController {
 
         final Long appointmentId;
         try {
-            appointmentId = appointmentService.createAppointment(dto);
+            // Tu servicio debe validar:
+            // - vehículo pertenece al cliente logueado (403/404)
+            // - disponibilidad (409 CONFLICT) -> NO guardar
+            appointmentId = appointmentService.createAppointment(appointment);
+
         } catch (ResponseStatusException ex) {
 
+            // NO disponibilidad -> mensaje claro y NO guardar
             if (ex.getStatusCode() == HttpStatus.CONFLICT) {
-                model.addAttribute("errorDisponibilidad", ex.getReason());
+                model.addAttribute(
+                        "availabilityError",
+                        ex.getReason() != null ? ex.getReason() : "No hay disponibilidad para esa franja."
+                );
                 reloadFormLists(model);
                 return "cliente/citas/form";
+            }
+
+            // Vehículo de otro cliente -> 403 o 404 (según tu service)
+            if (ex.getStatusCode() == HttpStatus.FORBIDDEN || ex.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw ex;
             }
 
             throw ex;
@@ -105,7 +122,7 @@ public class ClienteAppointmentController {
         return "redirect:/cliente/citas/" + appointmentId;
     }
 
-    // ========= CHECK 8 =========
+    // ========= CHECK: detalle/confirmación =========
     @GetMapping("/{id}")
     public String detalleCita(@PathVariable Long id, Model model) {
 
@@ -116,9 +133,12 @@ public class ClienteAppointmentController {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Cita no encontrada"));
 
+        // Para que tu detail.html pueda mostrar servicio/vehículo:
+        // O bien el appointment viene con relaciones cargadas (join fetch),
+        // o en el template accedes a appointment.vehicle / appointment.service.
         model.addAttribute("appointment", appointment);
 
-        return "cliente/citas/detalle";
+        return "cliente/citas/detail"; // ✅ según tu checklist (detail.html)
     }
 
     // ========= helpers =========
@@ -135,6 +155,11 @@ public class ClienteAppointmentController {
                 "services",
                 serviceRepository.findByActivoTrueOrderByNombreAsc()
         );
+
+        // 🔥 si por cualquier motivo no viene el appointment al re-render, lo aseguramos
+        if (!model.containsAttribute("appointment")) {
+            model.addAttribute("appointment", new AppointmentCreateDto());
+        }
     }
 
     private Long getCurrentCustomerIdOrThrow() {
