@@ -4,8 +4,52 @@
       th:replace="~{layout/base :: html(pageTitle='Backoffice - Dashboard', content=~{::content})}">
 
 <section th:fragment="content">
-  <h1 class="h4 mb-2">Backoffice</h1>
-  <p class="text-muted mb-0">Zona interna del taller (en construcción).</p>
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1">Backoffice</h1>
+      <p class="text-muted mb-0">Zona interna del taller.</p>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a class="btn btn-primary" th:href="@{/backoffice/agenda}">
+        Ir a Agenda
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h2 class="h6 mb-1">Agenda diaria</h2>
+          <p class="text-muted small mb-3">Listado de citas con filtros por fecha y estado.</p>
+          <a class="btn btn-outline-primary btn-sm" th:href="@{/backoffice/agenda}">
+            Ver agenda
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Placeholder futuro -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h2 class="h6 mb-1">Órdenes / Trabajos</h2>
+          <p class="text-muted small mb-0">Pendiente de implementar.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Placeholder futuro -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h2 class="h6 mb-1">Clientes</h2>
+          <p class="text-muted small mb-0">Pendiente de implementar.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
 </html>

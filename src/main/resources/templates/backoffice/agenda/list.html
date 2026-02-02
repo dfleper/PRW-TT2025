@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Backoffice · Agenda')"></head>
+
+<body>
+
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<main class="container my-4">
+
+  <!-- Encabezado -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <div>
+      <h1 class="h3 mb-1">Agenda diaria</h1>
+      <div class="text-muted small">
+        Fecha:
+        <span class="fw-semibold" th:text="${date}">2026-02-02</span>
+        <span th:if="${status != null}">
+          · Estado:
+          <span class="fw-semibold" th:text="${status}">PENDIENTE</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" th:href="@{/backoffice/agenda}">Hoy</a>
+      <a class="btn btn-outline-dark" th:href="@{/backoffice}">Dashboard</a>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <form class="row g-3 align-items-end" method="get" th:action="@{/backoffice/agenda}">
+
+        <div class="col-12 col-md-4">
+          <label for="date" class="form-label mb-1">Fecha</label>
+          <input id="date"
+                 name="date"
+                 type="date"
+                 class="form-control"
+                 th:value="${date}">
+          <div class="form-text">Agenda diaria (por defecto: hoy).</div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label for="status" class="form-label mb-1">Estado</label>
+          <select id="status" name="status" class="form-select">
+            <!-- value="" normal, NO th:value="" -->
+            <option value="" th:selected="${status == null}">Todos</option>
+
+            <option th:each="s : ${statuses}"
+                    th:value="${s}"
+                    th:text="${s}"
+                    th:selected="${status != null and s == status}">
+              PENDIENTE
+            </option>
+          </select>
+          <div class="form-text">Filtro opcional por estado.</div>
+        </div>
+
+        <div class="col-12 col-md-4 d-flex gap-2">
+          <button type="submit" class="btn btn-primary w-100">Aplicar</button>
+
+          <a class="btn btn-outline-secondary w-100"
+             th:href="@{/backoffice/agenda(date=${date})}">
+            Limpiar estado
+          </a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <div class="fw-semibold">Citas del día</div>
+      <div class="text-muted small">
+        Total:
+        <span class="fw-semibold"
+              th:text="${appointments != null ? #lists.size(appointments) : 0}">0</span>
+      </div>
+    </div>
+
+    <div class="card-body p-0">
+
+      <!-- Vacío -->
+      <div class="p-4" th:if="${appointments == null || #lists.isEmpty(appointments)}">
+        <div class="text-center">
+          <div class="display-6">🗓️</div>
+          <p class="mb-1 fw-semibold">No hay citas para este día</p>
+          <p class="text-muted mb-0">Cambia la fecha o elimina el filtro de estado.</p>
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <div class="table-responsive" th:if="${appointments != null && !#lists.isEmpty(appointments)}">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+          <tr>
+            <th class="ps-3">Hora</th>
+            <th>Servicio</th>
+            <th>Vehículo</th>
+            <th>Cliente</th>
+            <th>Estado</th>
+            <th class="pe-3 text-end">Acciones</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr th:each="a : ${appointments}">
+            <!-- Hora -->
+            <td class="ps-3 text-nowrap">
+              <div class="fw-semibold" th:text="${#temporals.format(a.inicio, 'HH:mm')}">13:04</div>
+              <div class="small text-muted">
+                <span th:text="${#temporals.format(a.inicio, 'dd/MM/yyyy')}">02/02/2026</span>
+                ·
+                <span th:text="${#temporals.format(a.fin, 'HH:mm')}">13:49</span>
+              </div>
+            </td>
+
+            <!-- Servicio -->
+            <td>
+              <div class="fw-semibold" th:text="${a.service.nombre}">Cambio de aceite</div>
+              <div class="small text-muted">
+                <span class="me-2">Código:</span>
+                <span th:text="${a.service.codigo}">ACEITE</span>
+                <span class="mx-2">·</span>
+                <span th:text="${a.service.minutosEstimados}">30</span> min
+              </div>
+            </td>
+
+            <!-- Vehículo -->
+            <td class="text-nowrap">
+              <div class="fw-semibold">
+                <span class="badge text-bg-secondary" th:text="${a.vehicle.matricula}">1234ABC</span>
+              </div>
+              <div class="small text-muted">
+                <span th:text="${a.vehicle.marca != null ? a.vehicle.marca : '-'}">Seat</span>
+                <span th:text="${a.vehicle.modelo != null ? ' ' + a.vehicle.modelo : ''}"> Ibiza</span>
+              </div>
+            </td>
+
+            <!-- Cliente -->
+            <!-- <td class="text-nowrap">
+              <span class="fw-semibold">ID</span>
+              <span th:text="${a.customer.idCustomer}">1</span>
+            </td> -->
+			
+			<!-- Cliente -->
+			<td class="text-nowrap">
+			  <div class="fw-semibold"
+			       th:text="${a.customer.user.nombre + ' ' + a.customer.user.apellidos}">
+			    Nombre Apellidos
+			  </div>
+
+			  <div class="small text-muted"
+			       th:text="${a.customer.user.email}">
+			    email@cliente.com
+			  </div>
+			</td>
+
+            <!-- Estado -->
+            <td class="text-nowrap">
+              <span class="badge"
+                    th:classappend="${
+                      a.estado == T(es.prw.features.appointments.domain.AppointmentStatus).PENDIENTE  ? ' text-bg-warning' :
+                      a.estado == T(es.prw.features.appointments.domain.AppointmentStatus).CONFIRMADA ? ' text-bg-primary' :
+                      a.estado == T(es.prw.features.appointments.domain.AppointmentStatus).EN_CURSO   ? ' text-bg-info' :
+                      a.estado == T(es.prw.features.appointments.domain.AppointmentStatus).FINALIZADA ? ' text-bg-success' :
+                      a.estado == T(es.prw.features.appointments.domain.AppointmentStatus).CANCELADA  ? ' text-bg-danger' :
+                      ' text-bg-secondary'
+                    }"
+                    th:text="${a.estado}">
+                PENDIENTE
+              </span>
+            </td>
+
+            <!-- Acciones -->
+            <td class="pe-3 text-end">
+              <!-- Placeholder: activaremos cuando exista detalle backoffice -->
+              <button class="btn btn-sm btn-outline-primary" type="button" disabled>Ver</button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- Bootstrap JS (necesario para el navbar toggler) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

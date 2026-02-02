@@ -81,7 +81,54 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
             @Param("customerId") Long customerId
     );
 
-    // (Puedes dejar tus derivados si quieres, pero ya no los usaremos para la vista)
+    // ========= Derivados existentes =========
     List<AppointmentEntity> findByCustomer_IdCustomerOrderByInicioDesc(Long customerId);
     List<AppointmentEntity> findByCustomer_IdCustomerOrderByInicioAsc(Long customerId);
+
+    // ========= BACKOFFICE: agenda diaria (JOIN FETCH completo para Thymeleaf) =========
+    // Rango [start, end) = [00:00 del día, 00:00 del día siguiente)
+    @Query("""
+        select a
+        from AppointmentEntity a
+        join fetch a.service
+        join fetch a.vehicle
+        join fetch a.customer c
+        join fetch c.user u
+        where a.inicio >= :start and a.inicio < :end
+        order by a.inicio asc
+    """)
+    List<AppointmentEntity> findAgendaByDay(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+    @Query("""
+        select a
+        from AppointmentEntity a
+        join fetch a.service
+        join fetch a.vehicle
+        join fetch a.customer c
+        join fetch c.user u
+        where a.inicio >= :start and a.inicio < :end
+          and a.estado = :estado
+        order by a.inicio asc
+    """)
+    List<AppointmentEntity> findAgendaByDayAndStatus(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("estado") AppointmentStatus estado
+    );
+
+    // ========= BACKOFFICE: agenda diaria (derivados - opcional) =========
+    // Si algún día quieres no usar joins (no recomendado para Thymeleaf si accedes a relaciones)
+    List<AppointmentEntity> findByInicioGreaterThanEqualAndInicioLessThanOrderByInicioAsc(
+            LocalDateTime start,
+            LocalDateTime end
+    );
+
+    List<AppointmentEntity> findByInicioGreaterThanEqualAndInicioLessThanAndEstadoOrderByInicioAsc(
+            LocalDateTime start,
+            LocalDateTime end,
+            AppointmentStatus estado
+    );
 }
