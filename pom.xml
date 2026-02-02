@@ -25,7 +25,7 @@
     <java.version>17</java.version>
     <maven.compiler.release>17</maven.compiler.release>
 
-    <!-- Encoding (SOLUCIÓN al MalformedInputException) -->
+    <!-- Encoding -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -83,7 +83,7 @@
       <scope>runtime</scope>
     </dependency>
 
-    <!-- Flyway (Spring Boot 3.x) -->
+    <!-- Flyway -->
     <dependency>
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-core</artifactId>
@@ -110,49 +110,56 @@
       <optional>true</optional>
     </dependency>
 
+    <!-- Security -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+
+    <!-- Navbar #authorization -->
+    <dependency>
+      <groupId>org.thymeleaf.extras</groupId>
+      <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+    </dependency>
+
+    <!-- Actuator -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
     <!-- Tests -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
-    
-    <!-- Spring Boot Security -->
+
     <dependency>
-  	  <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-security</artifactId>
-    </dependency>
-    
-    <!-- Navbar #authorization -->
-    <dependency>
-      <groupId>org.thymeleaf.extras</groupId>
-      <artifactId>thymeleaf-extras-springsecurity6</artifactId>
-    </dependency>
-    
-    <dependency>
-  	  <groupId>org.springframework.security</groupId>
+      <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
-    </dependency>
-    
-    <!-- Actuator -->
-    <dependency>
-  	  <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
 
   </dependencies>
 
   <build>
-    <!-- Esto fuerza el nombre del WAR -->
     <finalName>TT2025</finalName>
 
-    <!-- Importante: asegurar encoding en resources -->
+    <!-- CLAVE: NO filtrar application*.properties/yml para evitar MalformedInputException -->
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+      </resource>
+    </resources>
+
     <plugins>
 
-      <!-- Resources plugin (SOLUCIÓN al MalformedInputException) -->
+      <!-- Resources plugin: fuerza UTF-8 -->
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
         <configuration>
           <encoding>${project.build.sourceEncoding}</encoding>
         </configuration>

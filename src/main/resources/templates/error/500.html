@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: html(pageTitle='Error del sistema', content=~{::content})}"
+      th:remove="tag">
+
+<section th:fragment="content">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4 text-center">
+          <h1 class="h5 mb-2">Ha ocurrido un error</h1>
+          <p class="text-muted mb-4">
+            Se ha producido un error inesperado.  
+            Inténtalo de nuevo más tarde.
+          </p>
+          <div class="d-flex justify-content-center gap-2">
+            <a class="btn btn-outline-secondary" th:href="@{/}">Inicio</a>
+            <a class="btn btn-primary" th:href="@{/cliente}">Zona cliente</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</html>

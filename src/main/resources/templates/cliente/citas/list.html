@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: html(pageTitle='Mis citas', content=~{::content})}"
+      th:remove="tag">
+
+<section th:fragment="content">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <div>
+          <h1 class="h5 mb-1">Mis citas</h1>
+          <div class="small text-muted">Aquí puedes ver tus citas pasadas y futuras.</div>
+        </div>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-secondary btn-sm" th:href="@{/cliente}">Volver</a>
+          <a class="btn btn-primary btn-sm" th:href="@{/cliente/citas/nueva}">Reservar cita</a>
+        </div>
+      </div>
+
+      <!-- Flash messages -->
+      <div th:if="${success}" class="alert alert-success shadow-sm" th:text="${success}"></div>
+      <div th:if="${info}" class="alert alert-info shadow-sm" th:text="${info}"></div>
+      <div th:if="${error}" class="alert alert-danger shadow-sm" th:text="${error}"></div>
+
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-3">Inicio</th>
+                  <th>Servicio</th>
+                  <th>Vehículo</th>
+                  <th>Estado</th>
+                  <th class="text-end pe-3">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:if="${#lists.isEmpty(appointments)}">
+                  <td colspan="5" class="text-center text-muted py-4">
+                    No tienes citas todavía.
+                  </td>
+                </tr>
+
+                <tr th:each="a : ${appointments}">
+                  <td class="ps-3">
+                    <div th:text="${#temporals.format(a.inicio, 'dd/MM/yyyy HH:mm')}">-</div>
+                    <div class="small text-muted">
+                      <span>Fin:</span>
+                      <span th:text="${#temporals.format(a.fin, 'HH:mm')}">-</span>
+                    </div>
+                  </td>
+
+                  <td th:text="${a.service.nombre}">-</td>
+                  <td th:text="${a.vehicle.matricula}">-</td>
+
+                  <td>
+                    <span class="badge bg-secondary" th:text="${a.estado}">PENDIENTE</span>
+                  </td>
+
+                  <td class="text-end pe-3">
+                    <div class="d-inline-flex gap-2">
+                      <a class="btn btn-outline-primary btn-sm"
+                         th:href="@{/cliente/citas/{id}(id=${a.id})}">
+                        Ver
+                      </a>
+
+                      <!-- Cancelar SOLO si es cancelable (calculado en controller) -->
+                      <form th:if="${cancelableIds != null and cancelableIds.contains(a.id)}"
+                            th:action="@{/cliente/citas/{id}/cancelar(id=${a.id})}"
+                            method="post">
+                        <button type="submit" class="btn btn-outline-danger btn-sm"
+                                onclick="return confirm('¿Seguro que quieres cancelar esta cita?');">
+                          Cancelar
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+</html>

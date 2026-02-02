@@ -44,6 +44,9 @@ public class SecurityConfig {
         // Público (si lo quieres así)
         .requestMatchers("/api/availability").permitAll()
 
+        // ✅ CHECKLIST: Mis citas -> SOLO CLIENTE (regla específica)
+        .requestMatchers("/cliente/citas/**").hasAnyAuthority("CLIENTE", "ROLE_CLIENTE")
+
         // Zonas protegidas
         .requestMatchers("/cliente/**").hasAnyAuthority("CLIENTE", "ROLE_CLIENTE")
 

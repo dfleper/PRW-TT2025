@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface AppointmentRepository extends JpaRepository<AppointmentEntity, Long> {
@@ -43,24 +44,27 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
             @Param("cancelada") AppointmentStatus cancelada
     );
 
-    /*
-    // ========= Alternativa si INSISTES en employeeId (requiere saber el nombre real del ID en EmployeeEntity) =========
-    // Si en EmployeeEntity el getter es getIdEmployee() -> propiedad "idEmployee"
+    // ========= Listado de citas del cliente (con JOIN FETCH para evitar LazyInitializationException) =========
     @Query("""
-        select count(a) > 0
+        select a
         from AppointmentEntity a
-        where a.employeeAsignado.idEmployee = :employeeId
-          and a.estado <> :cancelada
-          and a.inicio < :fin
-          and a.fin > :inicio
+        join fetch a.service
+        join fetch a.vehicle
+        where a.customer.idCustomer = :customerId
+        order by a.inicio desc
     """)
-    boolean existsOverlapForEmployeeId(
-            @Param("employeeId") Long employeeId,
-            @Param("inicio") LocalDateTime inicio,
-            @Param("fin") LocalDateTime fin,
-            @Param("cancelada") AppointmentStatus cancelada
-    );
-    */
+    List<AppointmentEntity> findListByCustomerWithJoinsDesc(@Param("customerId") Long customerId);
+
+    // (si luego quieres ASC)
+    @Query("""
+        select a
+        from AppointmentEntity a
+        join fetch a.service
+        join fetch a.vehicle
+        where a.customer.idCustomer = :customerId
+        order by a.inicio asc
+    """)
+    List<AppointmentEntity> findListByCustomerWithJoinsAsc(@Param("customerId") Long customerId);
 
     // ========= Detalle seguro con JOIN FETCH (evita LazyInitializationException) =========
     @Query("""
@@ -76,4 +80,8 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
             @Param("id") Long id,
             @Param("customerId") Long customerId
     );
+
+    // (Puedes dejar tus derivados si quieres, pero ya no los usaremos para la vista)
+    List<AppointmentEntity> findByCustomer_IdCustomerOrderByInicioDesc(Long customerId);
+    List<AppointmentEntity> findByCustomer_IdCustomerOrderByInicioAsc(Long customerId);
 }
