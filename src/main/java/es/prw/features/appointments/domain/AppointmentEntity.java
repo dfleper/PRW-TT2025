@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "appointments")
+@Access(AccessType.FIELD)
 public class AppointmentEntity {
 
     @Id
@@ -49,7 +50,7 @@ public class AppointmentEntity {
     private LocalDateTime fin;
 
     @Convert(converter = AppointmentStatusConverter.class)
-    @Column(name = "estado", nullable = false, columnDefinition = "enum('pendiente','confirmada','en_curso','finalizada','cancelada')")
+    @Column(name = "estado", nullable = false, length = 20)
     private AppointmentStatus estado = AppointmentStatus.PENDIENTE;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -72,7 +73,7 @@ public class AppointmentEntity {
         updatedAt = LocalDateTime.now();
     }
 
-    // ===== getters/setters (mínimos) =====
+    // ===== getters/setters =====
     public Long getId() { return id; }
 
     public CustomerEntity getCustomer() { return customer; }

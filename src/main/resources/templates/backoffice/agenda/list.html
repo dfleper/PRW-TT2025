@@ -29,7 +29,7 @@
   </div>
 
   <!-- Filtros -->
-  <div class="card shadow-sm mb-3">
+	<div class="card shadow-sm mb-3 rounded-4 overflow-hidden">
     <div class="card-body">
       <form class="row g-3 align-items-end" method="get" th:action="@{/backoffice/agenda}">
 
@@ -73,7 +73,7 @@
   </div>
 
   <!-- Tabla -->
-  <div class="card shadow-sm">
+  <div class="card shadow-sm rounded-4 overflow-hidden">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
       <div class="fw-semibold">Citas del día</div>
       <div class="text-muted small">
@@ -180,7 +180,10 @@
             <!-- Acciones -->
             <td class="pe-3 text-end">
               <!-- Placeholder: activaremos cuando exista detalle backoffice -->
-              <button class="btn btn-sm btn-outline-primary" type="button" disabled>Ver</button>
+			  <a class="btn btn-sm btn-outline-primary"
+			     th:href="@{/backoffice/citas/{id}(id=${a.id})}">
+			    Ver
+			  </a>
             </td>
           </tr>
           </tbody>

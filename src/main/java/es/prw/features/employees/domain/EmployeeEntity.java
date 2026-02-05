@@ -3,12 +3,13 @@ package es.prw.features.employees.domain;
 import es.prw.features.iam.domain.UserEntity;
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
 @Table(name = "employees")
+@Access(AccessType.FIELD)
 public class EmployeeEntity {
 
     @Id
@@ -21,8 +22,7 @@ public class EmployeeEntity {
     private UserEntity user;
 
     @Convert(converter = EmployeeTypeConverter.class)
-    @Column(name = "tipo", nullable = false,
-            columnDefinition = "enum('recepcionista','mecanico','jefe')")
+    @Column(name = "tipo", nullable = false, length = 20)
     private EmployeeType tipo;
 
     @Column(name = "especialidad", length = 80)
@@ -61,7 +61,9 @@ public class EmployeeEntity {
         updatedAt = LocalDateTime.now();
     }
 
+    // ===== getters/setters =====
     public Long getId() { return id; }
+
     public UserEntity getUser() { return user; }
     public void setUser(UserEntity user) { this.user = user; }
 
@@ -76,6 +78,15 @@ public class EmployeeEntity {
 
     public Boolean getActivo() { return activo; }
     public void setActivo(Boolean activo) { this.activo = activo; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    public UserEntity getCreatedByUser() { return createdByUser; }
+    public void setCreatedByUser(UserEntity createdByUser) { this.createdByUser = createdByUser; }
+
+    public UserEntity getUpdatedByUser() { return updatedByUser; }
+    public void setUpdatedByUser(UserEntity updatedByUser) { this.updatedByUser = updatedByUser; }
 
     @Override
     public boolean equals(Object o) {

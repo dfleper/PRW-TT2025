@@ -44,9 +44,9 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
             @Param("cancelada") AppointmentStatus cancelada
     );
 
-    // ========= Listado de citas del cliente (con JOIN FETCH para evitar LazyInitializationException) =========
+    // ========= Listado de citas del cliente (JOIN FETCH para evitar LazyInitializationException) =========
     @Query("""
-        select a
+        select distinct a
         from AppointmentEntity a
         join fetch a.service
         join fetch a.vehicle
@@ -55,9 +55,8 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
     """)
     List<AppointmentEntity> findListByCustomerWithJoinsDesc(@Param("customerId") Long customerId);
 
-    // (si luego quieres ASC)
     @Query("""
-        select a
+        select distinct a
         from AppointmentEntity a
         join fetch a.service
         join fetch a.vehicle
@@ -66,9 +65,9 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
     """)
     List<AppointmentEntity> findListByCustomerWithJoinsAsc(@Param("customerId") Long customerId);
 
-    // ========= Detalle seguro con JOIN FETCH (evita LazyInitializationException) =========
+    // ========= Detalle cliente seguro con JOIN FETCH (evita LazyInitializationException) =========
     @Query("""
-        select a
+        select distinct a
         from AppointmentEntity a
         join fetch a.service
         join fetch a.vehicle
@@ -81,6 +80,21 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
             @Param("customerId") Long customerId
     );
 
+    // ========= BACKOFFICE: detalle con JOIN FETCH completo para Thymeleaf =========
+    // Carga service/vehicle/customer->user y employeeAsignado->user (si existe)
+    @Query("""
+        select distinct a
+        from AppointmentEntity a
+        join fetch a.service s
+        join fetch a.vehicle v
+        join fetch a.customer c
+        join fetch c.user cu
+        left join fetch a.employeeAsignado e
+        left join fetch e.user eu
+        where a.id = :id
+    """)
+    Optional<AppointmentEntity> findDetailByIdWithJoins(@Param("id") Long id);
+
     // ========= Derivados existentes =========
     List<AppointmentEntity> findByCustomer_IdCustomerOrderByInicioDesc(Long customerId);
     List<AppointmentEntity> findByCustomer_IdCustomerOrderByInicioAsc(Long customerId);
@@ -88,7 +102,7 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
     // ========= BACKOFFICE: agenda diaria (JOIN FETCH completo para Thymeleaf) =========
     // Rango [start, end) = [00:00 del día, 00:00 del día siguiente)
     @Query("""
-        select a
+        select distinct a
         from AppointmentEntity a
         join fetch a.service
         join fetch a.vehicle
@@ -103,7 +117,7 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
     );
 
     @Query("""
-        select a
+        select distinct a
         from AppointmentEntity a
         join fetch a.service
         join fetch a.vehicle
