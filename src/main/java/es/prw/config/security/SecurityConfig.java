@@ -47,9 +47,21 @@ public class SecurityConfig {
         // ✅ CHECKLIST: Mis citas -> SOLO CLIENTE (regla específica)
         .requestMatchers("/cliente/citas/**").hasAnyAuthority("CLIENTE", "ROLE_CLIENTE")
 
-        // Zonas protegidas
+        // Zona cliente
         .requestMatchers("/cliente/**").hasAnyAuthority("CLIENTE", "ROLE_CLIENTE")
 
+        // ✅ TAREA 15: Work Orders en Backoffice (roles del taller)
+        .requestMatchers(
+            "/backoffice/citas/*/workorder",
+            "/backoffice/workorders/**"
+        ).hasAnyAuthority(
+            "RECEPCION", "ROLE_RECEPCION",
+            "MECANICO", "ROLE_MECANICO",
+            "JEFE_TALLER", "ROLE_JEFE_TALLER",
+            "ADMIN", "ROLE_ADMIN"
+        )
+
+        // Backoffice general
         .requestMatchers("/backoffice/**").hasAnyAuthority(
             "RECEPCION", "ROLE_RECEPCION",
             "MECANICO", "ROLE_MECANICO",
@@ -57,6 +69,7 @@ public class SecurityConfig {
             "ADMIN", "ROLE_ADMIN"
         )
 
+        // Admin
         .requestMatchers("/admin/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
         .anyRequest().authenticated()
