@@ -1,13 +1,15 @@
 package es.prw.features.workorders.controller;
 
 import es.prw.features.parts.repository.PartRepository;
+import es.prw.features.workorders.service.WorkOrderService;
 import es.prw.features.workorders.parts.dto.WorkOrderPartDto;
 import es.prw.features.workorders.parts.service.WorkOrderPartService;
-import es.prw.features.workorders.service.WorkOrderService;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashMap;
@@ -67,8 +69,29 @@ public class BackofficeWorkOrderController {
                             @RequestParam(name = "observaciones", required = false) String observaciones,
                             RedirectAttributes ra) {
 
-        workOrderService.updateNotes(workOrderId, diagnostico, observaciones);
-        ra.addFlashAttribute("ok", "Orden de trabajo guardada");
+        try {
+            workOrderService.updateNotes(workOrderId, diagnostico, observaciones);
+            ra.addFlashAttribute("ok", "Orden de trabajo guardada");
+        } catch (ResponseStatusException ex) {
+            ra.addFlashAttribute("error", ex.getReason());
+        }
+
+        return "redirect:/backoffice/workorders/" + workOrderId;
+    }
+
+    // ✅ Tarea 17: cerrar OT
+    @PostMapping("/workorders/{id}/close")
+    public String closeWorkOrder(@PathVariable("id") Long workOrderId, RedirectAttributes ra) {
+
+        try {
+            workOrderService.closeWorkOrder(workOrderId);
+            ra.addFlashAttribute("ok", "Orden de trabajo cerrada correctamente");
+        } catch (ResponseStatusException ex) {
+            ra.addFlashAttribute("error", ex.getReason());
+        } catch (Exception ex) {
+            ra.addFlashAttribute("error", "Error inesperado al cerrar la orden de trabajo");
+        }
+
         return "redirect:/backoffice/workorders/" + workOrderId;
     }
 }

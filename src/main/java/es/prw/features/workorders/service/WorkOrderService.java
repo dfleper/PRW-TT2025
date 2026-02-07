@@ -9,5 +9,7 @@ public interface WorkOrderService {
     WorkOrderEntity getById(Long workOrderId);
 
     WorkOrderEntity updateNotes(Long workOrderId, String diagnostico, String observaciones);
-}
 
+    // ✅ Tarea 17: cerrar OT
+    WorkOrderEntity closeWorkOrder(Long workOrderId);
+}

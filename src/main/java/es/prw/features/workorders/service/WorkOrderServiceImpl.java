@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+
 @Service
 @Transactional
 public class WorkOrderServiceImpl implements WorkOrderService {
@@ -65,8 +67,37 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         WorkOrderEntity wo = workOrderRepository.findById(workOrderId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden de trabajo no encontrada"));
 
+        // ✅ Regla mínima: OT cerrada = NO se puede editar
+        if (wo.getEstado() == WorkOrderStatus.cerrada) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "La orden de trabajo está cerrada y no permite cambios"
+            );
+        }
+
         wo.setDiagnostico(diagnostico);
         wo.setObservaciones(observaciones);
+
+        return workOrderRepository.save(wo);
+    }
+
+    @Override
+    public WorkOrderEntity closeWorkOrder(Long workOrderId) {
+
+        WorkOrderEntity wo = workOrderRepository.findById(workOrderId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden de trabajo no encontrada"));
+
+        if (wo.getEstado() == WorkOrderStatus.cerrada) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "La orden de trabajo ya está cerrada");
+        }
+
+        // ✅ Cierre
+        wo.setEstado(WorkOrderStatus.cerrada);
+
+        // Si ya viniera informada por lo que sea, no la pisamos.
+        if (wo.getClosedAt() == null) {
+            wo.setClosedAt(LocalDateTime.now());
+        }
 
         return workOrderRepository.save(wo);
     }

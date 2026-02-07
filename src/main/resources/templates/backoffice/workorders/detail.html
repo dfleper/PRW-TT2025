@@ -54,7 +54,32 @@
 						</span>
 					</div>
 
-					<div class="card-body">
+					<div class="card-body"
+						th:with="isClosed=${wo.estado == T(es.prw.features.workorders.domain.WorkOrderStatus).cerrada}">
+
+						<!-- ✅ Botón cerrar OT (solo si no está cerrada) -->
+						<div class="mb-3" th:if="${!isClosed}">
+							<form th:action="@{/backoffice/workorders/{id}/close(id=${wo.id})}" method="post"
+								onsubmit="return confirm('¿Cerrar la orden de trabajo? No se podrá editar después.');">
+
+								<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
+									th:value="${_csrf.token}" />
+
+								<button type="submit" class="btn btn-danger w-100">
+									Cerrar orden de trabajo
+								</button>
+							</form>
+							<div class="form-text mt-2">
+								Al cerrar la OT se bloquean notas y piezas.
+							</div>
+						</div>
+
+						<!-- ✅ Aviso si está cerrada -->
+						<div class="mb-3" th:if="${isClosed}">
+							<div class="alert alert-success mb-0">
+								Esta orden está <strong>cerrada</strong>. No se permiten cambios.
+							</div>
+						</div>
 
 						<div class="mb-3">
 							<div class="text-muted small mb-1">Apertura</div>
@@ -83,8 +108,7 @@
 								<span th:text="${#temporals.format(wo.appointment.fin, 'HH:mm')}">11:00</span>
 							</div>
 							<div class="small text-muted">
-								<span
-									th:text="${#temporals.format(wo.appointment.inicio, 'dd/MM/yyyy')}">06/02/2026</span>
+								<span th:text="${#temporals.format(wo.appointment.inicio, 'dd/MM/yyyy')}">06/02/2026</span>
 							</div>
 
 							<div class="mt-3">
@@ -117,7 +141,8 @@
 						<div class="fw-semibold">Datos y diagnóstico</div>
 					</div>
 
-					<div class="card-body">
+					<div class="card-body"
+						th:with="isClosed=${wo.estado == T(es.prw.features.workorders.domain.WorkOrderStatus).cerrada}">
 
 						<!-- Datos cita: servicio / vehículo / cliente -->
 						<div th:if="${wo.appointment != null}">
@@ -148,10 +173,8 @@
 												th:text="${wo.appointment.vehicle.matricula}">1234ABC</span>
 										</div>
 										<div class="small text-muted">
-											<span
-												th:text="${wo.appointment.vehicle.marca != null ? wo.appointment.vehicle.marca : '-'}">Seat</span>
-											<span
-												th:text="${wo.appointment.vehicle.modelo != null ? ' ' + wo.appointment.vehicle.modelo : ''}">
+											<span th:text="${wo.appointment.vehicle.marca != null ? wo.appointment.vehicle.marca : '-'}">Seat</span>
+											<span th:text="${wo.appointment.vehicle.modelo != null ? ' ' + wo.appointment.vehicle.modelo : ''}">
 												Ibiza</span>
 										</div>
 									</div>
@@ -161,10 +184,8 @@
 								<!-- Cliente -->
 								<div class="col-12 col-md-6">
 									<div class="text-muted small mb-1">Cliente</div>
-									<div
-										th:if="${wo.appointment.customer != null && wo.appointment.customer.user != null}">
-										<div class="small text-muted"
-											th:if="${wo.appointment.customer.user.telefono != null}"
+									<div th:if="${wo.appointment.customer != null && wo.appointment.customer.user != null}">
+										<div class="small text-muted" th:if="${wo.appointment.customer.user.telefono != null}"
 											th:text="${wo.appointment.customer.user.telefono}">
 											600123123
 										</div>
@@ -198,6 +219,7 @@
 							<div class="mb-3">
 								<label for="diagnostico" class="form-label mb-1">Diagnóstico</label>
 								<textarea id="diagnostico" name="diagnostico" rows="6" class="form-control"
+									th:disabled="${isClosed}"
 									placeholder="Describe el diagnóstico..." th:text="${wo.diagnostico}"></textarea>
 								<div class="form-text">Información técnica del problema detectado.</div>
 							</div>
@@ -205,18 +227,23 @@
 							<div class="mb-3">
 								<label for="observaciones" class="form-label mb-1">Observaciones</label>
 								<textarea id="observaciones" name="observaciones" rows="6" class="form-control"
+									th:disabled="${isClosed}"
 									placeholder="Notas adicionales, decisiones, recomendaciones..."
 									th:text="${wo.observaciones}"></textarea>
 								<div class="form-text">Notas internas del taller.</div>
 							</div>
 
 							<div class="d-flex flex-wrap gap-2">
-								<button type="submit" class="btn btn-primary">Guardar</button>
+								<button type="submit" class="btn btn-primary" th:disabled="${isClosed}">Guardar</button>
 
 								<a class="btn btn-outline-secondary" th:if="${wo.appointment != null}"
 									th:href="@{/backoffice/citas/{id}(id=${wo.appointment.id})}">
 									Volver a cita
 								</a>
+							</div>
+
+							<div class="alert alert-warning mt-3 mb-0" th:if="${isClosed}">
+								OT cerrada: el formulario está deshabilitado.
 							</div>
 
 						</form>
@@ -252,7 +279,8 @@
 											<input type="hidden" th:if="${_csrf != null}"
 												th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-											<button class="btn btn-sm btn-outline-danger" type="submit">✖</button>
+											<button class="btn btn-sm btn-outline-danger" type="submit"
+												th:disabled="${isClosed}">✖</button>
 										</form>
 									</td>
 								</tr>
@@ -265,7 +293,10 @@
 							</tbody>
 						</table>
 
-						<form th:action="@{/backoffice/workorders/{id}/parts(id=${wo.id})}" th:object="${newPart}"
+						<!-- ✅ Añadir piezas SOLO si la OT está abierta -->
+						<form th:if="${!isClosed}"
+							th:action="@{/backoffice/workorders/{id}/parts(id=${wo.id})}"
+							th:object="${newPart}"
 							method="post" class="row g-2 mt-3">
 
 							<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
@@ -312,7 +343,7 @@
 						    if (allows) {
 						      qty.step = '0.1';   // o 0.01 si quieres
 						      qty.min = '0.1';
-						      qty.placeholder = 'Cantidad (ej: 3.5)';
+						      qty.placeholder = 'Cantidad';
 						    } else {
 						      qty.step = '1';
 						      qty.min = '1';

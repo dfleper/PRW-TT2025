@@ -48,7 +48,7 @@
                   appt.estado == T(es.prw.features.appointments.domain.AppointmentStatus).CANCELADA  ? ' text-bg-danger' :
                   ' text-bg-secondary'
                 }"
-                th:text="${appt.estado}">
+                th:text="${#strings.replace(appt.estado.name(), '_', ' ')}">
             PENDIENTE
           </span>
         </div>
@@ -89,6 +89,36 @@
 
             <div th:if="${appt.employeeAsignado == null}">
               <span class="badge text-bg-secondary">SIN ASIGNAR</span>
+            </div>
+          </div>
+
+          <hr class="my-4"/>
+
+          <!-- ✅ OT asociada (info útil) -->
+          <div class="mb-0">
+            <div class="text-muted small mb-1">Orden de trabajo</div>
+
+            <div th:if="${wo != null}">
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="fw-semibold">OT #<span th:text="${wo.id}">1</span></div>
+                <span class="badge"
+                      th:classappend="${
+                        wo.estado == T(es.prw.features.workorders.domain.WorkOrderStatus).cerrada ? ' text-bg-success' :
+                        ' text-bg-warning'
+                      }"
+                      th:text="${#strings.replace(wo.estado.name(), '_', ' ')}">
+                  abierta
+                </span>
+              </div>
+
+              <a class="btn btn-outline-secondary btn-sm mt-2 w-100"
+                 th:href="@{/backoffice/workorders/{id}(id=${wo.id})}">
+                Ver OT
+              </a>
+            </div>
+
+            <div th:if="${wo == null}" class="text-muted small">
+              No hay OT asociada.
             </div>
           </div>
 
@@ -138,11 +168,11 @@
             <div class="col-12 col-md-6">
               <div class="text-muted small mb-1">Cliente</div>
               <div th:if="${appt.customer != null && appt.customer.user != null}">
-				<div class="small text-muted"
-				     th:if="${appt.customer.user.telefono != null}"
-				     th:text="${appt.customer.user.telefono}">
-				  600123123
-				</div>
+                <div class="small text-muted"
+                     th:if="${appt.customer.user.telefono != null}"
+                     th:text="${appt.customer.user.telefono}">
+                  600123123
+                </div>
                 <div class="fw-semibold"
                      th:text="${appt.customer.user.nombre + ' ' + appt.customer.user.apellidos}">
                   Nombre Apellidos
@@ -159,6 +189,12 @@
 
           <hr class="my-4"/>
 
+          <!-- ✅ Mensaje claro si quieren finalizar pero no pueden -->
+          <div class="alert alert-warning"
+               th:if="${appt.estado == T(es.prw.features.appointments.domain.AppointmentStatus).EN_CURSO and !canFinalize}">
+            Para finalizar la cita, la orden de trabajo debe estar <strong>CERRADA</strong>.
+          </div>
+
           <div class="d-flex flex-wrap gap-4">
 
             <!-- Acción: cambiar estado -->
@@ -173,14 +209,19 @@
               <div>
                 <label for="newStatus" class="form-label mb-1">Cambiar estado</label>
                 <select id="newStatus" name="newStatus" class="form-select">
+
                   <option th:each="s : ${T(es.prw.features.appointments.domain.AppointmentStatus).values()}"
+                          th:if="${s != T(es.prw.features.appointments.domain.AppointmentStatus).FINALIZADA
+                                  or canFinalize
+                                  or appt.estado == T(es.prw.features.appointments.domain.AppointmentStatus).FINALIZADA}"
                           th:value="${s}"
-                          th:text="${s}"
+                          th:text="${#strings.replace(s.name(), '_', ' ')}"
                           th:selected="${s == appt.estado}">
                     PENDIENTE
                   </option>
+
                 </select>
-                <div class="form-text">Reglas: cancelada / finalizar solo desde EN_CURSO.</div>
+                <div class="form-text">Reglas: cancelar / finalizar solo desde EN CURSO y con OT cerrada.</div>
               </div>
 
               <button type="submit" class="btn btn-primary">Guardar</button>

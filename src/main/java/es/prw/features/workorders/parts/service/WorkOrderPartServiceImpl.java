@@ -39,6 +39,10 @@ public class WorkOrderPartServiceImpl implements WorkOrderPartService {
     @Transactional(readOnly = true)
     public List<WorkOrderPartEntity> listByWorkOrder(Long workOrderId) {
 
+        if (workOrderId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Orden de trabajo no válida");
+        }
+
         workOrderRepository.findById(workOrderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden de trabajo no encontrada"));
 
@@ -48,7 +52,7 @@ public class WorkOrderPartServiceImpl implements WorkOrderPartService {
     @Override
     public WorkOrderPartEntity addPart(Long workOrderId, WorkOrderPartDto dto) {
 
-        WorkOrderEntity wo = requireOpenWorkOrder(workOrderId);
+        WorkOrderEntity wo = requireNotClosedWorkOrder(workOrderId);
 
         WorkOrderPartEntity line = new WorkOrderPartEntity();
         line.setWorkOrder(wo);
@@ -61,14 +65,21 @@ public class WorkOrderPartServiceImpl implements WorkOrderPartService {
     @Override
     public WorkOrderPartEntity updatePart(Long partLineId, WorkOrderPartDto dto) {
 
+        if (partLineId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pieza usada no válida");
+        }
+
         WorkOrderPartEntity existing = workOrderPartRepository.findWithWorkOrderById(partLineId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pieza usada no encontrada"));
 
-        if (existing.getWorkOrder() == null) {
+        WorkOrderEntity wo = existing.getWorkOrder();
+        if (wo == null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Pieza sin orden de trabajo asociada");
         }
-        if (existing.getWorkOrder().getEstado() != WorkOrderStatus.abierta) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "OT no abierta: no se permiten cambios");
+
+        // ✅ Regla mínima T17: si OT está cerrada => no cambios
+        if (wo.getEstado() == WorkOrderStatus.cerrada) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "OT cerrada: no se permiten cambios");
         }
 
         applyDto(existing, dto);
@@ -79,14 +90,21 @@ public class WorkOrderPartServiceImpl implements WorkOrderPartService {
     @Override
     public void deletePart(Long partLineId) {
 
+        if (partLineId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pieza usada no válida");
+        }
+
         WorkOrderPartEntity existing = workOrderPartRepository.findWithWorkOrderById(partLineId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pieza usada no encontrada"));
 
-        if (existing.getWorkOrder() == null) {
+        WorkOrderEntity wo = existing.getWorkOrder();
+        if (wo == null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Pieza sin orden de trabajo asociada");
         }
-        if (existing.getWorkOrder().getEstado() != WorkOrderStatus.abierta) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "OT no abierta: no se permiten cambios");
+
+        // ✅ Regla mínima T17: si OT está cerrada => no cambios
+        if (wo.getEstado() == WorkOrderStatus.cerrada) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "OT cerrada: no se permiten cambios");
         }
 
         workOrderPartRepository.delete(existing);
@@ -94,14 +112,19 @@ public class WorkOrderPartServiceImpl implements WorkOrderPartService {
 
     // ===================== Helpers =====================
 
-    private WorkOrderEntity requireOpenWorkOrder(Long workOrderId) {
+    private WorkOrderEntity requireNotClosedWorkOrder(Long workOrderId) {
+
+        if (workOrderId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Orden de trabajo no válida");
+        }
 
         WorkOrderEntity wo = workOrderRepository.findById(workOrderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden de trabajo no encontrada"));
 
-        if (wo.getEstado() != WorkOrderStatus.abierta) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "OT no abierta: no se permiten cambios");
+        if (wo.getEstado() == WorkOrderStatus.cerrada) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "OT cerrada: no se permiten cambios");
         }
+
         return wo;
     }
 

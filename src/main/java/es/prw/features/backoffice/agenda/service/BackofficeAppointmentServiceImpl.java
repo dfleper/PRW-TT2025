@@ -6,6 +6,9 @@ import es.prw.features.appointments.repository.AppointmentRepository;
 import es.prw.features.employees.domain.EmployeeEntity;
 import es.prw.features.employees.domain.EmployeeType;
 import es.prw.features.employees.repository.EmployeeRepository;
+import es.prw.features.workorders.domain.WorkOrderStatus;
+import es.prw.features.workorders.repository.WorkOrderRepository;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,11 +24,14 @@ public class BackofficeAppointmentServiceImpl implements BackofficeAppointmentSe
 
     private final AppointmentRepository appointmentRepository;
     private final EmployeeRepository employeeRepository;
+    private final WorkOrderRepository workOrderRepository;
 
     public BackofficeAppointmentServiceImpl(AppointmentRepository appointmentRepository,
-                                           EmployeeRepository employeeRepository) {
+                                           EmployeeRepository employeeRepository,
+                                           WorkOrderRepository workOrderRepository) {
         this.appointmentRepository = appointmentRepository;
         this.employeeRepository = employeeRepository;
+        this.workOrderRepository = workOrderRepository;
     }
 
     @Override
@@ -63,8 +69,26 @@ public class BackofficeAppointmentServiceImpl implements BackofficeAppointmentSe
             throw new ResponseStatusException(HttpStatus.CONFLICT, "No se puede cambiar una cita cancelada");
         }
 
+        // Regla actual: finalizar solo si está EN_CURSO
         if (newStatus == AppointmentStatus.FINALIZADA && current != AppointmentStatus.EN_CURSO) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Solo se puede finalizar si está EN_CURSO");
+        }
+
+        // ✅ T17: NO permitir finalizar si no hay OT cerrada
+        if (newStatus == AppointmentStatus.FINALIZADA) {
+
+            var wo = workOrderRepository.findByAppointment_Id(id)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.CONFLICT,
+                            "No existe orden de trabajo asociada: no se puede finalizar la cita"
+                    ));
+
+            if (wo.getEstado() != WorkOrderStatus.cerrada) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "La orden de trabajo debe estar CERRADA para finalizar la cita"
+                );
+            }
         }
 
         appt.setEstado(newStatus);
