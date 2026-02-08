@@ -45,13 +45,25 @@
 
               <td class="text-end">
                 <div class="d-inline-flex gap-2">
-                  <a class="btn btn-outline-secondary btn-sm"
-                     th:href="@{/cliente/vehiculos/{id}/editar(id=${v.id})}">Editar</a>
 
+                  <!-- ✅ Historial -->
+                  <a class="btn btn-outline-primary btn-sm"
+                     th:href="@{/cliente/vehiculos/{id}/historial(id=${v.id})}">
+                    Historial
+                  </a>
+
+                  <!-- Editar -->
+                  <a class="btn btn-outline-secondary btn-sm"
+                     th:href="@{/cliente/vehiculos/{id}/editar(id=${v.id})}">
+                    Editar
+                  </a>
+
+                  <!-- Eliminar -->
                   <form th:action="@{/cliente/vehiculos/{id}/eliminar(id=${v.id})}" method="post" class="m-0">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <button class="btn btn-outline-danger btn-sm" type="submit">Eliminar</button>
                   </form>
+
                 </div>
               </td>
             </tr>

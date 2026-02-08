@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Zona cliente · Historial')"></head>
+
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<main class="container my-4">
+
+  <h1 class="h3 mb-3">Historial del vehículo</h1>
+
+  <div class="mb-3">
+    <a class="btn btn-outline-secondary btn-sm" th:href="@{/cliente/vehiculos}">
+      ← Volver a Mis vehículos
+    </a>
+  </div>
+
+  <div th:if="${#lists.isEmpty(items)}" class="alert alert-info">
+    Sin intervenciones registradas.
+  </div>
+
+  <div th:if="${!#lists.isEmpty(items)}" class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Servicio</th>
+        <th>Estado</th>
+        <th class="text-end">Acción</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="a : ${items}">
+        <td>
+          <div class="fw-semibold" th:text="${#temporals.format(a.inicio, 'dd/MM/yyyy HH:mm')}">29/01/2026 13:00</div>
+          <div class="text-muted small" th:text="${#temporals.format(a.fin, 'HH:mm')}">14:00</div>
+        </td>
+        <td th:text="${a.service.nombre}">Servicio</td>
+        <td>
+          <span class="badge text-bg-success" th:text="${a.estado}">FINALIZADA</span>
+        </td>
+        <td class="text-end">
+          <a class="btn btn-primary btn-sm"
+             th:href="@{/cliente/historial/citas/{id}(id=${a.id})}">
+            Ver detalle
+          </a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+</body>
+</html>

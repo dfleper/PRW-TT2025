@@ -46,7 +46,7 @@ public class WorkOrderPartServiceImpl implements WorkOrderPartService {
         workOrderRepository.findById(workOrderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden de trabajo no encontrada"));
 
-        return workOrderPartRepository.findByWorkOrderIdOrderByIdAsc(workOrderId);
+        return workOrderPartRepository.findByWorkOrder_IdOrderByIdAsc(workOrderId);
     }
 
     @Override

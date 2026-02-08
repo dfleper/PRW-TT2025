@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Zona cliente · Detalle historial')"></head>
+
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<main class="container my-4">
+
+  <h1 class="h3 mb-3">Detalle de intervención</h1>
+
+  <div class="mb-3">
+    <a class="btn btn-outline-secondary btn-sm"
+       th:href="@{/cliente/vehiculos/{id}/historial(id=${appointment.vehicle.idVehicle})}">
+      ← Volver al historial
+    </a>
+  </div>
+
+  <!-- Resumen cita -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row g-2">
+        <div class="col-md-4">
+          <div class="text-muted small">Servicio</div>
+          <div class="fw-semibold" th:text="${appointment.service.nombre}">Servicio</div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-muted small">Inicio</div>
+          <div th:text="${#temporals.format(appointment.inicio, 'dd/MM/yyyy HH:mm')}">-</div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-muted small">Fin</div>
+          <div th:text="${#temporals.format(appointment.fin, 'dd/MM/yyyy HH:mm')}">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OT -->
+  <div class="card mb-3">
+    <div class="card-header fw-semibold">Orden de Trabajo</div>
+    <div class="card-body">
+
+      <div th:if="${appointment.workOrder == null}" class="alert alert-info mb-0">
+        No hay orden de trabajo asociada a esta intervención.
+      </div>
+
+      <div th:if="${appointment.workOrder != null}">
+        <div class="mb-3">
+          <div class="text-muted small">Diagnóstico</div>
+          <div th:text="${appointment.workOrder.diagnostico != null ? appointment.workOrder.diagnostico : '—'}"></div>
+        </div>
+
+        <div class="mb-0">
+          <div class="text-muted small">Observaciones</div>
+          <div th:text="${appointment.workOrder.observaciones != null ? appointment.workOrder.observaciones : '—'}"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Piezas -->
+  <div class="card">
+    <div class="card-header fw-semibold">Piezas usadas</div>
+    <div class="card-body">
+
+      <div th:if="${#lists.isEmpty(parts)}" class="alert alert-info mb-0">
+        No hay piezas registradas para esta intervención.
+      </div>
+
+      <div th:if="${!#lists.isEmpty(parts)}" class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Nombre</th>
+            <th class="text-end">Cantidad</th>
+            <th class="text-end">Precio</th>
+            <th class="text-end">Total</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="p : ${parts}">
+            <td th:text="${p.sku}">SKU</td>
+            <td th:text="${p.nombre}">Nombre</td>
+            <td class="text-end" th:text="${p.cantidad}">1.00</td>
+            <td class="text-end" th:text="${p.precioUnit}">0.00</td>
+            <td class="text-end" th:text="${p.total}">0.00</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+</body>
+</html>

@@ -133,6 +133,24 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
             @Param("estado") AppointmentStatus estado
     );
 
+    // ========= HISTORIAL POR VEHÍCULO (CLIENTE) =========
+    // Citas FINALIZADA del vehículo, ordenadas por inicio desc.
+    // Carga service/vehicle y workOrder (si existe) para evitar LazyInitializationException en la vista.
+    @Query("""
+        select distinct a
+        from AppointmentEntity a
+        join fetch a.service
+        join fetch a.vehicle
+        left join fetch a.workOrder
+        where a.vehicle.idVehicle = :vehicleId
+          and a.estado = :estado
+        order by a.inicio desc
+    """)
+    List<AppointmentEntity> findFinalizedHistoryByVehicleId(
+            @Param("vehicleId") Long vehicleId,
+            @Param("estado") AppointmentStatus estado
+    );
+
     // ========= BACKOFFICE: agenda diaria (derivados - opcional) =========
     // Si algún día quieres no usar joins (no recomendado para Thymeleaf si accedes a relaciones)
     List<AppointmentEntity> findByInicioGreaterThanEqualAndInicioLessThanOrderByInicioAsc(
@@ -145,4 +163,22 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
             LocalDateTime end,
             AppointmentStatus estado
     );
+    
+    @Query("""
+    	    select distinct a
+    	    from AppointmentEntity a
+    	    join fetch a.service
+    	    join fetch a.vehicle
+    	    join fetch a.customer
+    	    left join fetch a.workOrder
+    	    where a.id = :appointmentId
+    	      and a.customer.idCustomer = :customerId
+    	      and a.estado = :estado
+    	""")
+    	Optional<AppointmentEntity> findHistoryDetailFinalizedByIdAndCustomer(
+    	        @Param("appointmentId") Long appointmentId,
+    	        @Param("customerId") Long customerId,
+    	        @Param("estado") AppointmentStatus estado
+    	);
+
 }
