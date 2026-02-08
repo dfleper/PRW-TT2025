@@ -10,8 +10,20 @@
       <p class="text-muted mb-3">Gestión digital para taller de mecánica rápida.</p>
 
       <div class="d-flex gap-2 flex-wrap">
-        <a class="btn btn-primary" th:href="@{/servicios}">Ver servicios</a>
-        <a class="btn btn-outline-secondary" th:href="@{/login}">Iniciar sesión</a>
+        <a class="btn btn-outline-secondary"
+           th:if="${#authorization.expression('!isAuthenticated()')}"
+           th:href="@{/login}">
+          Iniciar sesión
+        </a>
+
+        <!-- Opcional: si quieres un botón cuando ya estás logueado -->
+        <!--
+        <a class="btn btn-primary"
+           th:if="${#authorization.expression('isAuthenticated()')}"
+           th:href="@{/backoffice}">
+          Ir al panel
+        </a>
+        -->
       </div>
     </div>
   </div>

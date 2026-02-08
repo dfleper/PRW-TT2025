@@ -18,6 +18,7 @@ import es.prw.features.iam.domain.UserEntity;
 import es.prw.features.iam.repository.CustomerRepository;
 import es.prw.features.iam.repository.UserRepository;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -26,18 +27,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/cliente/citas")
 public class ClienteAppointmentController {
+
+    private static final String SESSION_SELECTED_SERVICE = "selectedServiceId";
 
     private final VehicleRepository vehicleRepository;
     private final ServiceRepository serviceRepository;
@@ -62,7 +60,7 @@ public class ClienteAppointmentController {
         this.appointmentRepository = appointmentRepository;
     }
 
-    // ========= T12: listado =========
+    // ========= LISTADO =========
     @GetMapping
     public String listado(Model model) {
         Long customerId = getCurrentCustomerIdOrThrow();
@@ -70,7 +68,6 @@ public class ClienteAppointmentController {
         List<AppointmentEntity> appointments =
                 appointmentRepository.findListByCustomerWithJoinsDesc(customerId);
 
-        // Calculamos qué citas se pueden cancelar para NO usar T(...) en Thymeleaf
         Set<Long> cancelableIds = new HashSet<>();
         for (AppointmentEntity a : appointments) {
             boolean canCancel =
@@ -86,20 +83,38 @@ public class ClienteAppointmentController {
         return "cliente/citas/list";
     }
 
-    // ========= T11: form nueva cita =========
+    // ========= FORM NUEVA CITA =========
     @GetMapping("/nueva")
-    public String nuevaCitaForm(Model model) {
+    public String nuevaCitaForm(Model model, HttpSession session, RedirectAttributes ra) {
+
+        Long selectedServiceId = (Long) session.getAttribute(SESSION_SELECTED_SERVICE);
+
+        // 🔒 No permitir crear cita sin servicio seleccionado
+        if (selectedServiceId == null) {
+            ra.addFlashAttribute(
+                "info",
+                "Debes seleccionar un servicio antes de reservar una cita."
+            );
+            return "redirect:/cliente/servicios";
+        }
+
         reloadFormLists(model);
+
+        AppointmentCreateDto dto = new AppointmentCreateDto();
+        dto.setServiceId(selectedServiceId); // ✅ preselección
+        model.addAttribute("appointment", dto);
+
         return "cliente/citas/form";
     }
 
-    // ========= T11: crear cita =========
+    // ========= CREAR CITA =========
     @PostMapping
     public String crearCita(
             @Valid @ModelAttribute("appointment") AppointmentCreateDto appointment,
             BindingResult bindingResult,
             Model model,
-            RedirectAttributes redirectAttributes
+            RedirectAttributes redirectAttributes,
+            HttpSession session
     ) {
 
         if (bindingResult.hasErrors()) {
@@ -109,6 +124,10 @@ public class ClienteAppointmentController {
 
         try {
             Long appointmentId = appointmentService.createAppointment(appointment);
+
+            // 🧹 LIMPIAR SERVICIO SELECCIONADO (ya usado)
+            session.removeAttribute(SESSION_SELECTED_SERVICE);
+
             redirectAttributes.addFlashAttribute("success", "Cita creada correctamente");
             return "redirect:/cliente/citas/" + appointmentId;
 
@@ -117,7 +136,9 @@ public class ClienteAppointmentController {
             if (ex.getStatusCode() == HttpStatus.CONFLICT) {
                 model.addAttribute(
                         "availabilityError",
-                        ex.getReason() != null ? ex.getReason() : "No hay disponibilidad para esa franja horaria."
+                        ex.getReason() != null
+                                ? ex.getReason()
+                                : "No hay disponibilidad para esa franja horaria."
                 );
                 reloadFormLists(model);
                 return "cliente/citas/form";
@@ -127,7 +148,7 @@ public class ClienteAppointmentController {
         }
     }
 
-    // ========= T12: detalle =========
+    // ========= DETALLE =========
     @GetMapping("/{id}")
     public String detalleCita(@PathVariable Long id, Model model) {
 
@@ -148,7 +169,7 @@ public class ClienteAppointmentController {
         return "cliente/citas/detail";
     }
 
-    // ========= T12: cancelar =========
+    // ========= CANCELAR =========
     @PostMapping("/{id}/cancelar")
     public String cancelarCita(@PathVariable Long id, RedirectAttributes redirectAttributes) {
 
@@ -169,7 +190,6 @@ public class ClienteAppointmentController {
             return "redirect:/cliente/citas/" + id;
         }
 
-        // (Opcional MVP) No permitir cancelar si faltan < 24h
         LocalDateTime inicio = appointment.getInicio();
         if (inicio != null) {
             Duration d = Duration.between(LocalDateTime.now(), inicio);
@@ -188,7 +208,7 @@ public class ClienteAppointmentController {
         return "redirect:/cliente/citas/" + id;
     }
 
-    // ========= helpers =========
+    // ========= HELPERS =========
     private void reloadFormLists(Model model) {
 
         Long customerId = getCurrentCustomerIdOrThrow();
@@ -224,5 +244,5 @@ public class ClienteAppointmentController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "El usuario no es cliente"));
 
         return customer.getIdCustomer();
-    } 
+    }
 }

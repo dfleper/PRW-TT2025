@@ -1,53 +1,214 @@
-/* Turbo Taller - UI base (Bootstrap-friendly) */
+/* =========================================================
+   Turbo Taller — UI base (PRO, Bootstrap-friendly)
+   ========================================================= */
 
 :root {
+  /* Colores base */
   --tt-bg: #f8f9fa;
-  --tt-navbar: #0b1220;
+  --tt-navbar: rgba(11, 18, 32, 0.92); /* semi-transparente para glass */
   --tt-border: #1f2937;
+
+  /* Fondo */
+  --tt-bg-image: url("/img/fondo.png");
+
+  /* Overlay (desktop) → equilibrio entre estética y legibilidad */
+  --tt-bg-overlay: rgba(248, 249, 250, 0.40);
+
+  /* Navbar */
+  --tt-navbar-padding-y: 10px;
+  --tt-navbar-padding-y-lg: 14px;
+
+  /* Logo */
+  --tt-logo-h: 40px;
+  --tt-logo-h-lg: 56px;
+
+  /* Radius */
+  --tt-radius-card: 16px;
+  --tt-radius-control: 12px;
 }
 
+/* =========================================================
+   Fondo global responsive
+   ========================================================= */
+html,
+body {
+  height: 100%;
+}
+
+/* Fondo aplicado a body y compatible con .tt-body */
+body,
 .tt-body {
-  background: var(--tt-bg);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+
+  background-color: var(--tt-bg);
+
+  /* Responsive real */
+  background-image:
+    linear-gradient(var(--tt-bg-overlay), var(--tt-bg-overlay)),
+    var(--tt-bg-image);
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  background-attachment: fixed;
 }
 
+/* Móvil: mejor rendimiento + más overlay */
+@media (max-width: 767.98px) {
+  body,
+  .tt-body {
+    background-attachment: scroll;
+    background-position: center top;
+    --tt-bg-overlay: rgba(248, 249, 250, 0.55);
+  }
+}
+
+/* Pantallas grandes: deja lucir más la imagen */
+@media (min-width: 1400px) {
+  body,
+  .tt-body {
+    --tt-bg-overlay: rgba(248, 249, 250, 0.35);
+  }
+}
+
+/* =========================================================
+   Navbar PRO (glass + responsive)
+   ========================================================= */
 .tt-navbar {
   background: var(--tt-navbar);
   border-color: var(--tt-border) !important;
+
+  padding-top: var(--tt-navbar-padding-y);
+  padding-bottom: var(--tt-navbar-padding-y);
+
+  backdrop-filter: saturate(140%) blur(6px);
+  -webkit-backdrop-filter: saturate(140%) blur(6px);
 }
 
+@media (min-width: 992px) {
+  .tt-navbar {
+    padding-top: var(--tt-navbar-padding-y-lg);
+    padding-bottom: var(--tt-navbar-padding-y-lg);
+  }
+}
+
+/* Brand */
+.tt-navbar .navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1;
+  letter-spacing: .2px;
+}
+
+/* Logo */
+.tt-brand-logo {
+  height: var(--tt-logo-h);
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+@media (min-width: 992px) {
+  .tt-brand-logo {
+    height: var(--tt-logo-h-lg);
+  }
+}
+
+/* Texto brand */
+.tt-brand-text {
+  font-weight: 700;
+  color: #ffffff;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+@media (min-width: 992px) {
+  .tt-brand-text {
+    font-size: 1.15rem;
+  }
+}
+
+/* Links */
 .tt-navlink {
   color: #cbd5e1 !important;
+  font-weight: 600;
+  padding-left: .75rem !important;
+  padding-right: .75rem !important;
+  border-radius: 10px;
 }
 
 .tt-navlink:hover,
 .tt-navlink:focus {
   color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.10);
 }
 
-.tt-navbar .navbar-brand {
-  letter-spacing: .2px;
+.tt-navlink.active {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.16);
 }
 
+/* Toggler */
 .tt-navbar-toggler {
-  border-color: rgba(255,255,255,.25) !important;
+  border-color: rgba(255, 255, 255, .25) !important;
 }
 
 .tt-navbar .navbar-toggler-icon {
   filter: invert(1);
 }
 
-.tt-footer {
-  border-top: 1px solid #e5e7eb;
-  background: #fff;
+/* Menú colapsado */
+@media (max-width: 991.98px) {
+  .tt-navbar .navbar-collapse {
+    padding-top: 10px;
+  }
+
+  .tt-navbar .navbar-nav .nav-item {
+    margin-top: 6px;
+  }
 }
 
-/* Pequeños ajustes visuales */
-.card {
-  border-radius: 16px;
+/* =========================================================
+   Contenido principal (panel sobre fondo)
+   ========================================================= */
+main.container {
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(17, 24, 39, 0.06);
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
-.btn, .form-control, .form-select, .alert {
-  border-radius: 12px;
+
+@media (max-width: 575.98px) {
+  main.container {
+    padding: 1rem;
+    border-radius: 16px;
+  }
+}
+
+/* =========================================================
+   Footer
+   ========================================================= */
+.tt-footer {
+  border-top: 1px solid rgba(17, 24, 39, 0.08);
+  background: rgba(255, 255, 255, 0.80);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* =========================================================
+   Ajustes visuales generales
+   ========================================================= */
+.card {
+  border-radius: var(--tt-radius-card);
+  border: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.btn,
+.form-control,
+.form-select,
+.alert {
+  border-radius: var(--tt-radius-control);
 }

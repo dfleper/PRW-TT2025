@@ -10,23 +10,25 @@
 
       <div class="d-flex align-items-center justify-content-between mb-3">
         <h1 class="h4 mb-0">Nueva cita</h1>
-        <a class="btn btn-outline-secondary btn-sm" th:href="@{/cliente}">Volver</a>
+        <a class="btn btn-outline-secondary btn-sm" th:href="@{/cliente/servicios}">
+          Cambiar servicio
+        </a>
       </div>
 
       <div class="card shadow-sm border-0">
         <div class="card-body p-4">
 
-          <!-- Error disponibilidad (backend) -->
           <div class="alert alert-danger mb-3"
                th:if="${availabilityError}"
                th:text="${availabilityError}">
           </div>
 
-          <!-- Aviso si no hay vehículos -->
           <div class="alert alert-warning mb-3"
                th:if="${vehicles != null and #lists.isEmpty(vehicles)}">
-            No tienes vehículos registrados. Añade uno antes de reservar una cita.
-            <a class="alert-link ms-1" th:href="@{/cliente/vehiculos/nuevo}">Crear vehículo</a>
+            No tienes vehículos registrados.
+            <a class="alert-link ms-1" th:href="@{/cliente/vehiculos/nuevo}">
+              Crear vehículo
+            </a>
           </div>
 
           <form th:action="@{/cliente/citas}" th:object="${appointment}" method="post" novalidate>
@@ -40,7 +42,7 @@
                       id="vehicleId"
                       required
                       th:disabled="${vehicles != null and #lists.isEmpty(vehicles)}">
-                <option value="" selected disabled>Selecciona un vehículo…</option>
+                <option value="" disabled>Selecciona un vehículo…</option>
 
                 <option th:each="v : ${vehicles}"
                         th:value="${v.idVehicle}"
@@ -56,25 +58,23 @@
 
             <!-- Servicio -->
             <div class="mb-3">
-              <label class="form-label" for="serviceId">Servicio</label>
+              <label class="form-label">Servicio</label>
               <select class="form-select"
                       th:field="*{serviceId}"
-                      id="serviceId"
-                      required>
-                <option value="" selected disabled>Selecciona un servicio…</option>
-
+                      disabled>
                 <option th:each="s : ${services}"
                         th:value="${s.id}"
+                        th:selected="${s.id == appointment.serviceId}"
                         th:text="${s.nombre + ' (' + s.minutosEstimados + ' min)'}">
                 </option>
               </select>
 
-              <div class="text-danger small mt-1"
-                   th:if="${#fields.hasErrors('serviceId')}"
-                   th:errors="*{serviceId}">
-              </div>
+              <!-- enviar igualmente el valor -->
+              <input type="hidden" th:field="*{serviceId}" />
 
-              <div class="form-text">La duración se calcula automáticamente según el servicio.</div>
+              <div class="form-text">
+                El servicio se selecciona previamente desde el catálogo.
+              </div>
             </div>
 
             <!-- Fecha / Hora -->
@@ -90,25 +90,13 @@
                    th:if="${#fields.hasErrors('startDateTime')}"
                    th:errors="*{startDateTime}">
               </div>
-
-              <div class="form-text">El sistema validará la disponibilidad antes de guardar.</div>
-            </div>
-
-            <!-- (Opcional) Disponibilidad en vivo -->
-            <div class="mb-3">
-              <div id="availabilityBox"
-                   class="alert d-none mb-0"
-                   role="alert"
-                   data-availability-url="/api/availability">
-              </div>
-              <div class="form-text mt-2">
-                (Opcional) Si existe <code>/api/availability</code>, verás aquí si la franja está libre.
-              </div>
             </div>
 
             <!-- Acciones -->
             <div class="d-grid d-sm-flex gap-2 justify-content-sm-end mt-4">
-              <a class="btn btn-outline-secondary" th:href="@{/cliente}">Cancelar</a>
+              <a class="btn btn-outline-secondary" th:href="@{/cliente/servicios}">
+                Cancelar
+              </a>
 
               <button class="btn btn-primary"
                       type="submit"
