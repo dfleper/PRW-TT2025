@@ -33,3 +33,16 @@ springdoc.api-docs.enabled=true
 # Configuration flyway
 spring.flyway.enabled=true
 spring.flyway.locations=classpath:db/migration
+
+# ===========================
+# Mail (DEV) - EXAMPLE (no secrets)
+# ===========================
+app.mail.enabled=true
+app.mail.from=no-reply@tt2025.local
+
+spring.mail.host=localhost
+spring.mail.port=1025
+spring.mail.username=
+spring.mail.password=
+spring.mail.properties.mail.smtp.auth=false
+spring.mail.properties.mail.smtp.starttls.enable=false

@@ -1,6 +1,7 @@
 package es.prw.features.appointments.service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import es.prw.features.appointments.domain.AppointmentEntity;
@@ -15,7 +16,11 @@ import es.prw.features.iam.domain.CustomerEntity;
 import es.prw.features.iam.domain.UserEntity;
 import es.prw.features.iam.repository.CustomerRepository;
 import es.prw.features.iam.repository.UserRepository;
+import es.prw.features.notifications.service.AppointmentMailData;
+import es.prw.features.notifications.service.EmailService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,12 +32,15 @@ import org.springframework.web.server.ResponseStatusException;
 @Transactional
 public class AppointmentServiceImpl implements AppointmentService {
 
+    private static final Logger log = LoggerFactory.getLogger(AppointmentServiceImpl.class);
+
     private final VehicleRepository vehicleRepository;
     private final UserRepository userRepository;
     private final CustomerRepository customerRepository;
     private final ServiceRepository serviceRepository;
     private final AvailabilityService availabilityService;
     private final AppointmentRepository appointmentRepository;
+    private final EmailService emailService;
 
     public AppointmentServiceImpl(
             VehicleRepository vehicleRepository,
@@ -40,7 +48,8 @@ public class AppointmentServiceImpl implements AppointmentService {
             CustomerRepository customerRepository,
             ServiceRepository serviceRepository,
             AvailabilityService availabilityService,
-            AppointmentRepository appointmentRepository
+            AppointmentRepository appointmentRepository,
+            EmailService emailService
     ) {
         this.vehicleRepository = vehicleRepository;
         this.userRepository = userRepository;
@@ -48,10 +57,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         this.serviceRepository = serviceRepository;
         this.availabilityService = availabilityService;
         this.appointmentRepository = appointmentRepository;
+        this.emailService = emailService;
     }
 
     // =========================
-    // T11: Crear cita
+    // T11: Crear cita (+T19 mail confirmación)
     // =========================
     @Override
     public Long createAppointment(AppointmentCreateDto dto) {
@@ -110,7 +120,37 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setFin(endDateTime);
         appointment.setEstado(AppointmentStatus.PENDIENTE);
 
+        // 1) Guardar SIEMPRE primero
         AppointmentEntity saved = appointmentRepository.save(appointment);
+
+        // 2) Intentar enviar email (best-effort). Si falla, NO bloquea la reserva.
+        try {
+            String to = saved.getCustomer().getUser().getEmail();
+            String customerName = saved.getCustomer().getUser().getNombre();
+
+            String serviceName = (saved.getService() != null) ? saved.getService().getNombre() : null;
+            String plate = (saved.getVehicle() != null) ? saved.getVehicle().getMatricula() : null;
+
+            String dtText = saved.getInicio()
+                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
+            var mailData = new AppointmentMailData(
+                    saved.getId(),
+                    customerName,
+                    serviceName,
+                    plate,
+                    dtText,
+                    saved.getEstado().name()
+            );
+
+            emailService.sendAppointmentConfirmation(to, mailData);
+
+        } catch (Exception ex) {
+            // No imprimir stacktrace: aviso corto y seguimos
+            log.warn("[APPOINTMENT] Cita {} creada, pero fallo enviando email de confirmación: {}",
+                    saved.getId(), ex.getMessage());
+        }
+
         return saved.getId();
     }
 
@@ -147,7 +187,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     public void cancelMyAppointment(Long appointmentId) {
         AppointmentEntity a = getMyAppointment(appointmentId);
 
-        // Regla: solo cancelar si NO está finalizada y NO está en curso (recomendado)
         if (a.getEstado() == AppointmentStatus.FINALIZADA) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "No se puede cancelar una cita finalizada");
         }
@@ -155,7 +194,6 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "No se puede cancelar una cita en curso");
         }
         if (a.getEstado() == AppointmentStatus.CANCELADA) {
-            // idempotente: si ya está cancelada, no hacemos nada
             return;
         }
 
