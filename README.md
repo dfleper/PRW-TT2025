@@ -136,28 +136,26 @@ Esta vista es una alternativa visual a `/actuator/mappings`, pensada para desarr
 
 ---
 
-# MailHog (DEV) — Configuración y funcionamiento (TT2025)
+## MailHog (DEV) — Configuración y funcionamiento (TT2025)
 
 MailHog es un **SMTP de pruebas** para desarrollo. Captura emails enviados por la aplicación y los muestra en una **bandeja web**, sin enviar nada a correos reales. Es ideal para el MVP porque:
 - Permite **probar notificaciones** sin credenciales reales.
 - Evita depender de Gmail/Outlook/SendGrid.
 - Facilita comprobar asunto, body y destinatarios.
 
----
-
-## 1) ¿Qué puertos usa?
+### 1) ¿Qué puertos usa?
 
 - **SMTP (entrada de correos):** `localhost:1025`
 - **UI Web (bandeja):** `http://localhost:8025`
 
----
+### 2) Arranque de MailHog
 
-## 2) Arranque de MailHog
-
-### Opción A (recomendada): Docker
+### Opción recomendada: Docker
 ```bash
 docker run --rm -p 1025:1025 -p 8025:8025 mailhog/mailhog
 ```
+
+---
 
 ## Seguridad y roles
 
