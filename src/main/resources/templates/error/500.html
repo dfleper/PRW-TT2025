@@ -1,25 +1,59 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: html(pageTitle='Error del sistema', content=~{::content})}"
-      th:remove="tag">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments/head :: head('Error interno · TT2025')"></head>
 
-<section th:fragment="content">
+<body>
+
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<main class="container my-4">
+
   <div class="row justify-content-center">
-    <div class="col-12 col-lg-8">
+    <div class="col-12 col-md-8 col-lg-6">
+
       <div class="card shadow-sm border-0">
-        <div class="card-body p-4 text-center">
-          <h1 class="h5 mb-2">Ha ocurrido un error</h1>
-          <p class="text-muted mb-4">
-            Se ha producido un error inesperado.  
-            Inténtalo de nuevo más tarde.
-          </p>
-          <div class="d-flex justify-content-center gap-2">
-            <a class="btn btn-outline-secondary" th:href="@{/}">Inicio</a>
-            <a class="btn btn-primary" th:href="@{/cliente}">Zona cliente</a>
+        <div class="card-body p-4">
+
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="display-6 fw-bold text-danger">500</div>
+            <div>
+              <h1 class="h4 mb-1">Error interno</h1>
+              <p class="text-muted mb-0">Ha ocurrido un problema inesperado al procesar tu solicitud.</p>
+            </div>
           </div>
+
+          <hr class="my-3"/>
+
+          <p class="mb-3">
+            Puedes intentar recargar la página o volver al inicio. Si el problema persiste, contacta con el administrador.
+          </p>
+
+          <div class="d-flex flex-wrap gap-2">
+
+            <a class="btn btn-primary" th:href="@{/}">
+              Inicio
+            </a>
+
+            <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="d-inline">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+              <button type="submit" class="btn btn-outline-danger">
+                Cerrar sesión
+              </button>
+            </form>
+
+          </div>
+
         </div>
       </div>
+
+      <p class="text-center text-muted small mt-3 mb-0">
+        Turbo Taller · TT2025
+      </p>
+
     </div>
   </div>
-</section>
+
+</main>
+
+</body>
 </html>

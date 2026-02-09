@@ -60,6 +60,10 @@
             <form th:if="${canCancel}"
                   th:action="@{/cliente/citas/{id}/cancelar(id=${appointment.id})}"
                   method="post">
+
+              <!-- ✅ CSRF token -->
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
               <button type="submit" class="btn btn-danger"
                       onclick="return confirm('¿Seguro que quieres cancelar esta cita?');">
                 Cancelar cita

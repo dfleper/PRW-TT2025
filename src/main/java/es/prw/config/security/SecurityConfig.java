@@ -29,7 +29,11 @@ public class SecurityConfig {
         // ✅ Actuator -> SOLO ADMIN
         .requestMatchers("/actuator/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
-        // ✅ Dev tools -> SOLO ADMIN
+        // ============================================================
+        // ✅ TAREA 21 (TEST 500): permitir endpoint /dev/boom para pruebas
+        // - Mantener protegido (SOLO ADMIN) para no exponerlo
+        // - Con @Profile("dev") en el controller, en producción ni existirá
+        // ============================================================
         .requestMatchers("/dev/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
         // Público
