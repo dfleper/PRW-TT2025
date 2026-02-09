@@ -94,10 +94,11 @@
 
           <hr class="my-4"/>
 
-          <!-- ✅ OT asociada (info útil) -->
+          <!-- ✅ OT asociada (info útil + CTA crear si no existe) -->
           <div class="mb-0">
             <div class="text-muted small mb-1">Orden de trabajo</div>
 
+            <!-- Caso: ya existe OT -->
             <div th:if="${wo != null}">
               <div class="d-flex align-items-center justify-content-between">
                 <div class="fw-semibold">OT #<span th:text="${wo.id}">1</span></div>
@@ -117,9 +118,23 @@
               </a>
             </div>
 
-            <div th:if="${wo == null}" class="text-muted small">
-              No hay OT asociada.
+            <!-- Caso: NO existe OT -->
+            <div th:if="${wo == null}">
+              <div class="text-muted small">No hay OT asociada.</div>
+
+              <form class="mt-2"
+                    method="post"
+                    th:action="@{/backoffice/citas/{id}/workorder(id=${appt.id})}">
+                <!-- CSRF -->
+                <input type="hidden" th:if="${_csrf != null}"
+                       th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <button type="submit" class="btn btn-primary btn-sm w-100">
+                  Abrir OT
+                </button>
+              </form>
             </div>
+
           </div>
 
         </div>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Backoffice · Órdenes de trabajo')"></head>
+
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<main class="container my-4">
+
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <div>
+      <h1 class="h3 mb-1">Órdenes de trabajo</h1>
+      <div class="text-muted small">Listado y filtros de OTs</div>
+    </div>
+  </div>
+
+  <!-- Mensajes -->
+  <div th:if="${ok}" class="alert alert-success" th:text="${ok}"></div>
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+  <!-- Filtros -->
+  <form class="card card-body mb-3" method="get" th:action="@{/backoffice/workorders}">
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-md-3">
+        <label class="form-label">Estado</label>
+        <select class="form-select" name="status">
+          <option value="ALL" th:selected="${status == null || status == '' || status == 'ALL'}">TODAS</option>
+          <option value="OPEN" th:selected="${status == 'OPEN'}">ABIERTAS</option>
+          <option value="CLOSED" th:selected="${status == 'CLOSED'}">CERRADAS</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <label class="form-label">Búsqueda</label>
+        <input class="form-control" type="text" name="q"
+               placeholder="matrícula o cliente (nombre/email)"
+               th:value="${q}">
+      </div>
+
+      <div class="col-12 col-md-3 d-grid">
+        <button class="btn btn-primary" type="submit">Filtrar</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Tabla -->
+  <div class="card">
+    <div class="card-body">
+
+      <div th:if="${#lists.isEmpty(rows)}" class="alert alert-info mb-0">
+        No hay órdenes.
+      </div>
+
+      <div th:if="${!#lists.isEmpty(rows)}" class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+          <tr>
+            <th>OT #</th>
+            <th>Cliente</th>
+            <th>Matrícula</th>
+            <th>Servicio</th>
+            <th>Estado OT</th>
+            <th>Estado cita</th>
+            <th>Fecha</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr th:each="r : ${rows}">
+            <td class="fw-semibold" th:text="${r.id()}">1</td>
+
+            <td>
+              <div class="fw-semibold" th:text="${r.customerName()}">Cliente</div>
+              <div class="text-muted small" th:text="${r.customerEmail()}">email</div>
+            </td>
+
+            <td th:text="${r.plate()}">0000-XXX</td>
+            <td th:text="${r.serviceName()}">Servicio</td>
+
+            <!-- Estado OT (en español y en mayúsculas) -->
+            <td>
+              <span class="badge bg-success"
+                    th:if="${r.otStatus() == 'OPEN'}">ABIERTA</span>
+              <span class="badge bg-secondary"
+                    th:if="${r.otStatus() == 'CLOSED'}">CERRADA</span>
+              <span class="badge bg-warning text-dark"
+                    th:if="${r.otStatus() != 'OPEN' and r.otStatus() != 'CLOSED'}"
+                    th:text="${r.otStatus()}">OT</span>
+            </td>
+
+            <!-- Estado cita (toque pro en español y mayúsculas) -->
+            <td>
+              <span class="badge bg-warning text-dark"
+                    th:if="${r.appointmentStatus() == 'PENDIENTE'}">PENDIENTE</span>
+
+              <span class="badge bg-primary"
+                    th:if="${r.appointmentStatus() == 'EN_CURSO'}">EN CURSO</span>
+
+              <span class="badge bg-success"
+                    th:if="${r.appointmentStatus() == 'FINALIZADA'}">FINALIZADA</span>
+
+              <span class="badge bg-secondary"
+                    th:if="${r.appointmentStatus() == 'CANCELADA'}">CANCELADA</span>
+
+              <span class="badge bg-light text-dark border"
+                    th:if="${r.appointmentStatus() != 'PENDIENTE'
+                            and r.appointmentStatus() != 'EN_CURSO'
+                            and r.appointmentStatus() != 'FINALIZADA'
+                            and r.appointmentStatus() != 'CANCELADA'}"
+                    th:text="${r.appointmentStatus()}">-</span>
+            </td>
+
+            <td class="text-nowrap">
+              <span th:text="${r.createdAt() != null ? #temporals.format(r.createdAt(), 'yyyy-MM-dd HH:mm') : '-'}">-</span>
+            </td>
+
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-primary"
+                 th:href="@{/backoffice/workorders/{id}(id=${r.id()})}">
+                Ver
+              </a>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+</body>
+</html>

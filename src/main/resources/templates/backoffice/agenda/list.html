@@ -17,7 +17,10 @@
         <span class="fw-semibold" th:text="${date}">2026-02-02</span>
         <span th:if="${status != null}">
           · Estado:
-          <span class="fw-semibold" th:text="${status}">PENDIENTE</span>
+          <span class="fw-semibold"
+                th:text="${status != null ? status.toString().replace('_',' ') : ''}">
+            PENDIENTE
+          </span>
         </span>
       </div>
     </div>
@@ -29,7 +32,7 @@
   </div>
 
   <!-- Filtros -->
-	<div class="card shadow-sm mb-3 rounded-4 overflow-hidden">
+  <div class="card shadow-sm mb-3 rounded-4 overflow-hidden">
     <div class="card-body">
       <form class="row g-3 align-items-end" method="get" th:action="@{/backoffice/agenda}">
 
@@ -47,11 +50,11 @@
           <label for="status" class="form-label mb-1">Estado</label>
           <select id="status" name="status" class="form-select">
             <!-- value="" normal, NO th:value="" -->
-            <option value="" th:selected="${status == null}">Todos</option>
+            <option value="" th:selected="${status == null}">TODOS</option>
 
             <option th:each="s : ${statuses}"
                     th:value="${s}"
-                    th:text="${s}"
+                    th:text="${s.toString().replace('_',' ')}"
                     th:selected="${status != null and s == status}">
               PENDIENTE
             </option>
@@ -143,23 +146,17 @@
             </td>
 
             <!-- Cliente -->
-            <!-- <td class="text-nowrap">
-              <span class="fw-semibold">ID</span>
-              <span th:text="${a.customer.idCustomer}">1</span>
-            </td> -->
-			
-			<!-- Cliente -->
-			<td class="text-nowrap">
-			  <div class="fw-semibold"
-			       th:text="${a.customer.user.nombre + ' ' + a.customer.user.apellidos}">
-			    Nombre Apellidos
-			  </div>
+            <td class="text-nowrap">
+              <div class="fw-semibold"
+                   th:text="${a.customer.user.nombre + ' ' + a.customer.user.apellidos}">
+                Nombre Apellidos
+              </div>
 
-			  <div class="small text-muted"
-			       th:text="${a.customer.user.email}">
-			    email@cliente.com
-			  </div>
-			</td>
+              <div class="small text-muted"
+                   th:text="${a.customer.user.email}">
+                email@cliente.com
+              </div>
+            </td>
 
             <!-- Estado -->
             <td class="text-nowrap">
@@ -171,19 +168,27 @@
                       a.estado == T(es.prw.features.appointments.domain.AppointmentStatus).FINALIZADA ? ' text-bg-success' :
                       a.estado == T(es.prw.features.appointments.domain.AppointmentStatus).CANCELADA  ? ' text-bg-danger' :
                       ' text-bg-secondary'
-                    }"
-                    th:text="${a.estado}">
-                PENDIENTE
+                    }">
+
+                <span th:switch="${a.estado}">
+                  <span th:case="${T(es.prw.features.appointments.domain.AppointmentStatus).PENDIENTE}">PENDIENTE</span>
+                  <span th:case="${T(es.prw.features.appointments.domain.AppointmentStatus).CONFIRMADA}">CONFIRMADA</span>
+                  <span th:case="${T(es.prw.features.appointments.domain.AppointmentStatus).EN_CURSO}">EN CURSO</span>
+                  <span th:case="${T(es.prw.features.appointments.domain.AppointmentStatus).FINALIZADA}">FINALIZADA</span>
+                  <span th:case="${T(es.prw.features.appointments.domain.AppointmentStatus).CANCELADA}">CANCELADA</span>
+                  <span th:case="*"
+                        th:text="${a.estado != null ? a.estado.toString().replace('_',' ') : '-'}">-</span>
+                </span>
+
               </span>
             </td>
 
             <!-- Acciones -->
             <td class="pe-3 text-end">
-              <!-- Placeholder: activaremos cuando exista detalle backoffice -->
-			  <a class="btn btn-sm btn-outline-primary"
-			     th:href="@{/backoffice/citas/{id}(id=${a.id})}">
-			    Ver
-			  </a>
+              <a class="btn btn-sm btn-outline-primary"
+                 th:href="@{/backoffice/citas/{id}(id=${a.id})}">
+                Ver
+              </a>
             </td>
           </tr>
           </tbody>

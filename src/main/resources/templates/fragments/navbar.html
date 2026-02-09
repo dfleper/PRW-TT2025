@@ -53,6 +53,23 @@
             )}">
           <a class="nav-link tt-navlink" th:href="@{/backoffice}">Backoffice</a>
         </li>
+
+        <!-- Personal: Agenda -->
+        <li class="nav-item"
+            th:if="${#authorization.expression(
+              'hasAnyAuthority(''RECEPCION'',''ROLE_RECEPCION'',''MECANICO'',''ROLE_MECANICO'',''JEFE_TALLER'',''ROLE_JEFE_TALLER'',''ADMIN'',''ROLE_ADMIN'')'
+            )}">
+          <a class="nav-link tt-navlink" th:href="@{/backoffice/agenda}">Agenda</a>
+        </li>
+
+        <!-- ✅ Personal: Órdenes de trabajo -->
+        <li class="nav-item"
+            th:if="${#authorization.expression(
+              'hasAnyAuthority(''RECEPCION'',''ROLE_RECEPCION'',''MECANICO'',''ROLE_MECANICO'',''JEFE_TALLER'',''ROLE_JEFE_TALLER'',''ADMIN'',''ROLE_ADMIN'')'
+            )}">
+          <a class="nav-link tt-navlink" th:href="@{/backoffice/workorders}">Órdenes</a>
+        </li>
+
       </ul>
 
       <!-- Derecha -->
