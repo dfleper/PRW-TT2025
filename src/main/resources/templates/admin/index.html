@@ -4,8 +4,36 @@
       th:replace="~{layout/base :: html(pageTitle='Admin', content=~{::content})}">
 
 <section th:fragment="content">
-  <h1 class="h4 mb-2">Admin</h1>
-  <p class="text-muted mb-0">Zona de administración (en construcción).</p>
-</section>
 
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1">Admin</h1>
+      <p class="text-muted small mb-0">Zona de administración (en construcción).</p>
+    </div>
+
+    <a class="btn btn-outline-secondary tt-btn-mobile" th:href="@{/}">
+      Volver
+    </a>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-9 col-lg-7 col-xl-6">
+
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <div class="fw-semibold mb-1">Panel de administración</div>
+          <div class="text-muted small mb-3">
+            Aquí estarán las opciones de gestión (usuarios, servicios, etc.).
+          </div>
+
+          <div class="alert alert-info mb-0">
+            Esta sección se completará en próximas tareas.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</section>
 </html>

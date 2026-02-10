@@ -6,7 +6,7 @@
 <section th:fragment="content">
 
   <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-    <div>
+    <div class="me-2">
       <h1 class="h4 mb-1">Catálogo de servicios</h1>
       <div class="text-muted small">
         Selecciona <strong>un servicio</strong> para tu próxima cita.
@@ -18,22 +18,28 @@
 
   <!-- Buscador -->
   <form class="row g-2 mb-3" method="get" th:action="@{/cliente/servicios}">
-    <div class="col-md-7">
-      <input class="form-control" type="search" name="q"
-             placeholder="Buscar por nombre o código..."
-             th:value="${q}">
+    <div class="col-12 col-md-7">
+      <div class="tt-form-row">
+        <label class="form-label mb-0 tt-show-mobile">Buscar</label>
+        <input class="form-control tt-mobile-full" type="search" name="q"
+               placeholder="Buscar por nombre o código..."
+               th:value="${q}">
+      </div>
     </div>
 
-    <div class="col-md-3">
-      <select class="form-select" name="sort">
-        <option value="nombre" th:selected="${sort=='nombre'}">Orden: Nombre</option>
-        <option value="precio" th:selected="${sort=='precio'}">Orden: Precio</option>
-        <option value="duracion" th:selected="${sort=='duracion'}">Orden: Duración</option>
-      </select>
+    <div class="col-12 col-md-3">
+      <div class="tt-form-row">
+        <label class="form-label mb-0 tt-show-mobile">Ordenar</label>
+        <select class="form-select tt-mobile-full" name="sort">
+          <option value="nombre" th:selected="${sort=='nombre'}">Orden: Nombre</option>
+          <option value="precio" th:selected="${sort=='precio'}">Orden: Precio</option>
+          <option value="duracion" th:selected="${sort=='duracion'}">Orden: Duración</option>
+        </select>
+      </div>
     </div>
 
-    <div class="col-md-2 d-grid">
-      <button class="btn btn-outline-primary" type="submit">Filtrar</button>
+    <div class="col-12 col-md-2 d-grid">
+      <button class="btn btn-outline-primary tt-btn-mobile" type="submit">Filtrar</button>
     </div>
   </form>
 
@@ -52,52 +58,66 @@
         </div>
       </div>
 
-      <div class="col-md-6 col-lg-4" th:each="s : ${services}">
-        <div class="card h-100 shadow-sm border-0">
+      <div class="col-12 col-md-6 col-lg-4" th:each="s : ${services}">
+
+        <!-- Card clicable (label) para mejorar UX en móvil -->
+        <label class="card h-100 shadow-sm border-0"
+               style="cursor:pointer;"
+               th:for="${'srv_' + s.id}">
+
           <div class="card-body">
 
             <div class="d-flex justify-content-between align-items-start gap-2">
-              <div>
-                <div class="fw-semibold" th:text="${s.nombre}">Servicio</div>
-                <div class="text-muted small" th:text="${s.codigo}">SRV-001</div>
+              <div class="me-2">
+                <div class="fw-semibold tt-break" th:text="${s.nombre}">Servicio</div>
+                <div class="text-muted small tt-break" th:text="${s.codigo}">SRV-001</div>
               </div>
 
-              <div class="form-check">
+              <div class="form-check m-0">
                 <input class="form-check-input service-radio"
                        type="radio"
                        th:field="*{serviceId}"
-                       th:value="${s.id}">
+                       th:value="${s.id}"
+                       th:id="${'srv_' + s.id}">
               </div>
             </div>
 
-            <p class="mt-2 mb-3 small text-secondary"
+            <p class="mt-2 mb-3 small text-secondary tt-break"
                th:text="${s.descripcion ?: 'Sin descripción'}"></p>
 
-            <div class="d-flex justify-content-between">
-              <span class="badge text-bg-success"
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="badge text-bg-success tt-nowrap"
                     th:text="${#numbers.formatDecimal(s.precioBase, 1, 'COMMA', 2, 'POINT')} + ' €'">
                 0,00 €
               </span>
-              <span class="badge text-bg-secondary"
+
+              <span class="badge text-bg-secondary tt-nowrap"
                     th:text="${s.minutosEstimados} + ' min'">
                 30 min
               </span>
             </div>
 
           </div>
-        </div>
+        </label>
+
       </div>
     </div>
 
-    <!-- ✅ Botón a la IZQUIERDA -->
-    <div class="d-flex justify-content-start mt-4">
-      <button class="btn btn-primary"
+    <!-- CTA -->
+    <div class="d-flex flex-column flex-sm-row justify-content-start gap-2 mt-4">
+      <button class="btn btn-primary tt-btn-mobile"
               id="reserveBtn"
               type="submit"
               disabled>
         Reservar cita
       </button>
+
+      <a class="btn btn-outline-secondary tt-btn-mobile"
+         th:href="@{/cliente}">
+        Volver
+      </a>
     </div>
+
   </form>
 
 </section>

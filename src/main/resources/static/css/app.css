@@ -44,7 +44,6 @@ body,
 
   background-color: var(--tt-bg);
 
-  /* Responsive real */
   background-image:
     linear-gradient(var(--tt-bg-overlay), var(--tt-bg-overlay)),
     var(--tt-bg-image);
@@ -54,13 +53,13 @@ body,
   background-attachment: fixed;
 }
 
-/* Móvil: mejor rendimiento + más overlay */
-@media (max-width: 767.98px) {
+/* Tablet (577–992): rendimiento mejor y overlay un poco más alto */
+@media (min-width: 577px) and (max-width: 992px) {
   body,
   .tt-body {
     background-attachment: scroll;
     background-position: center top;
-    --tt-bg-overlay: rgba(248, 249, 250, 0.55);
+    --tt-bg-overlay: rgba(248, 249, 250, 0.48);
   }
 }
 
@@ -211,4 +210,147 @@ main.container {
 .form-select,
 .alert {
   border-radius: var(--tt-radius-control);
+}
+
+/* =========================================================
+   Responsive (Tarea 22)
+   - móvil:    <= 576px
+   - tablet:   577px–992px
+   - escritorio: >= 993px
+   ========================================================= */
+
+/* Helpers reutilizables */
+.tt-nowrap { white-space: nowrap; }
+.tt-break { word-break: break-word; overflow-wrap: anywhere; }
+
+/* Helpers de visibilidad por breakpoint */
+@media (max-width: 576px) {
+  .tt-hide-mobile { display: none !important; }
+}
+@media (min-width: 577px) {
+  .tt-show-mobile { display: none !important; }
+}
+
+/* =========================
+   MÓVIL (<= 576px)
+   ========================= */
+@media (max-width: 576px) {
+
+  /* Evita scroll horizontal raro por textos largos.
+     Si en algún punto un dropdown se corta, lo movemos a un wrapper específico del layout. */
+  body { overflow-x: hidden; }
+
+  /* Fondo: en móvil mejor rendimiento y más overlay */
+  body,
+  .tt-body {
+    background-attachment: scroll;
+    background-position: center top;
+    --tt-bg-overlay: rgba(248, 249, 250, 0.55);
+  }
+
+  /* Formularios: apilar siempre */
+  .tt-form-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: .35rem !important;
+  }
+
+  /* Inputs y selects a 100% */
+  .tt-mobile-full {
+    width: 100% !important;
+  }
+
+  /* Botones grandes y separados */
+  .tt-btn-mobile {
+    width: 100% !important;
+    padding: .75rem 1rem !important;
+  }
+
+  /* Tablas: scroll horizontal controlado cuando haga falta */
+  .tt-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tt-table-scroll > table {
+    min-width: 640px;
+  }
+}
+
+/* =========================
+   TABLET (577px–992px)
+   ========================= */
+@media (min-width: 577px) and (max-width: 992px) {
+
+  .tt-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* =========================
+   ESCRITORIO (>= 993px)
+   ========================= */
+@media (min-width: 993px) {
+  /* Sin overrides extra por ahora */
+}
+
+/* =========================
+   Navbar: mejora móvil
+   ========================= */
+@media (max-width: 991.98px) {
+
+  /* Links: área de toque más grande y full width */
+  .tt-navbar .navbar-nav .nav-link {
+    display: block;
+    padding-top: .6rem;
+    padding-bottom: .6rem;
+  }
+
+  /* Acciones derecha (login/registro/logout): apilar y ocupar ancho */
+  .tt-nav-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: .5rem !important;
+    margin-top: .5rem;
+  }
+
+  .tt-auth-actions {
+    width: 100%;
+  }
+
+  .tt-auth-actions .btn,
+  .tt-nav-actions .btn {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   NUEVO: Tarjetas en móvil + tablet, tabla solo escritorio
+   - Útil para Órdenes de trabajo (Backoffice) y listados largos
+   ========================================================= */
+
+/* <= 992px (móvil + tablet): mostrar tarjetas */
+@media (max-width: 992px) {
+  .tt-show-cards-lg { display: grid !important; }
+  .tt-hide-cards-lg { display: none !important; }
+}
+
+/* >= 993px (escritorio): mostrar tabla */
+@media (min-width: 993px) {
+  .tt-show-cards-lg { display: none !important; }
+  .tt-hide-cards-lg { display: block !important; }
+}
+
+/* (Opcional) Pequeño helper para pares label/valor dentro de tarjetas */
+.tt-card-kv {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: .25rem .75rem;
+  align-items: baseline;
+}
+@media (max-width: 576px) {
+  .tt-card-kv {
+    grid-template-columns: 100px 1fr;
+  }
 }

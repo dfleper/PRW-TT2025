@@ -1,371 +1,438 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: html(pageTitle='Backoffice · Orden de trabajo', content=~{::content})}"
+      th:remove="tag">
 
-<head th:replace="fragments/head :: head('Backoffice · Orden de trabajo')"></head>
+<section th:fragment="content">
 
-<body>
+  <!-- Mensajes -->
+  <div th:if="${ok}" class="alert alert-success mb-3" th:text="${ok}"></div>
+  <div th:if="${error}" class="alert alert-danger mb-3" th:text="${error}"></div>
 
-	<div th:replace="fragments/navbar :: navbar"></div>
+  <!-- Encabezado -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <div class="me-2">
+      <h1 class="h3 mb-1">Orden de trabajo</h1>
+      <div class="text-muted small" th:if="${wo != null}">
+        ID OT:
+        <span class="fw-semibold" th:text="${wo.id}">1</span>
+        <span class="mx-2">·</span>
+        Cita:
+        <span class="fw-semibold" th:text="${wo.appointment != null ? wo.appointment.id : '-'}">22</span>
+      </div>
+    </div>
 
-	<main class="container my-4">
+    <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto">
+      <a class="btn btn-outline-secondary tt-btn-mobile"
+         th:if="${wo != null && wo.appointment != null}"
+         th:href="@{/backoffice/citas/{id}(id=${wo.appointment.id})}">
+        Volver a cita
+      </a>
+      <a class="btn btn-outline-dark tt-btn-mobile" th:href="@{/backoffice}">
+        Dashboard
+      </a>
+    </div>
+  </div>
 
-		<!-- Mensajes -->
-		<div th:if="${ok}" class="alert alert-success mb-3" th:text="${ok}"></div>
-		<div th:if="${error}" class="alert alert-danger mb-3" th:text="${error}"></div>
+  <div class="row g-3">
 
-		<!-- Encabezado -->
-		<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-			<div>
-				<h1 class="h3 mb-1">Orden de trabajo</h1>
-				<div class="text-muted small" th:if="${wo != null}">
-					ID OT:
-					<span class="fw-semibold" th:text="${wo.id}">1</span>
-					<span class="mx-2">·</span>
-					Cita:
-					<span class="fw-semibold" th:text="${wo.appointment != null ? wo.appointment.id : '-'}">22</span>
-				</div>
-			</div>
+    <!-- Columna izquierda: resumen OT -->
+    <div class="col-12 col-lg-4">
+      <div class="card shadow-sm rounded-4 overflow-hidden border-0">
+        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+          <div class="fw-semibold">Resumen OT</div>
 
-			<div class="d-flex gap-2">
-				<a class="btn btn-outline-secondary" th:if="${wo != null && wo.appointment != null}"
-					th:href="@{/backoffice/citas/{id}(id=${wo.appointment.id})}">
-					Volver a cita
-				</a>
-				<a class="btn btn-outline-dark" th:href="@{/backoffice}">Dashboard</a>
-			</div>
-		</div>
-
-		<div class="row g-3">
-
-			<!-- Columna izquierda: resumen OT -->
-			<div class="col-12 col-lg-4">
-				<div class="card shadow-sm rounded-4 overflow-hidden">
-					<div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
-						<div class="fw-semibold">Resumen OT</div>
-
-						<span class="badge" th:classappend="${
+          <!-- Estado OT -->
+          <span class="badge"
+                th:classappend="${
                   wo.estado == T(es.prw.features.workorders.domain.WorkOrderStatus).abierta        ? ' text-bg-warning' :
                   wo.estado == T(es.prw.features.workorders.domain.WorkOrderStatus).en_proceso    ? ' text-bg-info' :
                   wo.estado == T(es.prw.features.workorders.domain.WorkOrderStatus).espera_piezas ? ' text-bg-secondary' :
                   wo.estado == T(es.prw.features.workorders.domain.WorkOrderStatus).cerrada       ? ' text-bg-success' :
                   ' text-bg-dark'
-                }" th:text="${wo.estado}">
-							abierta
-						</span>
-					</div>
+                }"
+                th:text="${#strings.toUpperCase(#strings.replace(wo.estado.name(), '_', ' '))}">
+            CERRADA
+          </span>
+        </div>
 
-					<div class="card-body"
-						th:with="isClosed=${wo.estado == T(es.prw.features.workorders.domain.WorkOrderStatus).cerrada}">
+        <div class="card-body"
+             th:with="isClosed=${wo.estado == T(es.prw.features.workorders.domain.WorkOrderStatus).cerrada}">
 
-						<!-- ✅ Botón cerrar OT (solo si no está cerrada) -->
-						<div class="mb-3" th:if="${!isClosed}">
-							<form th:action="@{/backoffice/workorders/{id}/close(id=${wo.id})}" method="post"
-								onsubmit="return confirm('¿Cerrar la orden de trabajo? No se podrá editar después.');">
+          <!-- Cerrar OT -->
+          <div class="mb-3" th:if="${!isClosed}">
+            <form th:action="@{/backoffice/workorders/{id}/close(id=${wo.id})}" method="post"
+                  onsubmit="return confirm('¿Cerrar la orden de trabajo? No se podrá editar después.');">
 
-								<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
-									th:value="${_csrf.token}" />
+              <input type="hidden" th:if="${_csrf != null}"
+                     th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-								<button type="submit" class="btn btn-danger w-100">
-									Cerrar orden de trabajo
-								</button>
-							</form>
-							<div class="form-text mt-2">
-								Al cerrar la OT se bloquean notas y piezas.
-							</div>
-						</div>
+              <button type="submit" class="btn btn-danger tt-btn-mobile">
+                Cerrar orden de trabajo
+              </button>
+            </form>
 
-						<!-- ✅ Aviso si está cerrada -->
-						<div class="mb-3" th:if="${isClosed}">
-							<div class="alert alert-success mb-0">
-								Esta orden está <strong>cerrada</strong>. No se permiten cambios.
-							</div>
-						</div>
+            <div class="form-text mt-2">
+              Al cerrar la OT se bloquean notas y piezas.
+            </div>
+          </div>
 
-						<div class="mb-3">
-							<div class="text-muted small mb-1">Apertura</div>
-							<div class="fw-semibold"
-								th:text="${wo.openedAt != null ? #temporals.format(wo.openedAt, 'dd/MM/yyyy HH:mm') : '-'}">
-								06/02/2026 10:30
-							</div>
-						</div>
+          <!-- Aviso cerrada -->
+          <div class="mb-3" th:if="${isClosed}">
+            <div class="alert alert-success mb-0">
+              Esta orden está <strong>CERRADA</strong>. No se permiten cambios.
+            </div>
+          </div>
 
-						<div class="mb-0">
-							<div class="text-muted small mb-1">Cierre</div>
-							<div class="fw-semibold"
-								th:text="${wo.closedAt != null ? #temporals.format(wo.closedAt, 'dd/MM/yyyy HH:mm') : '-'}">
-								-
-							</div>
-						</div>
+          <div class="mb-3">
+            <div class="text-muted small mb-1">Apertura</div>
+            <div class="fw-semibold"
+                 th:text="${wo.openedAt != null ? #temporals.format(wo.openedAt, 'dd/MM/yyyy HH:mm') : '-'}">
+              06/02/2026 10:30
+            </div>
+          </div>
 
-						<hr class="my-4" />
+          <div class="mb-0">
+            <div class="text-muted small mb-1">Cierre</div>
+            <div class="fw-semibold"
+                 th:text="${wo.closedAt != null ? #temporals.format(wo.closedAt, 'dd/MM/yyyy HH:mm') : '-'}">
+              -
+            </div>
+          </div>
 
-						<!-- Resumen cita (si existe) -->
-						<div th:if="${wo.appointment != null}">
-							<div class="text-muted small mb-1">Horario cita</div>
-							<div class="fw-semibold">
-								<span th:text="${#temporals.format(wo.appointment.inicio, 'HH:mm')}">10:30</span>
-								<span class="text-muted">→</span>
-								<span th:text="${#temporals.format(wo.appointment.fin, 'HH:mm')}">11:00</span>
-							</div>
-							<div class="small text-muted">
-								<span th:text="${#temporals.format(wo.appointment.inicio, 'dd/MM/yyyy')}">06/02/2026</span>
-							</div>
+          <hr class="my-4"/>
 
-							<div class="mt-3">
-								<div class="text-muted small mb-1">Estado cita</div>
-								<span class="badge" th:classappend="${
+          <div th:if="${wo.appointment != null}">
+            <div class="text-muted small mb-1">Horario cita</div>
+            <div class="fw-semibold tt-nowrap">
+              <span th:text="${#temporals.format(wo.appointment.inicio, 'HH:mm')}">10:30</span>
+              <span class="text-muted">→</span>
+              <span th:text="${#temporals.format(wo.appointment.fin, 'HH:mm')}">11:00</span>
+            </div>
+            <div class="small text-muted">
+              <span th:text="${#temporals.format(wo.appointment.inicio, 'dd/MM/yyyy')}">06/02/2026</span>
+            </div>
+
+            <div class="mt-3">
+              <div class="text-muted small mb-1">Estado cita</div>
+              <span class="badge"
+                    th:classappend="${
                       wo.appointment.estado == T(es.prw.features.appointments.domain.AppointmentStatus).PENDIENTE  ? ' text-bg-warning' :
                       wo.appointment.estado == T(es.prw.features.appointments.domain.AppointmentStatus).CONFIRMADA ? ' text-bg-primary' :
                       wo.appointment.estado == T(es.prw.features.appointments.domain.AppointmentStatus).EN_CURSO   ? ' text-bg-info' :
                       wo.appointment.estado == T(es.prw.features.appointments.domain.AppointmentStatus).FINALIZADA ? ' text-bg-success' :
                       wo.appointment.estado == T(es.prw.features.appointments.domain.AppointmentStatus).CANCELADA  ? ' text-bg-danger' :
                       ' text-bg-secondary'
-                    }" th:text="${wo.appointment.estado}">
-									EN_CURSO
-								</span>
-							</div>
-						</div>
+                    }"
+                    th:text="${#strings.toUpperCase(#strings.replace(wo.appointment.estado.name(), '_', ' '))}">
+                EN CURSO
+              </span>
+            </div>
+          </div>
 
-						<div th:if="${wo.appointment == null}" class="text-muted small">
-							Esta OT no tiene cita asociada.
-						</div>
+          <div th:if="${wo.appointment == null}" class="text-muted small">
+            Esta OT no tiene cita asociada.
+          </div>
 
-					</div>
-				</div>
-			</div>
+        </div>
+      </div>
+    </div>
 
-			<!-- Columna derecha: datos + formulario -->
-			<div class="col-12 col-lg-8">
-				<div class="card shadow-sm rounded-4 overflow-hidden">
-					<div class="card-header bg-white border-0">
-						<div class="fw-semibold">Datos y diagnóstico</div>
-					</div>
+    <!-- Columna derecha -->
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm rounded-4 overflow-hidden border-0">
+        <div class="card-header bg-white border-0">
+          <div class="fw-semibold">Datos y diagnóstico</div>
+        </div>
 
-					<div class="card-body"
-						th:with="isClosed=${wo.estado == T(es.prw.features.workorders.domain.WorkOrderStatus).cerrada}">
+        <div class="card-body"
+             th:with="isClosed=${wo.estado == T(es.prw.features.workorders.domain.WorkOrderStatus).cerrada}">
 
-						<!-- Datos cita: servicio / vehículo / cliente -->
-						<div th:if="${wo.appointment != null}">
+          <!-- Datos cita -->
+          <div th:if="${wo.appointment != null}">
 
-							<!-- Servicio -->
-							<div class="mb-3">
-								<div class="text-muted small mb-1">Servicio</div>
-								<div class="fw-semibold"
-									th:text="${wo.appointment.service != null ? wo.appointment.service.nombre : '-'}">
-									Cambio de aceite
-								</div>
-								<div class="small text-muted" th:if="${wo.appointment.service != null}">
-									<span class="me-2">Código:</span>
-									<span th:text="${wo.appointment.service.codigo}">ACEITE</span>
-									<span class="mx-2">·</span>
-									<span th:text="${wo.appointment.service.minutosEstimados}">30</span> min
-								</div>
-							</div>
+            <div class="mb-3">
+              <div class="text-muted small mb-1">Servicio</div>
+              <div class="fw-semibold"
+                   th:text="${wo.appointment.service != null ? wo.appointment.service.nombre : '-'}">
+                Cambio de aceite
+              </div>
+              <div class="small text-muted" th:if="${wo.appointment.service != null}">
+                <span class="me-2">Código:</span>
+                <span th:text="${wo.appointment.service.codigo}">ACEITE</span>
+                <span class="mx-2">·</span>
+                <span th:text="${wo.appointment.service.minutosEstimados}">30</span> min
+              </div>
+            </div>
 
-							<div class="row g-3">
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <div class="text-muted small mb-1">Vehículo</div>
+                <div th:if="${wo.appointment.vehicle != null}">
+                  <div class="fw-semibold">
+                    <span class="badge text-bg-secondary"
+                          th:text="${wo.appointment.vehicle.matricula}">1234ABC</span>
+                  </div>
+                  <div class="small text-muted">
+                    <span th:text="${wo.appointment.vehicle.marca != null ? wo.appointment.vehicle.marca : '-'}">Seat</span>
+                    <span th:text="${wo.appointment.vehicle.modelo != null ? ' ' + wo.appointment.vehicle.modelo : ''}">
+                      Ibiza
+                    </span>
+                  </div>
+                </div>
+                <div th:if="${wo.appointment.vehicle == null}" class="text-muted">-</div>
+              </div>
 
-								<!-- Vehículo -->
-								<div class="col-12 col-md-6">
-									<div class="text-muted small mb-1">Vehículo</div>
-									<div th:if="${wo.appointment.vehicle != null}">
-										<div class="fw-semibold">
-											<span class="badge text-bg-secondary"
-												th:text="${wo.appointment.vehicle.matricula}">1234ABC</span>
-										</div>
-										<div class="small text-muted">
-											<span th:text="${wo.appointment.vehicle.marca != null ? wo.appointment.vehicle.marca : '-'}">Seat</span>
-											<span th:text="${wo.appointment.vehicle.modelo != null ? ' ' + wo.appointment.vehicle.modelo : ''}">
-												Ibiza</span>
-										</div>
-									</div>
-									<div th:if="${wo.appointment.vehicle == null}" class="text-muted">-</div>
-								</div>
+              <div class="col-12 col-md-6">
+                <div class="text-muted small mb-1">Cliente</div>
+                <div th:if="${wo.appointment.customer != null && wo.appointment.customer.user != null}">
+                  <div class="small text-muted" th:if="${wo.appointment.customer.user.telefono != null}"
+                       th:text="${wo.appointment.customer.user.telefono}">
+                    600123123
+                  </div>
 
-								<!-- Cliente -->
-								<div class="col-12 col-md-6">
-									<div class="text-muted small mb-1">Cliente</div>
-									<div th:if="${wo.appointment.customer != null && wo.appointment.customer.user != null}">
-										<div class="small text-muted" th:if="${wo.appointment.customer.user.telefono != null}"
-											th:text="${wo.appointment.customer.user.telefono}">
-											600123123
-										</div>
+                  <div class="fw-semibold"
+                       th:text="${wo.appointment.customer.user.nombre + ' ' + wo.appointment.customer.user.apellidos}">
+                    Nombre Apellidos
+                  </div>
 
-										<div class="fw-semibold"
-											th:text="${wo.appointment.customer.user.nombre + ' ' + wo.appointment.customer.user.apellidos}">
-											Nombre Apellidos
-										</div>
+                  <div class="small text-muted" th:text="${wo.appointment.customer.user.email}">
+                    email@cliente.com
+                  </div>
+                </div>
+                <div th:if="${wo.appointment.customer == null || wo.appointment.customer.user == null}" class="text-muted">-</div>
+              </div>
+            </div>
 
-										<div class="small text-muted" th:text="${wo.appointment.customer.user.email}">
-											email@cliente.com
-										</div>
-									</div>
-									<div th:if="${wo.appointment.customer == null || wo.appointment.customer.user == null}"
-										class="text-muted">-</div>
-								</div>
+            <hr class="my-4"/>
+          </div>
 
-							</div>
+          <!-- Form diagnóstico -->
+          <form method="post" th:action="@{/backoffice/workorders/{id}(id=${wo.id})}">
+            <input type="hidden" th:if="${_csrf != null}"
+                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-							<hr class="my-4" />
+            <div class="mb-3">
+              <div class="tt-form-row">
+                <label for="diagnostico" class="form-label mb-0">Diagnóstico</label>
+                <textarea id="diagnostico" name="diagnostico" rows="6"
+                          class="form-control tt-mobile-full"
+                          th:disabled="${isClosed}"
+                          placeholder="Describe el diagnóstico..."
+                          th:text="${wo.diagnostico}"></textarea>
+                <div class="form-text">Información técnica del problema detectado.</div>
+              </div>
+            </div>
 
-						</div>
+            <div class="mb-3">
+              <div class="tt-form-row">
+                <label for="observaciones" class="form-label mb-0">Observaciones</label>
+                <textarea id="observaciones" name="observaciones" rows="6"
+                          class="form-control tt-mobile-full"
+                          th:disabled="${isClosed}"
+                          placeholder="Notas adicionales, decisiones, recomendaciones..."
+                          th:text="${wo.observaciones}"></textarea>
+                <div class="form-text">Notas internas del taller.</div>
+              </div>
+            </div>
 
-						<!-- Formulario diagnóstico / observaciones -->
-						<form method="post" th:action="@{/backoffice/workorders/{id}(id=${wo.id})}">
+            <div class="d-grid gap-2 d-sm-flex">
+              <button type="submit" class="btn btn-primary tt-btn-mobile" th:disabled="${isClosed}">
+                Guardar
+              </button>
 
-							<!-- CSRF -->
-							<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
-								th:value="${_csrf.token}" />
+              <a class="btn btn-outline-secondary tt-btn-mobile" th:if="${wo.appointment != null}"
+                 th:href="@{/backoffice/citas/{id}(id=${wo.appointment.id})}">
+                Volver a cita
+              </a>
+            </div>
 
-							<div class="mb-3">
-								<label for="diagnostico" class="form-label mb-1">Diagnóstico</label>
-								<textarea id="diagnostico" name="diagnostico" rows="6" class="form-control"
-									th:disabled="${isClosed}"
-									placeholder="Describe el diagnóstico..." th:text="${wo.diagnostico}"></textarea>
-								<div class="form-text">Información técnica del problema detectado.</div>
-							</div>
+            <div class="alert alert-warning mt-3 mb-0" th:if="${isClosed}">
+              OT CERRADA: el formulario está deshabilitado.
+            </div>
+          </form>
 
-							<div class="mb-3">
-								<label for="observaciones" class="form-label mb-1">Observaciones</label>
-								<textarea id="observaciones" name="observaciones" rows="6" class="form-control"
-									th:disabled="${isClosed}"
-									placeholder="Notas adicionales, decisiones, recomendaciones..."
-									th:text="${wo.observaciones}"></textarea>
-								<div class="form-text">Notas internas del taller.</div>
-							</div>
+          <hr class="my-4">
 
-							<div class="d-flex flex-wrap gap-2">
-								<button type="submit" class="btn btn-primary" th:disabled="${isClosed}">Guardar</button>
+          <h5 class="mb-3">Piezas usadas</h5>
 
-								<a class="btn btn-outline-secondary" th:if="${wo.appointment != null}"
-									th:href="@{/backoffice/citas/{id}(id=${wo.appointment.id})}">
-									Volver a cita
-								</a>
-							</div>
+          <!-- =========================================================
+               PIEZAS: TARJETAS (móvil + tablet) <= 992px
+               ========================================================= -->
+          <div class="tt-show-cards-lg d-grid gap-2">
 
-							<div class="alert alert-warning mt-3 mb-0" th:if="${isClosed}">
-								OT cerrada: el formulario está deshabilitado.
-							</div>
+            <div th:if="${parts == null || #lists.isEmpty(parts)}" class="alert alert-info mb-0">
+              No hay piezas registradas
+            </div>
 
-						</form>
+            <div class="card border-0 shadow-sm" th:each="p : ${parts}">
+              <div class="card-body" th:with="sku=${partSku[p.partId]} ?: ('#' + p.partId)">
 
-						<hr class="my-4">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div>
+                    <div class="fw-semibold tt-break" th:text="${sku}">SKU</div>
+                    <div class="text-muted small tt-break" th:text="${p.notes != null ? p.notes : '—'}">Notas</div>
+                  </div>
 
-						<h5 class="mb-3">Piezas usadas</h5>
+                  <div class="text-end">
+                    <div class="small text-muted">Total</div>
+                    <div class="fw-semibold tt-nowrap" th:text="${p.total}">0.00</div>
+                  </div>
+                </div>
 
-						<table class="table table-sm table-bordered align-middle">
-							<thead class="table-light">
-								<tr>
-									<th>SKU</th>
-									<th>Cantidad</th>
-									<th>Precio unit.</th>
-									<th>Total</th>
-									<th>Notas</th>
-									<th style="width: 80px;"></th>
-								</tr>
-							</thead>
+                <hr class="my-3"/>
 
-							<tbody>
-								<tr th:each="p : ${parts}">
-									<td th:text="${partSku[p.partId]} ?: ('#' + p.partId)">SKU</td>
-									<td th:text="${p.quantity}">1</td>
-									<td th:text="${p.unitPrice}">0.00</td>
-									<td th:text="${p.total}">0.00</td>
-									<td th:text="${p.notes}">-</td>
-									<td>
-										<form
-											th:action="@{/backoffice/workorders/{id}/parts/{pid}/delete(id=${wo.id},pid=${p.id})}"
-											method="post" onsubmit="return confirm('¿Eliminar pieza?');">
+                <div class="row g-2 small">
+                  <div class="col-4">
+                    <div class="text-muted">Cant.</div>
+                    <div class="tt-nowrap" th:text="${p.quantity}">1</div>
+                  </div>
+                  <div class="col-4">
+                    <div class="text-muted">Precio</div>
+                    <div class="tt-nowrap" th:text="${p.unitPrice}">0.00</div>
+                  </div>
+                  <div class="col-4">
+                    <div class="text-muted">Total</div>
+                    <div class="tt-nowrap" th:text="${p.total}">0.00</div>
+                  </div>
+                </div>
 
-											<input type="hidden" th:if="${_csrf != null}"
-												th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <div class="d-grid mt-3">
+                  <form th:action="@{/backoffice/workorders/{id}/parts/{pid}/delete(id=${wo.id},pid=${p.id})}"
+                        method="post"
+                        onsubmit="return confirm('¿Eliminar pieza?');">
+                    <input type="hidden" th:if="${_csrf != null}"
+                           th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button class="btn btn-outline-danger tt-btn-mobile" type="submit" th:disabled="${isClosed}">
+                      Eliminar pieza
+                    </button>
+                  </form>
+                </div>
 
-											<button class="btn btn-sm btn-outline-danger" type="submit"
-												th:disabled="${isClosed}">✖</button>
-										</form>
-									</td>
-								</tr>
+              </div>
+            </div>
 
-								<tr th:if="${#lists.isEmpty(parts)}">
-									<td colspan="6" class="text-muted text-center">
-										No hay piezas registradas
-									</td>
-								</tr>
-							</tbody>
-						</table>
+          </div>
 
-						<!-- ✅ Añadir piezas SOLO si la OT está abierta -->
-						<form th:if="${!isClosed}"
-							th:action="@{/backoffice/workorders/{id}/parts(id=${wo.id})}"
-							th:object="${newPart}"
-							method="post" class="row g-2 mt-3">
+          <!-- =========================================================
+               PIEZAS: TABLA (escritorio) >= 993px
+               ========================================================= -->
+          <div class="tt-hide-cards-lg">
 
-							<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
-								th:value="${_csrf.token}" />
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                  <th class="tt-nowrap">SKU</th>
+                  <th class="tt-nowrap">Cantidad</th>
+                  <th class="tt-nowrap">Precio unit.</th>
+                  <th class="tt-nowrap">Total</th>
+                  <th>Notas</th>
+                  <th style="width: 80px;" class="tt-nowrap"></th>
+                </tr>
+                </thead>
 
-							<div class="col-md-5">
-								<select id="partSelect" th:field="*{partId}" class="form-select" required>
-									<option value="" disabled selected>Selecciona una pieza…</option>
-									<option th:each="cp : ${catalogParts}"
-									        th:value="${cp.id}"
-									        th:text="${cp.nombre}"
-									        th:attr="data-allows-decimal=${cp.allowsDecimal}">
-										Pieza
-									</option>
-								</select>
-							</div>
+                <tbody>
+                <tr th:each="p : ${parts}">
+                  <td class="tt-break" th:text="${partSku[p.partId]} ?: ('#' + p.partId)">SKU</td>
+                  <td class="tt-nowrap" th:text="${p.quantity}">1</td>
+                  <td class="tt-nowrap" th:text="${p.unitPrice}">0.00</td>
+                  <td class="tt-nowrap" th:text="${p.total}">0.00</td>
+                  <td class="tt-break" th:text="${p.notes}">-</td>
+                  <td>
+                    <form th:action="@{/backoffice/workorders/{id}/parts/{pid}/delete(id=${wo.id},pid=${p.id})}"
+                          method="post"
+                          onsubmit="return confirm('¿Eliminar pieza?');">
+                      <input type="hidden" th:if="${_csrf != null}"
+                             th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                      <button class="btn btn-sm btn-outline-danger" type="submit" th:disabled="${isClosed}">✖</button>
+                    </form>
+                  </td>
+                </tr>
 
-							<div class="col-md-2">
-								<input id="qtyInput" type="number" th:field="*{quantity}" class="form-control"
-									placeholder="Cantidad" min="1" step="1" required>
-							</div>
+                <tr th:if="${parts == null || #lists.isEmpty(parts)}">
+                  <td colspan="6" class="text-muted text-center">
+                    No hay piezas registradas
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
 
-							<div class="col-md-4">
-								<input type="text" th:field="*{notes}" class="form-control"
-									placeholder="Notas (opcional)">
-							</div>
+          </div>
 
-							<div class="col-md-1 d-grid">
-								<button class="btn btn-primary" type="submit">+</button>
-							</div>
+          <!-- Añadir piezas -->
+          <form th:if="${!isClosed}"
+                th:action="@{/backoffice/workorders/{id}/parts(id=${wo.id})}"
+                th:object="${newPart}"
+                method="post" class="row g-2 mt-3">
 
-						</form>
+            <input type="hidden" th:if="${_csrf != null}"
+                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-						<script>
-						(function () {
-						  const sel = document.getElementById('partSelect');
-						  const qty = document.getElementById('qtyInput');
-						  if (!sel || !qty) return;
+            <div class="col-12 col-md-5">
+              <select id="partSelect" th:field="*{partId}" class="form-select tt-mobile-full" required>
+                <option value="" disabled selected>Selecciona una pieza…</option>
+                <option th:each="cp : ${catalogParts}"
+                        th:value="${cp.id}"
+                        th:text="${cp.nombre}"
+                        th:attr="data-allows-decimal=${cp.allowsDecimal}">
+                  Pieza
+                </option>
+              </select>
+            </div>
 
-						  function refreshQtyRules() {
-						    const opt = sel.options[sel.selectedIndex];
-						    const allows = opt && opt.getAttribute('data-allows-decimal') === 'true';
+            <div class="col-12 col-md-2">
+              <input id="qtyInput" type="number" th:field="*{quantity}"
+                     class="form-control tt-mobile-full"
+                     placeholder="Cantidad" min="1" step="1" required>
+            </div>
 
-						    if (allows) {
-						      qty.step = '0.1';   // o 0.01 si quieres
-						      qty.min = '0.1';
-						      qty.placeholder = 'Cantidad';
-						    } else {
-						      qty.step = '1';
-						      qty.min = '1';
-						      qty.placeholder = 'Cantidad';
-						      if (String(qty.value).includes('.')) qty.value = '';
-						    }
-						  }
+            <div class="col-12 col-md-3">
+              <input type="text" th:field="*{notes}"
+                     class="form-control tt-mobile-full"
+                     placeholder="Notas (opcional)">
+            </div>
 
-						  sel.addEventListener('change', refreshQtyRules);
-						  refreshQtyRules();
-						})();
-						</script>
+            <div class="col-12 col-md-2 d-grid">
+              <button class="btn btn-primary tt-btn-mobile" type="submit">Añadir</button>
+            </div>
 
-					</div>
-				</div>
-			</div>
+          </form>
 
-		</div>
+          <script>
+            (function () {
+              const sel = document.getElementById('partSelect');
+              const qty = document.getElementById('qtyInput');
+              if (!sel || !qty) return;
 
-	</main>
+              function refreshQtyRules() {
+                const opt = sel.options[sel.selectedIndex];
+                const allows = opt && opt.getAttribute('data-allows-decimal') === 'true';
 
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+                if (allows) {
+                  qty.step = '0.1';
+                  qty.min = '0.1';
+                  qty.placeholder = 'Cantidad';
+                } else {
+                  qty.step = '1';
+                  qty.min = '1';
+                  qty.placeholder = 'Cantidad';
+                  if (String(qty.value).includes('.')) qty.value = '';
+                }
+              }
 
+              sel.addEventListener('change', refreshQtyRules);
+              refreshQtyRules();
+            })();
+          </script>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</section>
 </html>
