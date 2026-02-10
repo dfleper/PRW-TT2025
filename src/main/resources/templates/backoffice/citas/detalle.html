@@ -198,80 +198,95 @@
 
           <hr class="my-4"/>
 
-          <div class="alert alert-warning"
-               th:if="${appt.estado == T(es.prw.features.appointments.domain.AppointmentStatus).EN_CURSO and !canFinalize}">
-            Para finalizar la cita, la orden de trabajo debe estar <strong>CERRADA</strong>.
-          </div>
+          <!-- ✅ Flag para bloquear acciones si OT está CERRADA -->
+          <div th:with="woLocked=${wo != null and wo.estado == T(es.prw.features.workorders.domain.WorkOrderStatus).cerrada}">
 
-          <!-- ✅ Acciones: botones alineados y separados del texto -->
-          <div class="row g-3 align-items-stretch">
+            <!-- Mensaje opcional cuando está bloqueado -->
+            <div class="alert alert-info mb-3" th:if="${woLocked}">
+              La OT está <strong>CERRADA</strong>. No se permite cambiar estado ni reasignar mecánico desde esta pantalla.
+            </div>
 
-            <!-- Cambiar estado -->
-            <div class="col-12 col-xl-6 d-flex">
-              <form class="d-flex flex-column flex-grow-1 h-100"
-                    method="post"
-                    th:action="@{/backoffice/citas/{id}/estado(id=${appt.id})}">
+            <div class="alert alert-warning"
+                 th:if="${appt.estado == T(es.prw.features.appointments.domain.AppointmentStatus).EN_CURSO and !canFinalize}">
+              Para finalizar la cita, la orden de trabajo debe estar <strong>CERRADA</strong>.
+            </div>
 
-                <input type="hidden" th:if="${_csrf != null}"
-                       th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <!-- ✅ Acciones -->
+            <div class="row g-3 align-items-stretch">
 
-                <div>
-                  <label for="newStatus" class="form-label mb-1">Cambiar estado</label>
-                  <select id="newStatus" name="newStatus" class="form-select tt-mobile-full">
-                    <option th:each="s : ${T(es.prw.features.appointments.domain.AppointmentStatus).values()}"
-                            th:if="${s != T(es.prw.features.appointments.domain.AppointmentStatus).FINALIZADA
-                                    or canFinalize
-                                    or appt.estado == T(es.prw.features.appointments.domain.AppointmentStatus).FINALIZADA}"
-                            th:value="${s}"
-                            th:text="${#strings.replace(s.name(), '_', ' ')}"
-                            th:selected="${s == appt.estado}">
-                      PENDIENTE
-                    </option>
-                  </select>
+              <!-- Cambiar estado -->
+              <div class="col-12 col-xl-6 d-flex">
+                <form class="d-flex flex-column flex-grow-1 h-100"
+                      method="post"
+                      th:action="@{/backoffice/citas/{id}/estado(id=${appt.id})}">
 
-                  <!-- separación real -->
-                  <div class="form-text mb-3">
-                    Reglas: cancelar / finalizar solo desde EN CURSO y con OT cerrada.
+                  <input type="hidden" th:if="${_csrf != null}"
+                         th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                  <div>
+                    <label for="newStatus" class="form-label mb-1">Cambiar estado</label>
+                    <select id="newStatus" name="newStatus"
+                            class="form-select tt-mobile-full"
+                            th:disabled="${woLocked}">
+                      <option th:each="s : ${T(es.prw.features.appointments.domain.AppointmentStatus).values()}"
+                              th:if="${s != T(es.prw.features.appointments.domain.AppointmentStatus).FINALIZADA
+                                      or canFinalize
+                                      or appt.estado == T(es.prw.features.appointments.domain.AppointmentStatus).FINALIZADA}"
+                              th:value="${s}"
+                              th:text="${#strings.replace(s.name(), '_', ' ')}"
+                              th:selected="${s == appt.estado}">
+                        PENDIENTE
+                      </option>
+                    </select>
+
+                    <div class="form-text mb-3">
+                      Reglas: cancelar / finalizar solo desde EN CURSO y con OT cerrada.
+                    </div>
                   </div>
-                </div>
 
-                <button type="submit" class="btn btn-primary tt-btn-mobile mt-auto">
-                  Guardar
-                </button>
-              </form>
+                  <button type="submit"
+                          class="btn btn-primary tt-btn-mobile mt-auto"
+                          th:disabled="${woLocked}">
+                    Guardar
+                  </button>
+                </form>
+              </div>
+
+              <!-- Asignar mecánico -->
+              <div class="col-12 col-xl-6 d-flex">
+                <form class="d-flex flex-column flex-grow-1 h-100"
+                      method="post"
+                      th:action="@{/backoffice/citas/{id}/asignar(id=${appt.id})}">
+
+                  <input type="hidden" th:if="${_csrf != null}"
+                         th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                  <div>
+                    <label for="mechanicId" class="form-label mb-1">Asignar mecánico</label>
+                    <select id="mechanicId" name="mechanicId"
+                            class="form-select tt-mobile-full"
+                            th:disabled="${woLocked}">
+                      <option value="" disabled th:selected="${appt.employeeAsignado == null}">Selecciona...</option>
+                      <option th:each="m : ${mechanics}"
+                              th:value="${m.id}"
+                              th:selected="${appt.employeeAsignado != null and m.id == appt.employeeAsignado.id}"
+                              th:text="${m.user != null ? (m.user.nombre + ' ' + m.user.apellidos) : ('Empleado #' + m.id)}">
+                        Mecánico
+                      </option>
+                    </select>
+
+                    <div class="form-text mb-3">Solo mecánicos activos.</div>
+                  </div>
+
+                  <button type="submit"
+                          class="btn btn-outline-secondary tt-btn-mobile mt-auto"
+                          th:disabled="${woLocked}">
+                    Asignar
+                  </button>
+                </form>
+              </div>
+
             </div>
-
-            <!-- Asignar mecánico -->
-            <div class="col-12 col-xl-6 d-flex">
-              <form class="d-flex flex-column flex-grow-1 h-100"
-                    method="post"
-                    th:action="@{/backoffice/citas/{id}/asignar(id=${appt.id})}">
-
-                <input type="hidden" th:if="${_csrf != null}"
-                       th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
-                <div>
-                  <label for="mechanicId" class="form-label mb-1">Asignar mecánico</label>
-                  <select id="mechanicId" name="mechanicId" class="form-select tt-mobile-full">
-                    <option value="" disabled th:selected="${appt.employeeAsignado == null}">Selecciona...</option>
-                    <option th:each="m : ${mechanics}"
-                            th:value="${m.id}"
-                            th:selected="${appt.employeeAsignado != null and m.id == appt.employeeAsignado.id}"
-                            th:text="${m.user != null ? (m.user.nombre + ' ' + m.user.apellidos) : ('Empleado #' + m.id)}">
-                      Mecánico
-                    </option>
-                  </select>
-
-                  <!-- separación real -->
-                  <div class="form-text mb-3">Solo mecánicos activos.</div>
-                </div>
-
-                <button type="submit" class="btn btn-outline-secondary tt-btn-mobile mt-auto">
-                  Asignar
-                </button>
-              </form>
-            </div>
-
           </div>
 
         </div>
