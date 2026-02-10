@@ -9,7 +9,7 @@
   --tt-border: #1f2937;
 
   /* Fondo */
-  --tt-bg-image: url("/img/fondo.png");
+  --tt-bg-image: url("/img/fondo.webp");
 
   /* Overlay (desktop) → equilibrio entre estética y legibilidad */
   --tt-bg-overlay: rgba(248, 249, 250, 0.40);
