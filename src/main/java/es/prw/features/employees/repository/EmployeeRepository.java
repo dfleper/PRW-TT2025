@@ -7,10 +7,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Long> {
 
-    // Mecánicos activos (y otros tipos si lo necesitas) -> SIN user (ojo en Thymeleaf)
     @Query("""
         select e
         from EmployeeEntity e
@@ -20,7 +20,6 @@ public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Long> 
     """)
     List<EmployeeEntity> findActivosByTipo(@Param("tipo") EmployeeType tipo);
 
-    // ✅ Para THYMELEAF: incluye user con JOIN FETCH (evita LazyInitializationException)
     @Query("""
         select distinct e
         from EmployeeEntity e
@@ -31,13 +30,22 @@ public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Long> 
     """)
     List<EmployeeEntity> findActivosByTipoWithUser(@Param("tipo") EmployeeType tipo);
 
-    // Atajo específico para mecánicos (opcional)
     default List<EmployeeEntity> findMecanicosActivos() {
         return findActivosByTipo(EmployeeType.MECANICO);
     }
 
-    // ✅ Atajo para mecánicos (con user cargado)
     default List<EmployeeEntity> findMecanicosActivosWithUser() {
         return findActivosByTipoWithUser(EmployeeType.MECANICO);
     }
+
+    // =========================================================
+    // ✅ TAREA 22.6: identificar al mecánico logueado por email
+    // =========================================================
+    @Query("""
+        select e
+        from EmployeeEntity e
+        join fetch e.user u
+        where lower(u.email) = lower(:email)
+    """)
+    Optional<EmployeeEntity> findByUserEmailWithUser(@Param("email") String email);
 }

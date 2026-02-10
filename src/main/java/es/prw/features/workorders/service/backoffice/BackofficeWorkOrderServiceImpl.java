@@ -37,8 +37,39 @@ public class BackofficeWorkOrderServiceImpl implements BackofficeWorkOrderServic
 
                     return new WorkOrderListRow(
                             wo.getId(),
-                            toUiStatus(wo.getEstado()),              // OPEN / CLOSED
-                            wo.getCreatedAt(),                       // fecha para tabla
+                            toUiStatus(wo.getEstado()),
+                            wo.getCreatedAt(),
+                            wo.getClosedAt(),
+                            customerName,
+                            cu.getEmail(),
+                            v.getMatricula(),
+                            s.getNombre(),
+                            a.getEstado() == null ? "" : a.getEstado().name()
+                    );
+                })
+                .toList();
+    }
+
+    @Override
+    public List<WorkOrderListRow> listOpenAssignedTo(Long mechanicEmployeeId, String q) {
+        if (mechanicEmployeeId == null) {
+            return java.util.Collections.emptyList();
+        }
+
+        return workOrderRepository.findOpenAssignedToMechanic(mechanicEmployeeId, WorkOrderStatus.cerrada, q)
+                .stream()
+                .map(wo -> {
+                    var a = wo.getAppointment();
+                    var v = a.getVehicle();
+                    var s = a.getService();
+                    var cu = a.getCustomer().getUser();
+
+                    String customerName = joinName(cu.getNombre(), cu.getApellidos());
+
+                    return new WorkOrderListRow(
+                            wo.getId(),
+                            toUiStatus(wo.getEstado()),
+                            wo.getCreatedAt(),
                             wo.getClosedAt(),
                             customerName,
                             cu.getEmail(),
@@ -56,22 +87,19 @@ public class BackofficeWorkOrderServiceImpl implements BackofficeWorkOrderServic
         String s = status.trim().toUpperCase(Locale.ROOT);
         if (s.isBlank() || s.equals("ALL")) return null;
 
-        // UI: OPEN/CLOSED -> dominio: abierta/cerrada
         if (s.equals("OPEN")) return WorkOrderStatus.abierta;
         if (s.equals("CLOSED")) return WorkOrderStatus.cerrada;
 
-        // Si llega algo raro, lo tratamos como ALL
         return null;
     }
 
     private String toUiStatus(WorkOrderStatus estado) {
         if (estado == null) return "OPEN";
 
-        // ✅ Con default evitamos el error de exhaustividad del switch
         return switch (estado) {
             case abierta -> "OPEN";
             case cerrada -> "CLOSED";
-            default -> estado.name().toUpperCase(Locale.ROOT); // por si aparecen más estados
+            default -> estado.name().toUpperCase(Locale.ROOT);
         };
     }
 

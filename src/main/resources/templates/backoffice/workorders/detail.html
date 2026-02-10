@@ -4,11 +4,23 @@
       th:replace="~{layout/base :: html(pageTitle='Backoffice · Orden de trabajo', content=~{::content})}"
       th:remove="tag">
 
-<section th:fragment="content">
+<section th:fragment="content"
+         th:with="
+           isClosed=${wo.estado == T(es.prw.features.workorders.domain.WorkOrderStatus).cerrada},
+           isMechanic=${#authorization.expression('hasAnyAuthority(''MECANICO'',''ROLE_MECANICO'')')}
+         ">
 
   <!-- Mensajes -->
   <div th:if="${ok}" class="alert alert-success mb-3" th:text="${ok}"></div>
   <div th:if="${error}" class="alert alert-danger mb-3" th:text="${error}"></div>
+
+  <!-- Aviso MECÁNICO -->
+  <div class="alert alert-info mb-3"
+       th:if="${isMechanic}">
+    Perfil <strong>MECÁNICO</strong>:
+    puedes editar <strong>Diagnóstico</strong> y <strong>Observaciones</strong> en OTs abiertas.
+    No tienes permisos para <strong>cerrar</strong> la OT ni <strong>gestionar piezas</strong>.
+  </div>
 
   <!-- Encabezado -->
   <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
@@ -23,15 +35,30 @@
       </div>
     </div>
 
+    <!-- Acciones cabecera -->
     <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto">
+
+      <!-- ✅ MECÁNICO: Volver a Órdenes -->
       <a class="btn btn-outline-secondary tt-btn-mobile"
-         th:if="${wo != null && wo.appointment != null}"
+         th:if="${isMechanic}"
+         th:href="@{/backoffice/workorders}">
+        Volver a Órdenes
+      </a>
+
+      <!-- ✅ RESTO: Volver a cita -->
+      <a class="btn btn-outline-secondary tt-btn-mobile"
+         th:if="${!isMechanic && wo != null && wo.appointment != null}"
          th:href="@{/backoffice/citas/{id}(id=${wo.appointment.id})}">
         Volver a cita
       </a>
-      <a class="btn btn-outline-dark tt-btn-mobile" th:href="@{/backoffice}">
+
+      <!-- ✅ Dashboard SOLO si NO es mecánico -->
+      <a class="btn btn-outline-dark tt-btn-mobile"
+         th:if="${!isMechanic}"
+         th:href="@{/backoffice}">
         Dashboard
       </a>
+
     </div>
   </div>
 
@@ -57,11 +84,10 @@
           </span>
         </div>
 
-        <div class="card-body"
-             th:with="isClosed=${wo.estado == T(es.prw.features.workorders.domain.WorkOrderStatus).cerrada}">
+        <div class="card-body">
 
-          <!-- Cerrar OT -->
-          <div class="mb-3" th:if="${!isClosed}">
+          <!-- Cerrar OT (solo NO mecánico y solo si no cerrada) -->
+          <div class="mb-3" th:if="${!isClosed && !isMechanic}">
             <form th:action="@{/backoffice/workorders/{id}/close(id=${wo.id})}" method="post"
                   onsubmit="return confirm('¿Cerrar la orden de trabajo? No se podrá editar después.');">
 
@@ -82,6 +108,14 @@
           <div class="mb-3" th:if="${isClosed}">
             <div class="alert alert-success mb-0">
               Esta orden está <strong>CERRADA</strong>. No se permiten cambios.
+            </div>
+          </div>
+
+          <!-- Aviso: mecánico no puede cerrar -->
+          <div class="mb-3" th:if="${!isClosed && isMechanic}">
+            <div class="alert alert-secondary mb-0">
+              Esta OT está <strong>ABIERTA</strong>. Puedes editar diagnóstico/observaciones.
+              <strong>No puedes cerrar</strong> la OT.
             </div>
           </div>
 
@@ -146,8 +180,7 @@
           <div class="fw-semibold">Datos y diagnóstico</div>
         </div>
 
-        <div class="card-body"
-             th:with="isClosed=${wo.estado == T(es.prw.features.workorders.domain.WorkOrderStatus).cerrada}">
+        <div class="card-body">
 
           <!-- Datos cita -->
           <div th:if="${wo.appointment != null}">
@@ -208,7 +241,7 @@
             <hr class="my-4"/>
           </div>
 
-          <!-- Form diagnóstico -->
+          <!-- Form diagnóstico (mecánico sí puede; cerrado no) -->
           <form method="post" th:action="@{/backoffice/workorders/{id}(id=${wo.id})}">
             <input type="hidden" th:if="${_csrf != null}"
                    th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
@@ -242,7 +275,16 @@
                 Guardar
               </button>
 
-              <a class="btn btn-outline-secondary tt-btn-mobile" th:if="${wo.appointment != null}"
+              <!-- ✅ MECÁNICO: volver a órdenes -->
+              <a class="btn btn-outline-secondary tt-btn-mobile"
+                 th:if="${isMechanic}"
+                 th:href="@{/backoffice/workorders}">
+                Volver a Órdenes
+              </a>
+
+              <!-- ✅ RESTO: volver a cita -->
+              <a class="btn btn-outline-secondary tt-btn-mobile"
+                 th:if="${!isMechanic && wo.appointment != null}"
                  th:href="@{/backoffice/citas/{id}(id=${wo.appointment.id})}">
                 Volver a cita
               </a>
@@ -256,6 +298,12 @@
           <hr class="my-4">
 
           <h5 class="mb-3">Piezas usadas</h5>
+
+          <!-- Aviso: piezas bloqueadas para mecánico -->
+          <div class="alert alert-secondary mb-3"
+               th:if="${isMechanic}">
+            Gestión de piezas deshabilitada para el perfil <strong>MECÁNICO</strong>.
+          </div>
 
           <!-- =========================================================
                PIEZAS: TARJETAS (móvil + tablet) <= 992px
@@ -304,7 +352,9 @@
                         onsubmit="return confirm('¿Eliminar pieza?');">
                     <input type="hidden" th:if="${_csrf != null}"
                            th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <button class="btn btn-outline-danger tt-btn-mobile" type="submit" th:disabled="${isClosed}">
+                    <button class="btn btn-outline-danger tt-btn-mobile"
+                            type="submit"
+                            th:disabled="${isClosed || isMechanic}">
                       Eliminar pieza
                     </button>
                   </form>
@@ -346,7 +396,11 @@
                           onsubmit="return confirm('¿Eliminar pieza?');">
                       <input type="hidden" th:if="${_csrf != null}"
                              th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                      <button class="btn btn-sm btn-outline-danger" type="submit" th:disabled="${isClosed}">✖</button>
+                      <button class="btn btn-sm btn-outline-danger"
+                              type="submit"
+                              th:disabled="${isClosed || isMechanic}">
+                        ✖
+                      </button>
                     </form>
                   </td>
                 </tr>
@@ -362,8 +416,8 @@
 
           </div>
 
-          <!-- Añadir piezas -->
-          <form th:if="${!isClosed}"
+          <!-- Añadir piezas (solo NO cerrada y NO mecánico) -->
+          <form th:if="${!isClosed && !isMechanic}"
                 th:action="@{/backoffice/workorders/{id}/parts(id=${wo.id})}"
                 th:object="${newPart}"
                 method="post" class="row g-2 mt-3">
@@ -401,6 +455,7 @@
 
           </form>
 
+          <!-- JS (solo afecta si existe el form) -->
           <script>
             (function () {
               const sel = document.getElementById('partSelect');
