@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: html(pageTitle='Admin · Usuarios', content=~{::content})}"
+      th:remove="tag">
+
+<section th:fragment="content">
+
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <div>
+      <h1 class="h3 mb-1">Usuarios</h1>
+      <div class="text-muted small">Gestión de roles y estado (solo ADMIN)</div>
+    </div>
+
+    <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto">
+      <a class="btn btn-outline-secondary tt-btn-mobile" th:href="@{/admin}">Volver a Admin</a>
+      <a class="btn btn-outline-dark tt-btn-mobile" th:href="@{/}">Home</a>
+    </div>
+  </div>
+
+  <!-- Mensajes -->
+  <div th:if="${ok}" class="alert alert-success" th:text="${ok}"></div>
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+
+      <div th:if="${users == null || #lists.isEmpty(users)}" class="alert alert-info mb-0">
+        No hay usuarios.
+      </div>
+
+      <div th:if="${users != null && !#lists.isEmpty(users)}">
+
+        <!-- =========================================================
+             TARJETAS (móvil + tablet) <= 992px
+             (se mantiene: botones apilados OK)
+             ========================================================= -->
+        <div class="tt-show-cards-lg d-grid gap-2">
+
+          <div class="card border-0 shadow-sm"
+               th:each="u : ${users}"
+               th:with="roleNames=${u.roles != null ? u.roles.![nombre] : T(java.util.Collections).emptyList()}">
+
+            <div class="card-body">
+
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <div class="tt-break">
+                  <div class="fw-semibold">
+                    <span th:text="${u.nombre + ' ' + u.apellidos}">Nombre Apellidos</span>
+                  </div>
+                  <div class="text-muted small tt-break" th:text="${u.email}">email</div>
+                  <div class="text-muted small" th:if="${u.telefono != null}" th:text="${u.telefono}">600000000</div>
+                </div>
+
+                <div class="text-end">
+                  <div class="text-muted small">ID</div>
+                  <div class="fw-semibold" th:text="${u.idUser}">1</div>
+
+                  <div class="mt-2">
+                    <span class="badge"
+                          th:classappend="${u.activo} ? ' text-bg-success' : ' text-bg-secondary'"
+                          th:text="${u.activo} ? 'ACTIVO' : 'INACTIVO'">
+                      ACTIVO
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="my-3"/>
+
+              <!-- Roles -->
+              <form method="post"
+                    th:action="@{/admin/users/{id}/roles(id=${u.idUser})}">
+
+                <input type="hidden" th:if="${_csrf != null}"
+                       th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <div class="text-muted small mb-2">Roles</div>
+
+                <div class="d-grid gap-2" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                  <label th:each="r : ${allRoles}" class="form-check mb-0">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="roles"
+                           th:value="${r.nombre}"
+                           th:checked="${#lists.contains(roleNames, r.nombre)}">
+                    <span class="form-check-label"
+                          th:text="${r.nombre == 'JEFE_TALLER' ? 'JEFE TALLER' :
+                                   (r.nombre == 'MECANICO' ? 'MECÁNICO' : r.nombre)}">
+                      ROL
+                    </span>
+                  </label>
+                </div>
+
+                <div class="d-grid gap-2 mt-3">
+                  <button class="btn btn-primary tt-btn-mobile" type="submit">
+                    Guardar roles
+                  </button>
+                </div>
+              </form>
+
+              <!-- Activar/Desactivar -->
+              <form method="post"
+                    th:action="@{/admin/users/{id}/toggle(id=${u.idUser})}"
+                    class="mt-2">
+
+                <input type="hidden" th:if="${_csrf != null}"
+                       th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <button type="submit"
+                        class="btn tt-btn-mobile"
+                        th:classappend="${u.activo} ? ' btn-outline-danger' : ' btn-outline-success'"
+                        th:text="${u.activo} ? 'Desactivar usuario' : 'Activar usuario'">
+                  Desactivar usuario
+                </button>
+              </form>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- =========================================================
+             TABLA (escritorio) >= 993px
+             ✅ botones juntos en Acciones
+             ========================================================= -->
+        <div class="tt-hide-cards-lg">
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+              <tr>
+                <th class="text-nowrap">ID</th>
+                <th>Email</th>
+                <th>Nombre</th>
+                <th class="text-nowrap">Activo</th>
+                <th style="min-width: 420px;">Roles</th>
+                <th class="text-end" style="width: 320px;">Acciones</th>
+              </tr>
+              </thead>
+
+              <tbody>
+              <tr th:each="u : ${users}"
+                  th:with="roleNames=${u.roles != null ? u.roles.![nombre] : T(java.util.Collections).emptyList()}">
+
+                <td class="text-muted" th:text="${u.idUser}">1</td>
+
+                <td class="fw-semibold tt-break" th:text="${u.email}">email</td>
+
+                <td>
+                  <div class="fw-semibold" th:text="${u.nombre + ' ' + u.apellidos}">Nombre Apellidos</div>
+                  <div class="text-muted small" th:if="${u.telefono != null}" th:text="${u.telefono}">600000000</div>
+                </td>
+
+                <td>
+                  <span class="badge"
+                        th:classappend="${u.activo} ? ' text-bg-success' : ' text-bg-secondary'"
+                        th:text="${u.activo} ? 'ACTIVO' : 'INACTIVO'">
+                    ACTIVO
+                  </span>
+                </td>
+
+                <!-- Roles (sin botón) -->
+                <td>
+                  <form method="post"
+                        th:id="${'rolesForm_' + u.idUser}"
+                        th:action="@{/admin/users/{id}/roles(id=${u.idUser})}">
+
+                    <input type="hidden" th:if="${_csrf != null}"
+                           th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                    <div class="d-grid gap-2" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+                      <label th:each="r : ${allRoles}" class="form-check mb-0">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               name="roles"
+                               th:value="${r.nombre}"
+                               th:checked="${#lists.contains(roleNames, r.nombre)}">
+                        <span class="form-check-label"
+                              th:text="${r.nombre == 'JEFE_TALLER' ? 'JEFE TALLER' :
+                                       (r.nombre == 'MECANICO' ? 'MECÁNICO' : r.nombre)}">
+                          ROL
+                        </span>
+                      </label>
+                    </div>
+
+                  </form>
+                </td>
+
+                <!-- Acciones (botones juntos) -->
+                <td class="text-end">
+                  <div class="d-flex justify-content-end gap-2 flex-wrap">
+
+                    <!-- ✅ Guardar roles (envía el form de roles por id) -->
+                    <button type="submit"
+                            class="btn btn-sm btn-primary"
+                            th:attr="form=${'rolesForm_' + u.idUser}">
+                      Guardar roles
+                    </button>
+
+                    <!-- Activar/Desactivar -->
+                    <form method="post"
+                          th:action="@{/admin/users/{id}/toggle(id=${u.idUser})}"
+                          class="m-0">
+
+                      <input type="hidden" th:if="${_csrf != null}"
+                             th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                      <button type="submit"
+                              class="btn btn-sm"
+                              th:classappend="${u.activo} ? ' btn-outline-danger' : ' btn-outline-success'"
+                              th:text="${u.activo} ? 'Desactivar' : 'Activar'">
+                        Desactivar
+                      </button>
+                    </form>
+
+                  </div>
+                </td>
+
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</section>
+</html>
