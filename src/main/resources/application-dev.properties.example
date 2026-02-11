@@ -3,8 +3,8 @@
 # ==============================
 
 spring.datasource.url=jdbc:mariadb://localhost:3306/tt2025
-spring.datasource.username=YOUR_USER
-spring.datasource.password=YOUR_PASSWORD
+spring.datasource.username=USERNAME
+spring.datasource.password=PASSWORD
 spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
 
 # Hikari (local)
@@ -14,29 +14,64 @@ spring.datasource.hikari.connection-timeout=30000
 spring.datasource.hikari.idle-timeout=600000
 spring.datasource.hikari.max-lifetime=1800000
 
+# ==============================
 # JPA/Hibernate (Flyway)
+# ==============================
+
 spring.jpa.hibernate.ddl-auto=validate
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 
-# Thymeleaf (dev)
-spring.thymeleaf.cache=false
-
-# Logs
+# Logs SQL (dev)
 logging.level.org.hibernate.SQL=DEBUG
 logging.level.org.hibernate.orm.jdbc.bind=TRACE
 
-# Swagger-UI
+# ==============================
+# Thymeleaf (dev)
+# ==============================
+
+spring.thymeleaf.cache=false
+
+# ==============================
+# Swagger-UI (dev)
+# ==============================
+
 springdoc.swagger-ui.enabled=true
 springdoc.api-docs.enabled=true
 
-# Configuration flyway
+# ==============================
+# Flyway
+# ==============================
+
 spring.flyway.enabled=true
 spring.flyway.locations=classpath:db/migration
 
+# ==============================
+# Horario
+# ==============================
+
+tt.workshop.enforce-hours=true
+tt.workshop.open-time=08:00
+tt.workshop.close-time=18:00
+tt.workshop.block-weekends=true
+
+# ==============================
+# Debug (dev)
+# ==============================
+
+logging.level.org.springframework.security=DEBUG
+logging.level.org.springframework.web=INFO
+
+# ==============================
+# Actuator
+# ==============================
+
+management.endpoints.web.exposure.include=mappings
+
 # ===========================
-# Mail (DEV) - EXAMPLE (no secrets)
+# Mail (DEV)
 # ===========================
+
 app.mail.enabled=true
 app.mail.from=no-reply@tt2025.local
 
@@ -46,3 +81,12 @@ spring.mail.username=
 spring.mail.password=
 spring.mail.properties.mail.smtp.auth=false
 spring.mail.properties.mail.smtp.starttls.enable=false
+
+# Desactiva Whitelabel y deja que Spring Boot resuelva templates/error/{status}.html
+server.error.whitelabel.enabled=false
+
+# Evita mostrar detalles técnicos en la vista de error (incluso en dev)
+server.error.include-message=never
+server.error.include-binding-errors=never
+server.error.include-exception=false
+server.error.include-stacktrace=never
