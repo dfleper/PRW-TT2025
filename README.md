@@ -307,6 +307,15 @@ Las tareas se gestionan en GitHub Projects (Backlog → Ready → In Progress �
 
 ---
 
+## Tests 
+- Véase 📄 **[TESTING.md](TESTING.md).**
+
+Ejecutar tests dev:
+
+```bash
+mvn test
+```
+
 ## Legal
 - Véase 📄 **[AVISO.md](AVISO.md).** Todos los derechos reservados.
 - See 📄 **[NOTICE.md](NOTICE.md).** All rights reserved.
