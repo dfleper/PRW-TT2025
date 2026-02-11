@@ -77,6 +77,7 @@ spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
 - Run → Spring Boot App
 
 **Opción B (terminal):**
+
 Linux / macOS:
 ```bash
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
