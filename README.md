@@ -4,13 +4,9 @@ Turbo Taller (TT2025) digitaliza la gestión de un taller de mecánica rápida. 
 
 ---
 
-## STACK
-
-Proyecto TT2025 – Turbo Taller: aplicación web Spring Boot (Java 17) con Thymeleaf + HTML/CSS/JS y MariaDB, orientada a la gestión de citas, agenda interna, órdenes de trabajo, historial y notificaciones.
-
----
-
 ## Stack / Tecnologías
+
+Aplicación web desarrollada con Spring Boot (Java 17) y Thymeleaf, utilizando MariaDB como base de datos.
 
 - **Java:** 17  
 - **IDE:** Spring Tool Suite **4.32.0 (STS)**
@@ -40,16 +36,39 @@ DROP DATABASE IF EXISTS tt2025;
 CREATE DATABASE tt2025 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-### 2) Configuración del proyecto
-Configura la conexión en `src/main/resources/application-dev.properties` (o `application.properties`):
+### 2) Configuración del proyecto 
 
-```properties
+- El proyecto utiliza perfiles de Spring (`dev`, `prod`, etc.) para separar configuraciones por entorno.
+
+- La configuración general se encuentra en:
+	`src/main/resources/application.properties`
+
+- La configuración específica de desarrollo local se encuentra en:
+	`src/main/resources/application-dev.properties`
+	
+Plantilla disponible en:
+📄 [application-dev.properties.example](src/main/resources/application-dev.properties.example)
+
+Copia este fichero como `application-dev.properties` y configura tus credenciales locales.
+
+**application-dev.properties**
+
+```
+==============================
+# DEV (LOCAL) - MariaDB
+# ============================
+
 spring.datasource.url=jdbc:mariadb://localhost:3306/tt2025
-spring.datasource.username=TU_USUARIO
-spring.datasource.password=TU_PASSWORD
+spring.datasource.username=USERNAME
+spring.datasource.password=PASSWORD
+spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
+
+# Otras propiedades opcionales según entorno
 ```
 
 > Recomendado: usar variables de entorno en lugar de credenciales en el repo.
+
+> `application-dev.properties` debe estar incluido en `.gitignore`.
 
 ### 3) Ejecutar la aplicación
 
@@ -58,19 +77,120 @@ spring.datasource.password=TU_PASSWORD
 - Run → Spring Boot App
 
 **Opción B (terminal):**
+Linux / macOS:
 ```bash
-./mvnw spring-boot:run
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-En Windows:
+Windows:
 ```bat
-mvnw.cmd spring-boot:run
+mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-### 4) Abrir en el navegador
+### 4) Flyway (DEV) — Inicialización automática de base de datos
+
+El proyecto utiliza **Flyway** para gestionar el versionado y la evolución del esquema de base de datos.
+
+### ¿Qué ocurre en el primer arranque?
+
+Cuando la aplicación se inicia con el perfil `dev` y la base de datos `tt2025` está vacía:
+
+1. Flyway detecta las migraciones en:
+   ```
+   src/main/resources/db/migration
+   ```
+2. Ejecuta automáticamente los scripts `V1`, `V2`, `V3`, etc., en orden.
+3. Crea la tabla de control:
+   ```
+   flyway_schema_history
+   ```
+4. Registra qué migraciones se han aplicado correctamente.
+
+Esto garantiza que cualquier desarrollador que clone el repositorio pueda levantar la base de datos desde cero sin ejecutar SQL manual adicional.
+
+---
+
+### Cómo comprobar que Flyway ha aplicado correctamente las migraciones
+
+En MariaDB:
+
+```sql
+USE tt2025;
+
+SHOW TABLES;
+
+SELECT installed_rank, version, description, success
+FROM flyway_schema_history
+ORDER BY installed_rank;
+```
+
+Si las migraciones aparecen con `success = 1`, la base de datos está correctamente inicializada.
+
+---
+
+### Usuarios de prueba (solo perfil DEV)
+
+En entorno de desarrollo (`dev`), el sistema crea automáticamente usuarios de prueba para facilitar la validación funcional.
+
+### Usuario CLIENTE
+
+- Email: `cliente@tt2025.local`
+- Password: `1234`
+- Rol: `CLIENTE`
+
+### Usuario ADMIN
+
+- Email: `admin@tt2025.local`
+- Password: `1234`
+- Rol: `ADMIN`
+
+> Las contraseñas no se almacenan en texto plano.  
+> Se guardan hasheadas mediante el mecanismo de seguridad configurado en Spring Security.
+
+Estos usuarios permiten:
+
+- Acceder a la zona cliente (`/cliente/...`)
+- Acceder a Backoffice (`/backoffice/...`)
+- Acceder a Swagger, Actuator y `/dev/mappings` (ADMIN)
+
+---
+
+### Verificación en base de datos
+
+Puedes comprobar que los usuarios existen ejecutando:
+
+```sql
+SELECT email, activo
+FROM users
+WHERE email IN ('cliente@tt2025.local', 'admin@tt2025.local');
+```
+
+---
+
+## Importante
+
+Los usuarios de prueba solo deben existir en perfil `dev`.
+
+En un entorno de producción:
+
+- No deben existir credenciales por defecto.
+- La creación de usuarios debe realizarse de forma controlada.
+- Deben usarse contraseñas seguras.
+
+
+### 5) Abrir en el navegador
 - App: `http://localhost:8080`
 
 ---
+
+### URLs útiles
+
+- Home: `http://localhost:8080/`
+- Login: `http://localhost:8080/login`
+- Swagger (ADMIN): `http://localhost:8080/swagger-ui/index.html`
+- Actuator (ADMIN): `http://localhost:8080/actuator`
+- Dev mappings (ADMIN - perfil dev): `http://localhost:8080/dev/mappings`
+
 
 ## Accesos y herramientas de desarrollo
 
