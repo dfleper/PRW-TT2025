@@ -1,5 +1,7 @@
 ﻿/* ============================================================
-   V5__audit_fields_and_last_login.sql
+   TURBO TALLER (TT2025) - FLYWAY V5__audit_fields_and_last_login.sql
+   ------------------------------------------------------------
+   Ajustes:
    - Añade trazabilidad (created_by/at, updated_by/at) a todas las tablas
    - Añade last_login_at a users
    ============================================================ */

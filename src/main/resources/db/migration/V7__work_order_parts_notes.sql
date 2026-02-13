@@ -1,5 +1,7 @@
 /* ============================================================
-   V7__work_order_parts_notes.sql
+   TURBO TALLER (TT2025) - FLYWAY V7__work_order_parts_notes.sql
+   ------------------------------------------------------------
+   Ajustes:
    - Añade notas opcionales a las piezas usadas en una OT
    ============================================================ */
 
