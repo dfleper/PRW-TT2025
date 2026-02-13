@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="fragments/head :: head('Página no encontrada · TT2025')"></head>
+
+<body>
+
+	<div th:replace="fragments/navbar :: navbar"></div>
+
+	<main class="container my-4">
+
+		<div class="row justify-content-center">
+			<div class="col-12 col-md-8 col-lg-6">
+
+				<div class="card shadow-sm border-0">
+					<div class="card-body p-4">
+
+						<div class="d-flex align-items-center gap-3 mb-3">
+							<div class="display-6 fw-bold text-warning">404</div>
+							<div>
+								<h1 class="h4 mb-1">Página no encontrada</h1>
+								<p class="text-muted mb-0">La URL que has intentado abrir no existe o ya no está
+									disponible.</p>
+							</div>
+						</div>
+
+						<hr class="my-3" />
+
+						<p class="mb-3">
+							Revisa que la dirección esté bien escrita o vuelve a la página de inicio.
+						</p>
+
+						<!-- Botones: móvil full-width, desktop inline -->
+						<div class="d-grid gap-2 d-sm-flex flex-sm-wrap">
+
+							<a class="btn btn-primary tt-btn-mobile" th:href="@{/}">
+								Inicio
+							</a>
+
+							<form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="m-0">
+								<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+								<button type="submit" class="btn btn-outline-danger tt-btn-mobile">
+									Cerrar sesión
+								</button>
+							</form>
+
+						</div>
+
+					</div>
+				</div>
+
+				<p class="text-center text-muted small mt-3 mb-0">
+					Turbo Taller · TT2025
+				</p>
+
+			</div>
+		</div>
+
+	</main>
+
+</body>
+
+</html>

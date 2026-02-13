@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+	th:replace="~{layout/base :: html(pageTitle='Zona cliente · Detalle historial', content=~{::content})}">
+
+<section th:fragment="content">
+
+	<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+		<div class="me-2">
+			<h1 class="h3 mb-1">Detalle de intervención</h1>
+			<div class="text-muted small">Servicio, tiempos, orden de trabajo y piezas.</div>
+		</div>
+
+		<div class="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto">
+			<a class="btn btn-outline-secondary btn-sm tt-btn-mobile" th:href="${appointment != null and appointment.vehicle != null}
+                  ? @{/cliente/vehiculos/{id}/historial(id=${appointment.vehicle.idVehicle})}
+                  : @{/cliente/vehiculos}">
+				← Volver al historial
+			</a>
+		</div>
+	</div>
+
+	<!-- Si appointment viniera null, no explotes -->
+	<div th:if="${appointment == null}" class="alert alert-danger">
+		No se pudo cargar la intervención.
+	</div>
+
+	<div th:if="${appointment != null}">
+
+		<!-- Resumen cita -->
+		<div class="card mb-3 border-0 shadow-sm">
+			<div class="card-body">
+				<div class="row g-2">
+					<div class="col-12 col-md-4">
+						<div class="text-muted small">Servicio</div>
+						<div class="fw-semibold tt-break"
+							th:text="${appointment.service != null ? appointment.service.nombre : '—'}">
+							Servicio
+						</div>
+					</div>
+
+					<div class="col-12 col-md-4">
+						<div class="text-muted small">Inicio</div>
+						<div class="tt-nowrap"
+							th:text="${appointment.inicio != null ? #temporals.format(appointment.inicio, 'dd/MM/yyyy HH:mm') : '—'}">
+							-
+						</div>
+					</div>
+
+					<div class="col-12 col-md-4">
+						<div class="text-muted small">Fin</div>
+						<div class="tt-nowrap"
+							th:text="${appointment.fin != null ? #temporals.format(appointment.fin, 'dd/MM/yyyy HH:mm') : '—'}">
+							-
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- OT -->
+		<div class="card mb-3 border-0 shadow-sm">
+			<div class="card-header fw-semibold bg-white border-0">Orden de Trabajo</div>
+			<div class="card-body">
+
+				<div th:if="${appointment.workOrder == null}" class="alert alert-info mb-0">
+					No hay orden de trabajo asociada a esta intervención.
+				</div>
+
+				<div th:if="${appointment.workOrder != null}">
+					<div class="mb-3">
+						<div class="text-muted small">Diagnóstico</div>
+						<div class="tt-break"
+							th:text="${appointment.workOrder.diagnostico != null ? appointment.workOrder.diagnostico : '—'}">
+						</div>
+					</div>
+
+					<div class="mb-0">
+						<div class="text-muted small">Observaciones</div>
+						<div class="tt-break"
+							th:text="${appointment.workOrder.observaciones != null ? appointment.workOrder.observaciones : '—'}">
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- Piezas -->
+		<div class="card border-0 shadow-sm">
+			<div class="card-header fw-semibold bg-white border-0">Piezas usadas</div>
+			<div class="card-body">
+
+				<div th:if="${parts == null or #lists.isEmpty(parts)}" class="alert alert-info mb-0">
+					No hay piezas registradas para esta intervención.
+				</div>
+
+				<div th:if="${parts != null and !#lists.isEmpty(parts)}">
+
+					<!-- MÓVIL -->
+					<div class="tt-show-mobile">
+						<div class="d-grid gap-2">
+
+							<div class="card border-0 shadow-sm" th:each="p : ${parts}">
+								<div class="card-body">
+
+									<div class="d-flex justify-content-between align-items-start gap-2">
+										<div class="tt-break">
+											<div class="fw-semibold" th:text="${p.nombre != null ? p.nombre : '—'}">
+												Nombre</div>
+											<div class="text-muted small tt-break">
+												<span class="me-1">SKU:</span>
+												<span th:text="${p.sku != null ? p.sku : '—'}">SKU</span>
+											</div>
+										</div>
+
+										<div class="text-end">
+											<div class="small text-muted">Total</div>
+											<div class="fw-semibold tt-nowrap"
+												th:text="${p.total != null ? p.total : '—'}">0.00</div>
+										</div>
+									</div>
+
+									<hr class="my-3" />
+
+									<div class="row g-2 small">
+										<div class="col-4">
+											<div class="text-muted">Cant.</div>
+											<div class="tt-nowrap" th:text="${p.cantidad != null ? p.cantidad : '—'}">
+												1.00</div>
+										</div>
+										<div class="col-4">
+											<div class="text-muted">Precio</div>
+											<div class="tt-nowrap"
+												th:text="${p.precioUnit != null ? p.precioUnit : '—'}">0.00</div>
+										</div>
+										<div class="col-4">
+											<div class="text-muted">Total</div>
+											<div class="tt-nowrap" th:text="${p.total != null ? p.total : '—'}">0.00
+											</div>
+										</div>
+									</div>
+
+								</div>
+							</div>
+
+						</div>
+					</div>
+
+					<!-- TABLET/PC -->
+					<div class="tt-hide-mobile">
+						<div class="tt-table-scroll">
+							<table class="table table-sm align-middle mb-0">
+								<thead>
+									<tr>
+										<th class="tt-nowrap">SKU</th>
+										<th>Nombre</th>
+										<th class="text-end tt-nowrap">Cantidad</th>
+										<th class="text-end tt-nowrap">Precio</th>
+										<th class="text-end tt-nowrap">Total</th>
+									</tr>
+								</thead>
+
+								<tbody>
+									<tr th:each="p : ${parts}">
+										<td class="tt-nowrap" th:text="${p.sku != null ? p.sku : '—'}">SKU</td>
+										<td class="tt-break" th:text="${p.nombre != null ? p.nombre : '—'}">Nombre</td>
+										<td class="text-end tt-nowrap"
+											th:text="${p.cantidad != null ? p.cantidad : '—'}">1.00</td>
+										<td class="text-end tt-nowrap"
+											th:text="${p.precioUnit != null ? p.precioUnit : '—'}">0.00</td>
+										<td class="text-end tt-nowrap" th:text="${p.total != null ? p.total : '—'}">0.00
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+
+</section>
+
+</html>

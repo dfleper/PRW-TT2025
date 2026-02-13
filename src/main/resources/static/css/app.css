@@ -1,0 +1,433 @@
+/* =========================================================
+   Turbo Taller — UI base (PRO, Bootstrap-friendly)
+   ========================================================= */
+
+:root {
+  /* Colores base */
+  --tt-bg: #f8f9fa;
+  --tt-navbar: rgba(11, 18, 32, 0.92); /* semi-transparente para glass */
+  --tt-border: #1f2937;
+
+  /* Fondo */
+  --tt-bg-image: url("/img/fondo.webp");
+
+  /* Overlay (desktop) → equilibrio entre estética y legibilidad */
+  --tt-bg-overlay: rgba(248, 249, 250, 0.40);
+
+  /* Navbar */
+  --tt-navbar-padding-y: 10px;
+  --tt-navbar-padding-y-lg: 14px;
+
+  /* Logo */
+  --tt-logo-h: 40px;
+  --tt-logo-h-lg: 56px;
+
+  /* Radius */
+  --tt-radius-card: 16px;
+  --tt-radius-control: 12px;
+}
+
+/* =========================================================
+   Fondo global responsive
+   ========================================================= */
+html,
+body {
+  height: 100%;
+}
+
+/* Fondo aplicado a body y compatible con .tt-body */
+body,
+.tt-body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  background-color: var(--tt-bg);
+
+  background-image:
+    linear-gradient(var(--tt-bg-overlay), var(--tt-bg-overlay)),
+    var(--tt-bg-image);
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+/* Tablet (577–992): rendimiento mejor y overlay un poco más alto */
+@media (min-width: 577px) and (max-width: 992px) {
+  body,
+  .tt-body {
+    background-attachment: scroll;
+    background-position: center top;
+    --tt-bg-overlay: rgba(248, 249, 250, 0.48);
+  }
+}
+
+/* Pantallas grandes: deja lucir más la imagen */
+@media (min-width: 1400px) {
+  body,
+  .tt-body {
+    --tt-bg-overlay: rgba(248, 249, 250, 0.35);
+  }
+}
+
+/* =========================================================
+   Navbar PRO (glass + responsive)
+   ========================================================= */
+.tt-navbar {
+  background: var(--tt-navbar);
+  border-color: var(--tt-border) !important;
+
+  padding-top: var(--tt-navbar-padding-y);
+  padding-bottom: var(--tt-navbar-padding-y);
+
+  backdrop-filter: saturate(140%) blur(6px);
+  -webkit-backdrop-filter: saturate(140%) blur(6px);
+}
+
+@media (min-width: 992px) {
+  .tt-navbar {
+    padding-top: var(--tt-navbar-padding-y-lg);
+    padding-bottom: var(--tt-navbar-padding-y-lg);
+  }
+}
+
+/* Brand */
+.tt-navbar .navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1;
+  letter-spacing: .2px;
+}
+
+/* Logo */
+.tt-brand-logo {
+  height: var(--tt-logo-h);
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+@media (min-width: 992px) {
+  .tt-brand-logo {
+    height: var(--tt-logo-h-lg);
+  }
+}
+
+/* Texto brand */
+.tt-brand-text {
+  font-weight: 700;
+  color: #ffffff;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+@media (min-width: 992px) {
+  .tt-brand-text {
+    font-size: 1.15rem;
+  }
+}
+
+/* Links */
+.tt-navlink {
+  color: #cbd5e1 !important;
+  font-weight: 600;
+  padding-left: .75rem !important;
+  padding-right: .75rem !important;
+  border-radius: 10px;
+}
+
+.tt-navlink:hover,
+.tt-navlink:focus {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.tt-navlink.active {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* Toggler */
+.tt-navbar-toggler {
+  border-color: rgba(255, 255, 255, .25) !important;
+}
+
+.tt-navbar .navbar-toggler-icon {
+  filter: invert(1);
+}
+
+/* Menú colapsado */
+@media (max-width: 991.98px) {
+  .tt-navbar .navbar-collapse {
+    padding-top: 10px;
+  }
+
+  .tt-navbar .navbar-nav .nav-item {
+    margin-top: 6px;
+  }
+}
+
+/* =========================================================
+   Contenido principal (panel sobre fondo)
+   ========================================================= */
+main.container {
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(17, 24, 39, 0.06);
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 575.98px) {
+  main.container {
+    padding: 1rem;
+    border-radius: 16px;
+  }
+}
+
+/* =========================================================
+   Footer
+   ========================================================= */
+.tt-footer {
+  border-top: 1px solid rgba(17, 24, 39, 0.08);
+  background: rgba(255, 255, 255, 0.80);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* =========================================================
+   Ajustes visuales generales
+   ========================================================= */
+.card {
+  border-radius: var(--tt-radius-card);
+  border: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.btn,
+.form-control,
+.form-select,
+.alert {
+  border-radius: var(--tt-radius-control);
+}
+
+/* =========================================================
+   Responsive (Tarea 22)
+   - móvil:    <= 576px
+   - tablet:   577px–992px
+   - escritorio: >= 993px
+   ========================================================= */
+
+/* Helpers reutilizables */
+.tt-nowrap { white-space: nowrap; }
+.tt-break { word-break: break-word; overflow-wrap: anywhere; }
+
+/* Helpers de visibilidad por breakpoint */
+@media (max-width: 576px) {
+  .tt-hide-mobile { display: none !important; }
+}
+@media (min-width: 577px) {
+  .tt-show-mobile { display: none !important; }
+}
+
+/* =========================
+   MÓVIL (<= 576px)
+   ========================= */
+@media (max-width: 576px) {
+
+  /* Evita scroll horizontal raro por textos largos.
+     Si en algún punto un dropdown se corta, lo movemos a un wrapper específico del layout. */
+  body { overflow-x: hidden; }
+
+  /* Fondo: en móvil mejor rendimiento y más overlay */
+  body,
+  .tt-body {
+    background-attachment: scroll;
+    background-position: center top;
+    --tt-bg-overlay: rgba(248, 249, 250, 0.55);
+  }
+
+  /* Formularios: apilar siempre */
+  .tt-form-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: .35rem !important;
+  }
+
+  /* Inputs y selects a 100% */
+  .tt-mobile-full {
+    width: 100% !important;
+  }
+
+  /* Botones grandes y separados */
+  .tt-btn-mobile {
+    width: 100% !important;
+    padding: .75rem 1rem !important;
+  }
+
+  /* Tablas: scroll horizontal controlado cuando haga falta */
+  .tt-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tt-table-scroll > table {
+    min-width: 640px;
+  }
+}
+
+/* =========================
+   TABLET (577px–992px)
+   ========================= */
+@media (min-width: 577px) and (max-width: 992px) {
+
+  .tt-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* =========================
+   ESCRITORIO (>= 993px)
+   ========================= */
+@media (min-width: 993px) {
+  /* Sin overrides extra por ahora */
+}
+
+/* =========================
+   Navbar: mejora móvil
+   ========================= */
+@media (max-width: 991.98px) {
+
+  /* Links: área de toque más grande y full width */
+  .tt-navbar .navbar-nav .nav-link {
+    display: block;
+    padding-top: .6rem;
+    padding-bottom: .6rem;
+  }
+
+  /* Acciones derecha (login/registro/logout): apilar y ocupar ancho */
+  .tt-nav-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: .5rem !important;
+    margin-top: .5rem;
+  }
+
+  .tt-auth-actions {
+    width: 100%;
+  }
+
+  .tt-auth-actions .btn,
+  .tt-nav-actions .btn {
+    width: 100%;
+  }
+
+  /* NUEVO: cuando está logueado, centrar el “Usuario” encima del Logout */
+  .tt-auth-logged {
+    align-items: stretch !important;
+  }
+}
+
+/* =========================================================
+   NUEVO: Tarjetas en móvil + tablet, tabla solo escritorio
+   - Útil para Órdenes de trabajo (Backoffice) y listados largos
+   ========================================================= */
+
+/* <= 992px (móvil + tablet): mostrar tarjetas */
+@media (max-width: 992px) {
+  .tt-show-cards-lg { display: grid !important; }
+  .tt-hide-cards-lg { display: none !important; }
+}
+
+/* >= 993px (escritorio): mostrar tabla */
+@media (min-width: 993px) {
+  .tt-show-cards-lg { display: none !important; }
+  .tt-hide-cards-lg { display: block !important; }
+}
+
+/* (Opcional) Pequeño helper para pares label/valor dentro de tarjetas */
+.tt-card-kv {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: .25rem .75rem;
+  align-items: baseline;
+}
+@media (max-width: 576px) {
+  .tt-card-kv {
+    grid-template-columns: 100px 1fr;
+  }
+}
+
+/* =========================================================
+   NUEVO: Usuario logueado (chip)
+   - Misma altura visual que el botón Logout (btn-sm)
+   - Desktop: en línea con Logout
+   - Tablet/Móvil: chip encima y centrado del Logout
+   ========================================================= */
+
+/* Contenedor del bloque auth logueado (form) */
+.tt-auth-logged {
+  /* ya tiene d-flex y gap del HTML */
+}
+
+/* Chip */
+.tt-user-chip {
+  /* Altura equivalente a btn-sm (Bootstrap): padding .25rem .5rem, font-size .875rem */
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+
+  padding: .25rem .5rem;
+  font-size: .875rem;
+  font-weight: 600;
+  line-height: 1.5;
+
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.22);
+  background: rgba(255,255,255,.92);
+  color: #0b1220;
+
+  box-shadow: 0 .25rem .75rem rgba(0,0,0,.08);
+
+  /* Para no crecer infinito en desktop */
+  max-width: 360px;
+}
+
+/* “Usuario:” */
+.tt-user-label {
+  opacity: .85;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* texto usuario (email) */
+.tt-user-text {
+  display: inline-block;
+  max-width: 230px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+/* Tablet + móvil: chip centrado encima del Logout */
+@media (max-width: 991.98px) {
+  .tt-user-chip {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    max-width: 100%;
+  }
+
+  /* el botón ya ocupa 100% por tus reglas */
+}
+
+/* Desktop: que chip y botón queden iguales en “alto” y alineados */
+@media (min-width: 992px) {
+  .tt-user-chip {
+    /* ajustito para que “calce” con el alto del btn-sm */
+    padding: .25rem .6rem;
+  }
+}

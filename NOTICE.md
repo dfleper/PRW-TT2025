@@ -1,7 +1,7 @@
 ## Legal notice
 
 Turbo Taller 2025 (TT2025)
-© 2026 Domingo. All rights reserved.
+© 2026 Domingo Fleitas. All rights reserved.
 
 This software and all its associated content (source code, architecture, design, documentation, databases, images, and functional concepts) are the exclusive property of the author.
 

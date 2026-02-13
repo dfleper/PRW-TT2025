@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+	th:replace="~{layout/base :: html(pageTitle='Zona cliente · Historial', content=~{::content})}">
+
+<section th:fragment="content">
+
+	<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+		<div class="me-2">
+			<h1 class="h3 mb-1">Historial del vehículo</h1>
+			<div class="text-muted small">Intervenciones finalizadas y detalle de orden de trabajo.</div>
+		</div>
+
+		<div class="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto">
+			<a class="btn btn-outline-secondary btn-sm tt-btn-mobile" th:href="@{/cliente/vehiculos}">
+				← Volver a Mis vehículos
+			</a>
+		</div>
+	</div>
+
+	<div th:if="${items == null or #lists.isEmpty(items)}" class="alert alert-info mb-0">
+		Sin intervenciones registradas.
+	</div>
+
+	<div th:if="${items != null and !#lists.isEmpty(items)}">
+
+		<!-- MÓVIL -->
+		<div class="tt-show-mobile">
+			<div class="d-grid gap-2">
+
+				<div class="card border-0 shadow-sm" th:each="a : ${items}">
+					<div class="card-body">
+
+						<div class="d-flex justify-content-between align-items-start gap-2">
+							<div>
+								<div class="fw-semibold tt-nowrap"
+									th:text="${#temporals.format(a.inicio, 'dd/MM/yyyy HH:mm')}">
+									29/01/2026 13:00
+								</div>
+								<div class="text-muted small tt-nowrap">
+									<span>Fin:</span>
+									<span th:text="${#temporals.format(a.fin, 'HH:mm')}">14:00</span>
+								</div>
+							</div>
+
+							<span class="badge text-bg-success tt-nowrap" th:text="${a.estado}">FINALIZADA</span>
+						</div>
+
+						<hr class="my-3" />
+
+						<div class="small tt-break">
+							<span class="text-muted">Servicio:</span>
+							<span th:text="${a.service.nombre}">Servicio</span>
+						</div>
+
+						<div class="d-grid mt-3">
+							<a class="btn btn-primary tt-btn-mobile"
+								th:href="@{/cliente/historial/citas/{id}(id=${a.id})}">
+								Ver detalle
+							</a>
+						</div>
+
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- TABLET/PC -->
+		<div class="tt-hide-mobile">
+			<div class="tt-table-scroll">
+				<table class="table table-hover align-middle mb-0">
+					<thead>
+						<tr>
+							<th class="tt-nowrap">Fecha</th>
+							<th>Servicio</th>
+							<th class="tt-nowrap">Estado</th>
+							<th class="text-end tt-nowrap">Acción</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						<tr th:each="a : ${items}">
+							<td class="tt-nowrap">
+								<div class="fw-semibold" th:text="${#temporals.format(a.inicio, 'dd/MM/yyyy HH:mm')}">
+									29/01/2026 13:00
+								</div>
+								<div class="text-muted small" th:text="${#temporals.format(a.fin, 'HH:mm')}">14:00</div>
+							</td>
+
+							<td class="tt-break" th:text="${a.service.nombre}">Servicio</td>
+
+							<td class="tt-nowrap">
+								<span class="badge text-bg-success" th:text="${a.estado}">FINALIZADA</span>
+							</td>
+
+							<td class="text-end">
+								<a class="btn btn-primary btn-sm"
+									th:href="@{/cliente/historial/citas/{id}(id=${a.id})}">
+									Ver detalle
+								</a>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+	</div>
+
+</section>
+
+</html>

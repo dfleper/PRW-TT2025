@@ -1,7 +1,7 @@
 ## Aviso legal
 
 Turbo Taller 2025 (TT2025)
-© 2026 Domingo. Todos los derechos reservados.
+© 2026 Domingo Fleitas. Todos los derechos reservados.
 
 Este software y todo su contenido asociado (código fuente, arquitectura, diseño, documentación, bases de datos, imágenes y conceptos funcionales) son propiedad exclusiva del autor.
 

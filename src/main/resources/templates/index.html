@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+	th:replace="~{layout/base :: html(pageTitle='Inicio', content=~{::content})}">
+
+<section th:fragment="content">
+
+	<div class="row align-items-center g-4">
+		<div class="col-12 col-lg-8">
+
+			<h1 class="display-6 fw-bold mb-2">Turbo Taller</h1>
+			<p class="text-muted mb-3">
+				Gestión digital para taller de mecánica rápida.
+			</p>
+
+			<div class="d-grid gap-2 d-sm-flex flex-sm-wrap">
+
+				<a class="btn btn-outline-secondary tt-btn-mobile"
+					th:if="${#authorization.expression('!isAuthenticated()')}" th:href="@{/login}">
+					Iniciar sesión
+				</a>
+
+				<a class="btn btn-primary tt-btn-mobile" th:if="${#authorization.expression('!isAuthenticated()')}"
+					th:href="@{/servicios}">
+					Ver servicios
+				</a>
+
+				<!-- Opcional: si quieres CTA cuando ya estás logueado -->
+				<!--
+        <a class="btn btn-primary tt-btn-mobile"
+           th:if="${#authorization.expression('isAuthenticated()')}"
+           th:href="@{/cliente}">
+          Ir a mi área
+        </a>
+        -->
+
+			</div>
+
+		</div>
+	</div>
+
+</section>
+
+</html>

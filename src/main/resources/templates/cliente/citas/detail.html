@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+	th:replace="~{layout/base :: html(pageTitle='Detalle de cita', content=~{::content})}" th:remove="tag">
+
+<section th:fragment="content">
+	<div class="row justify-content-center">
+		<div class="col-12 col-lg-8">
+
+			<!-- Flash messages -->
+			<div th:if="${success}" class="alert alert-success shadow-sm" th:text="${success}"></div>
+			<div th:if="${info}" class="alert alert-info shadow-sm" th:text="${info}"></div>
+			<div th:if="${error}" class="alert alert-danger shadow-sm" th:text="${error}"></div>
+
+			<div class="card shadow-sm border-0">
+				<div class="card-body p-4">
+
+					<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+						<div class="me-2">
+							<h1 class="h5 mb-1">Detalle de tu cita</h1>
+							<div class="small text-muted">Resumen y estado actual.</div>
+						</div>
+
+						<a class="btn btn-outline-secondary btn-sm tt-btn-mobile" th:href="@{/cliente/citas}">
+							Ir a mis citas
+						</a>
+					</div>
+
+					<dl class="row mb-0">
+
+						<dt class="col-sm-4 text-muted">Fecha y hora</dt>
+						<dd class="col-sm-8 tt-nowrap"
+							th:text="${#temporals.format(appointment.inicio, 'dd/MM/yyyy HH:mm')}">-</dd>
+
+						<dt class="col-sm-4 text-muted">Fin estimado</dt>
+						<dd class="col-sm-8 tt-nowrap"
+							th:text="${#temporals.format(appointment.fin, 'dd/MM/yyyy HH:mm')}">-</dd>
+
+						<dt class="col-sm-4 text-muted">Estado</dt>
+						<dd class="col-sm-8">
+							<span class="badge bg-secondary tt-nowrap" th:text="${appointment.estado}">PENDIENTE</span>
+						</dd>
+
+						<dt class="col-sm-4 text-muted">Servicio</dt>
+						<dd class="col-sm-8 tt-break" th:text="${appointment.service.nombre}">-</dd>
+
+						<dt class="col-sm-4 text-muted">Duración</dt>
+						<dd class="col-sm-8" th:text="${appointment.service.minutosEstimados + ' min'}">-</dd>
+
+						<dt class="col-sm-4 text-muted">Vehículo</dt>
+						<dd class="col-sm-8 tt-break"
+							th:text="${appointment.vehicle.matricula + ' — ' + appointment.vehicle.marca + ' ' + appointment.vehicle.modelo}">
+							-
+						</dd>
+
+					</dl>
+
+					<div class="alert alert-warning mt-3 mb-0" th:if="${!canCancel}">
+						Esta cita no se puede cancelar en su estado actual.
+					</div>
+
+					<div class="d-grid gap-2 d-sm-flex justify-content-sm-end mt-4">
+						<a class="btn btn-outline-secondary tt-btn-mobile" th:href="@{/cliente/citas/nueva}">
+							Reservar otra
+						</a>
+
+						<form th:if="${canCancel}" th:action="@{/cliente/citas/{id}/cancelar(id=${appointment.id})}"
+							method="post" class="m-0">
+
+							<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+							<button type="submit" class="btn btn-danger tt-btn-mobile"
+								onclick="return confirm('¿Seguro que quieres cancelar esta cita?');">
+								Cancelar cita
+							</button>
+						</form>
+
+						<a class="btn btn-primary tt-btn-mobile" th:href="@{/cliente}">
+							Volver
+						</a>
+					</div>
+
+				</div>
+			</div>
+
+		</div>
+	</div>
+</section>
+
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+	th:replace="~{layout/base :: html(pageTitle='Mis citas', content=~{::content})}" th:remove="tag">
+
+<section th:fragment="content">
+	<div class="row justify-content-center">
+		<div class="col-12 col-lg-10">
+
+			<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+				<div class="me-2">
+					<h1 class="h5 mb-1">Mis citas</h1>
+					<div class="small text-muted">Aquí puedes ver tus citas pasadas y futuras.</div>
+				</div>
+
+				<div class="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto">
+					<a class="btn btn-outline-secondary btn-sm tt-btn-mobile" th:href="@{/cliente}">
+						Volver
+					</a>
+					<a class="btn btn-primary btn-sm tt-btn-mobile" th:href="@{/cliente/citas/nueva}">
+						Reservar cita
+					</a>
+				</div>
+			</div>
+
+			<!-- Flash messages -->
+			<div th:if="${success}" class="alert alert-success shadow-sm" th:text="${success}"></div>
+			<div th:if="${info}" class="alert alert-info shadow-sm" th:text="${info}"></div>
+			<div th:if="${error}" class="alert alert-danger shadow-sm" th:text="${error}"></div>
+
+			<div class="card shadow-sm border-0">
+				<div class="card-body p-0">
+
+					<!-- Vacío -->
+					<div class="p-4 text-center text-muted" th:if="${#lists.isEmpty(appointments)}">
+						No tienes citas todavía.
+					</div>
+
+					<!-- =========================
+               MÓVIL: TARJETAS (<=576)
+               ========================= -->
+					<div class="p-3 tt-show-mobile" th:if="${!#lists.isEmpty(appointments)}">
+						<div class="d-grid gap-2">
+
+							<div class="card border-0 shadow-sm" th:each="a : ${appointments}">
+								<div class="card-body">
+
+									<div class="d-flex justify-content-between align-items-start gap-2">
+										<div>
+											<div class="fw-semibold tt-nowrap"
+												th:text="${#temporals.format(a.inicio, 'dd/MM/yyyy HH:mm')}">-</div>
+											<div class="small text-muted tt-nowrap">
+												<span>Fin:</span>
+												<span th:text="${#temporals.format(a.fin, 'HH:mm')}">-</span>
+											</div>
+										</div>
+
+										<span class="badge bg-secondary tt-nowrap"
+											th:text="${a.estado}">PENDIENTE</span>
+									</div>
+
+									<hr class="my-3" />
+
+									<div class="small">
+										<div class="mb-1 tt-break">
+											<span class="text-muted">Servicio:</span>
+											<span th:text="${a.service.nombre}">-</span>
+										</div>
+
+										<div class="mb-0">
+											<span class="text-muted">Vehículo:</span>
+											<span class="badge text-bg-secondary"
+												th:text="${a.vehicle.matricula}">-</span>
+										</div>
+									</div>
+
+									<div class="d-grid gap-2 mt-3">
+										<a class="btn btn-outline-primary tt-btn-mobile"
+											th:href="@{/cliente/citas/{id}(id=${a.id})}">
+											Ver detalle
+										</a>
+
+										<form th:if="${cancelableIds != null and cancelableIds.contains(a.id)}"
+											th:action="@{/cliente/citas/{id}/cancelar(id=${a.id})}" method="post"
+											class="m-0">
+
+											<input type="hidden" th:name="${_csrf.parameterName}"
+												th:value="${_csrf.token}" />
+
+											<button type="submit" class="btn btn-outline-danger tt-btn-mobile"
+												onclick="return confirm('¿Seguro que quieres cancelar esta cita?');">
+												Cancelar
+											</button>
+										</form>
+									</div>
+
+								</div>
+							</div>
+
+						</div>
+					</div>
+
+					<!-- =========================
+               TABLET/PC: TABLA (>=577)
+               ========================= -->
+					<div class="tt-hide-mobile" th:if="${!#lists.isEmpty(appointments)}">
+						<div class="tt-table-scroll">
+							<table class="table table-hover mb-0 align-middle">
+								<thead class="table-light">
+									<tr>
+										<th class="ps-3 tt-nowrap">Inicio</th>
+										<th>Servicio</th>
+										<th class="tt-nowrap">Vehículo</th>
+										<th class="tt-nowrap">Estado</th>
+										<th class="text-end pe-3 tt-nowrap">Acciones</th>
+									</tr>
+								</thead>
+
+								<tbody>
+									<tr th:each="a : ${appointments}">
+										<td class="ps-3 tt-nowrap">
+											<div th:text="${#temporals.format(a.inicio, 'dd/MM/yyyy HH:mm')}">-</div>
+											<div class="small text-muted">
+												<span>Fin:</span>
+												<span th:text="${#temporals.format(a.fin, 'HH:mm')}">-</span>
+											</div>
+										</td>
+
+										<td class="tt-break" th:text="${a.service.nombre}">-</td>
+										<td class="tt-nowrap" th:text="${a.vehicle.matricula}">-</td>
+
+										<td class="tt-nowrap">
+											<span class="badge bg-secondary" th:text="${a.estado}">PENDIENTE</span>
+										</td>
+
+										<td class="text-end pe-3">
+											<div class="d-inline-flex gap-2">
+												<a class="btn btn-outline-primary btn-sm"
+													th:href="@{/cliente/citas/{id}(id=${a.id})}">
+													Ver
+												</a>
+
+												<form th:if="${cancelableIds != null and cancelableIds.contains(a.id)}"
+													th:action="@{/cliente/citas/{id}/cancelar(id=${a.id})}"
+													method="post" class="m-0">
+
+													<input type="hidden" th:name="${_csrf.parameterName}"
+														th:value="${_csrf.token}" />
+
+													<button type="submit" class="btn btn-outline-danger btn-sm"
+														onclick="return confirm('¿Seguro que quieres cancelar esta cita?');">
+														Cancelar
+													</button>
+												</form>
+											</div>
+										</td>
+									</tr>
+
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+		</div>
+	</div>
+</section>
+
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+	th:replace="~{layout/base :: html(pageTitle='Cliente - Dashboard', content=~{::content})}">
+
+<section th:fragment="content">
+
+	<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+		<div class="me-2">
+			<h1 class="h4 mb-1">Área de cliente</h1>
+			<div class="text-muted small">Gestiona tus vehículos y reserva tus citas.</div>
+		</div>
+
+		<a class="btn btn-primary tt-btn-mobile" th:href="@{/cliente/citas/nueva}">
+			Nueva cita
+		</a>
+	</div>
+
+	<div class="row g-3">
+
+		<!-- Vehículos -->
+		<div class="col-12 col-md-6 col-lg-4">
+			<div class="card shadow-sm border-0 h-100">
+				<div class="card-body d-flex flex-column">
+					<div class="fw-semibold mb-1">Vehículos</div>
+					<div class="text-muted small mb-3">Vehículos asociados a tu cuenta.</div>
+
+					<div class="mt-auto d-grid">
+						<a class="btn btn-outline-primary tt-btn-mobile" th:href="@{/cliente/vehiculos}">
+							Ver vehículos
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Servicios -->
+		<div class="col-12 col-md-6 col-lg-4">
+			<div class="card shadow-sm border-0 h-100">
+				<div class="card-body d-flex flex-column">
+					<div class="fw-semibold mb-1">Servicios</div>
+					<div class="text-muted small mb-3">Consulta y selecciona servicios.</div>
+
+					<div class="mt-auto d-grid">
+						<a class="btn btn-outline-primary tt-btn-mobile" th:href="@{/cliente/servicios}">
+							Ver servicios
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Mis citas -->
+		<div class="col-12 col-md-6 col-lg-4">
+			<div class="card shadow-sm border-0 h-100">
+				<div class="card-body d-flex flex-column">
+					<div class="fw-semibold mb-1">Mis citas</div>
+					<div class="text-muted small mb-3">Consulta el listado de tus citas y su detalle.</div>
+
+					<div class="mt-auto d-grid">
+						<a class="btn btn-outline-primary tt-btn-mobile" th:href="@{/cliente/citas}">
+							Ver mis citas
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+</section>
+
+</html>
