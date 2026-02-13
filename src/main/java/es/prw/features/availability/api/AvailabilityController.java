@@ -14,23 +14,20 @@ import es.prw.features.appointments.service.AvailabilityService;
 @RequestMapping("/api")
 public class AvailabilityController {
 
-    private final AvailabilityService availabilityService;
+	private final AvailabilityService availabilityService;
 
-    public AvailabilityController(AvailabilityService availabilityService) {
-        this.availabilityService = availabilityService;
-    }
+	public AvailabilityController(AvailabilityService availabilityService) {
+		this.availabilityService = availabilityService;
+	}
 
-    /**
-     * GET /api/availability?serviceId=1&startDateTime=2026-01-28T10:00
-     * Respuesta: { "available": true }
-     */
-    @GetMapping("/availability")
-    public AvailabilityResponse check(
-            @RequestParam(name = "serviceId") Long serviceId,
-            @RequestParam(name = "startDateTime")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDateTime
-    ) {
-        boolean available = availabilityService.isAvailable(serviceId, startDateTime);
-        return new AvailabilityResponse(available);
-    }
+	/**
+	 * GET /api/availability?serviceId=1&startDateTime=2026-01-28T10:00 Respuesta: {
+	 * "available": true }
+	 */
+	@GetMapping("/availability")
+	public AvailabilityResponse check(@RequestParam(name = "serviceId") Long serviceId,
+			@RequestParam(name = "startDateTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDateTime) {
+		boolean available = availabilityService.isAvailable(serviceId, startDateTime);
+		return new AvailabilityResponse(available);
+	}
 }

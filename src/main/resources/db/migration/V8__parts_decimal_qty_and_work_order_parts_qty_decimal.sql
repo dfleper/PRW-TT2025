@@ -1,5 +1,6 @@
 /* ============================================================
-   V8__parts_decimal_qty.sql
+   TT2025 - FLYWAY V8__parts_decimal_qty.sql
+   ------------------------------------------------------------
    - parts: añade allows_decimal (si no existe)
    - work_order_parts: cantidad -> DECIMAL(10,2)
    - decimales SOLO para aceite (no filtros)

@@ -1,104 +1,96 @@
 <!DOCTYPE html>
-<html lang="es"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <body>
 
-<nav th:fragment="navbar" class="navbar navbar-expand-lg tt-navbar border-bottom">
-  <div class="container">
+	<nav th:fragment="navbar" class="navbar navbar-expand-lg tt-navbar border-bottom">
+		<div class="container">
 
-    <a class="navbar-brand d-flex align-items-center gap-2 flex-shrink-1 overflow-hidden"
-       th:href="@{/}">
-      <img src="/img/logo.webp" alt="Turbo Taller" class="tt-brand-logo">
-      <span class="tt-brand-text text-truncate">Turbo Taller</span>
-    </a>
+			<a class="navbar-brand d-flex align-items-center gap-2 flex-shrink-1 overflow-hidden" th:href="@{/}">
+				<img src="/img/logo.webp" alt="Turbo Taller" class="tt-brand-logo">
+				<span class="tt-brand-text text-truncate">Turbo Taller</span>
+			</a>
 
-    <button class="navbar-toggler tt-navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#ttNavbar"
-            aria-controls="ttNavbar"
-            aria-expanded="false"
-            aria-label="Abrir menú">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+			<button class="navbar-toggler tt-navbar-toggler" type="button" data-bs-toggle="collapse"
+				data-bs-target="#ttNavbar" aria-controls="ttNavbar" aria-expanded="false" aria-label="Abrir menú">
+				<span class="navbar-toggler-icon"></span>
+			</button>
 
-    <div class="collapse navbar-collapse" id="ttNavbar">
+			<div class="collapse navbar-collapse" id="ttNavbar">
 
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-        <li class="nav-item">
-          <a class="nav-link tt-navlink" th:href="@{/}">Home</a>
-        </li>
+					<li class="nav-item">
+						<a class="nav-link tt-navlink" th:href="@{/}">Home</a>
+					</li>
 
-        <!-- CLIENTE -> /cliente/servicios -->
-        <li class="nav-item" sec:authorize="hasAnyAuthority('CLIENTE','ROLE_CLIENTE')">
-          <a class="nav-link tt-navlink" th:href="@{/cliente/servicios}">Servicios</a>
-        </li>
+					<!-- CLIENTE -> /cliente/servicios -->
+					<li class="nav-item" sec:authorize="hasAnyAuthority('CLIENTE','ROLE_CLIENTE')">
+						<a class="nav-link tt-navlink" th:href="@{/cliente/servicios}">Servicios</a>
+					</li>
 
-        <!-- NO CLIENTE -> /servicios -->
-        <li class="nav-item" sec:authorize="!hasAnyAuthority('CLIENTE','ROLE_CLIENTE')">
-          <a class="nav-link tt-navlink" th:href="@{/servicios}">Servicios</a>
-        </li>
+					<!-- NO CLIENTE -> /servicios -->
+					<li class="nav-item" sec:authorize="!hasAnyAuthority('CLIENTE','ROLE_CLIENTE')">
+						<a class="nav-link tt-navlink" th:href="@{/servicios}">Servicios</a>
+					</li>
 
-        <!-- CLIENTE -->
-        <li class="nav-item" sec:authorize="hasAnyAuthority('CLIENTE','ROLE_CLIENTE')">
-          <a class="nav-link tt-navlink" th:href="@{/cliente}">Cliente</a>
-        </li>
+					<!-- CLIENTE -->
+					<li class="nav-item" sec:authorize="hasAnyAuthority('CLIENTE','ROLE_CLIENTE')">
+						<a class="nav-link tt-navlink" th:href="@{/cliente}">Cliente</a>
+					</li>
 
-        <!-- Personal (NO mecánico) -->
-        <li class="nav-item"
-            sec:authorize="hasAnyAuthority('RECEPCION','ROLE_RECEPCION','JEFE_TALLER','ROLE_JEFE_TALLER','ADMIN','ROLE_ADMIN')">
-          <a class="nav-link tt-navlink" th:href="@{/backoffice}">Backoffice</a>
-        </li>
+					<!-- Personal (NO mecánico) -->
+					<li class="nav-item"
+						sec:authorize="hasAnyAuthority('RECEPCION','ROLE_RECEPCION','JEFE_TALLER','ROLE_JEFE_TALLER','ADMIN','ROLE_ADMIN')">
+						<a class="nav-link tt-navlink" th:href="@{/backoffice}">Backoffice</a>
+					</li>
 
-        <li class="nav-item"
-            sec:authorize="hasAnyAuthority('RECEPCION','ROLE_RECEPCION','JEFE_TALLER','ROLE_JEFE_TALLER','ADMIN','ROLE_ADMIN')">
-          <a class="nav-link tt-navlink" th:href="@{/backoffice/agenda}">Agenda</a>
-        </li>
+					<li class="nav-item"
+						sec:authorize="hasAnyAuthority('RECEPCION','ROLE_RECEPCION','JEFE_TALLER','ROLE_JEFE_TALLER','ADMIN','ROLE_ADMIN')">
+						<a class="nav-link tt-navlink" th:href="@{/backoffice/agenda}">Agenda</a>
+					</li>
 
-        <!-- Órdenes: todo el taller (incluye MECÁNICO) -->
-        <li class="nav-item"
-            sec:authorize="hasAnyAuthority('RECEPCION','ROLE_RECEPCION','MECANICO','ROLE_MECANICO','JEFE_TALLER','ROLE_JEFE_TALLER','ADMIN','ROLE_ADMIN')">
-          <a class="nav-link tt-navlink" th:href="@{/backoffice/workorders}">Órdenes</a>
-        </li>
+					<!-- Órdenes: todo el taller (incluye MECÁNICO) -->
+					<li class="nav-item"
+						sec:authorize="hasAnyAuthority('RECEPCION','ROLE_RECEPCION','MECANICO','ROLE_MECANICO','JEFE_TALLER','ROLE_JEFE_TALLER','ADMIN','ROLE_ADMIN')">
+						<a class="nav-link tt-navlink" th:href="@{/backoffice/workorders}">Órdenes</a>
+					</li>
 
-        <!-- ADMIN -->
-        <li class="nav-item" sec:authorize="hasAnyAuthority('ADMIN','ROLE_ADMIN')">
-          <a class="nav-link tt-navlink" th:href="@{/admin}">Admin</a>
-        </li>
+					<!-- ADMIN -->
+					<li class="nav-item" sec:authorize="hasAnyAuthority('ADMIN','ROLE_ADMIN')">
+						<a class="nav-link tt-navlink" th:href="@{/admin}">Admin</a>
+					</li>
 
-      </ul>
+				</ul>
 
-      <div class="tt-nav-actions d-flex gap-2 align-items-center flex-wrap">
+				<div class="tt-nav-actions d-flex gap-2 align-items-center flex-wrap">
 
-        <div sec:authorize="!isAuthenticated()" class="d-flex gap-2 flex-wrap tt-auth-actions">
-          <a class="btn btn-outline-light btn-sm tt-btn-mobile" th:href="@{/login}">Login</a>
-          <a class="btn btn-primary btn-sm tt-btn-mobile" th:href="@{/register}">Registro</a>
-        </div>
+					<div sec:authorize="!isAuthenticated()" class="d-flex gap-2 flex-wrap tt-auth-actions">
+						<a class="btn btn-outline-light btn-sm tt-btn-mobile" th:href="@{/login}">Login</a>
+						<a class="btn btn-primary btn-sm tt-btn-mobile" th:href="@{/register}">Registro</a>
+					</div>
 
-        <!-- AUTH: Usuario + Logout -->
-        <form sec:authorize="isAuthenticated()"
-              th:action="@{/logout}"
-              method="post"
-              class="m-0 tt-auth-actions tt-auth-logged d-flex align-items-center gap-2 flex-wrap">
+					<!-- AUTH: Usuario + Logout -->
+					<form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post"
+						class="m-0 tt-auth-actions tt-auth-logged d-flex align-items-center gap-2 flex-wrap">
 
-          <!-- Usuario: + username -->
-          <div class="tt-user-chip" aria-label="Usuario logueado">
-            <span class="tt-user-label">Usuario:</span>
-            <span class="tt-user-text" sec:authentication="name">cliente@tt2025.local</span>
-          </div>
+						<!-- Usuario: + username -->
+						<div class="tt-user-chip" aria-label="Usuario logueado">
+							<span class="tt-user-label">Usuario:</span>
+							<span class="tt-user-text" sec:authentication="name">cliente@tt2025.local</span>
+						</div>
 
-          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+						<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-          <button type="submit" class="btn btn-primary btn-sm tt-btn-mobile">Logout</button>
-        </form>
+						<button type="submit" class="btn btn-primary btn-sm tt-btn-mobile">Logout</button>
+					</form>
 
-      </div>
+				</div>
 
-    </div>
-  </div>
-</nav>
+			</div>
+		</div>
+	</nav>
 
 </body>
+
 </html>

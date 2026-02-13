@@ -15,103 +15,112 @@ import es.prw.features.catalog.repository.ServiceRepository;
 @Service
 public class AvailabilityService {
 
-    private final AppointmentRepository appointmentRepository;
-    private final ServiceRepository serviceRepository;
+	private final AppointmentRepository appointmentRepository;
+	private final ServiceRepository serviceRepository;
 
-    // Opcional (MVP): reglas adicionales
-    @Value("${tt.workshop.enforce-hours:false}")
-    private boolean enforceHours;
+	// Reglas adicionales
+	@Value("${tt.workshop.enforce-hours:false}")
+	private boolean enforceHours;
 
-    @Value("${tt.workshop.open-time:08:00}")
-    private String openTimeStr;
+	@Value("${tt.workshop.open-time:08:00}")
+	private String openTimeStr;
 
-    @Value("${tt.workshop.close-time:18:00}")
-    private String closeTimeStr;
+	@Value("${tt.workshop.close-time:18:00}")
+	private String closeTimeStr;
 
-    @Value("${tt.workshop.block-weekends:false}")
-    private boolean blockWeekends;
+	@Value("${tt.workshop.block-weekends:false}")
+	private boolean blockWeekends;
 
-    public AvailabilityService(AppointmentRepository appointmentRepository, ServiceRepository serviceRepository) {
-        this.appointmentRepository = appointmentRepository;
-        this.serviceRepository = serviceRepository;
-    }
+	public AvailabilityService(AppointmentRepository appointmentRepository, ServiceRepository serviceRepository) {
+		this.appointmentRepository = appointmentRepository;
+		this.serviceRepository = serviceRepository;
+	}
 
-    // ====== API “de cliente”: elige servicio + hora, calculamos fin ======
-    public boolean isAvailable(Long serviceId, LocalDateTime startDateTime) {
-        if (serviceId == null || startDateTime == null) return false;
+	// ====== API “de cliente”: elige servicio + hora, calculamos fin ======
+	public boolean isAvailable(Long serviceId, LocalDateTime startDateTime) {
+		if (serviceId == null || startDateTime == null)
+			return false;
 
-        ServiceEntity service = serviceRepository.findById(serviceId).orElse(null);
-        if (service == null || !service.isActivo()) return false;
+		ServiceEntity service = serviceRepository.findById(serviceId).orElse(null);
+		if (service == null || !service.isActivo())
+			return false;
 
-        long durationMin = 60L;
-        Short minutos = service.getMinutosEstimados();
-        if (minutos != null && minutos > 0) {
-            durationMin = minutos.longValue();
-        }
+		long durationMin = 60L;
+		Short minutos = service.getMinutosEstimados();
+		if (minutos != null && minutos > 0) {
+			durationMin = minutos.longValue();
+		}
 
-        LocalDateTime endDateTime = startDateTime.plusMinutes(durationMin);
+		LocalDateTime endDateTime = startDateTime.plusMinutes(durationMin);
 
-        if (!passesOptionalRules(startDateTime, endDateTime)) return false;
+		if (!passesOptionalRules(startDateTime, endDateTime))
+			return false;
 
-        return !appointmentRepository.existsOverlap(
-                startDateTime,
-                endDateTime,
-                AppointmentStatus.CANCELADA
-        );
-    }
+		return !appointmentRepository.existsOverlap(startDateTime, endDateTime, AppointmentStatus.CANCELADA);
+	}
 
-    // ====== API “técnica”: si ya tienes inicio/fin calculados ======
-    public boolean isAvailable(LocalDateTime inicio, LocalDateTime fin) {
-        if (inicio == null || fin == null) return false;
-        if (!fin.isAfter(inicio)) return false;
+	// ====== API “técnica”: si ya tiene inicio/fin calculados ======
+	public boolean isAvailable(LocalDateTime inicio, LocalDateTime fin) {
+		if (inicio == null || fin == null)
+			return false;
+		if (!fin.isAfter(inicio))
+			return false;
 
-        if (!passesOptionalRules(inicio, fin)) return false;
+		if (!passesOptionalRules(inicio, fin))
+			return false;
 
-        return !appointmentRepository.existsOverlap(inicio, fin, AppointmentStatus.CANCELADA);
-    }
+		return !appointmentRepository.existsOverlap(inicio, fin, AppointmentStatus.CANCELADA);
+	}
 
-    // ====== NO MVP: disponibilidad por empleado ======
-    // Ahora mismo no tienes EmployeeRepository ni módulo de asignación,
-    // así que evitamos dependencias y dejamos esto preparado sin romper compilación.
-    public boolean isAvailableForEmployee(Long employeeId, LocalDateTime inicio, LocalDateTime fin) {
-        // Si todavía no se usa en el MVP, mejor devolver true para no bloquear flujos.
-        // Si prefieres "fail closed", cambia a: return false;
-        return true;
-    }
+	// ====== NO MVP (placeholder): disponibilidad por empleado ======
+	// Aún no existe asignación de empleados/agenda por empleado en el MVP.
+	// Este método NO calcula disponibilidad real: devuelve true siempre.
+	// Importante: no usar para reglas reales hasta implementar EmployeeRepository +
+	// solapes por empleado.
+	public boolean isAvailableForEmployee(Long employeeId, LocalDateTime inicio, LocalDateTime fin) {
+		// Placeholder "fail open" para no bloquear flujos mientras no se usa.
+		// Si prefieres "fail closed", cambia a: return false;
+		return true;
+	}
 
-    private boolean passesOptionalRules(LocalDateTime start, LocalDateTime end) {
-        // Regla base: rangos coherentes
-        if (start == null || end == null) return false;
-        if (!end.isAfter(start)) return false;
+	private boolean passesOptionalRules(LocalDateTime start, LocalDateTime end) {
+		// Regla base: rangos coherentes
+		if (start == null || end == null)
+			return false;
+		if (!end.isAfter(start))
+			return false;
 
-        if (!blockWeekends && !enforceHours) return true;
+		if (!blockWeekends && !enforceHours)
+			return true;
 
-        if (blockWeekends) {
-            DayOfWeek d = start.getDayOfWeek();
-            if (d == DayOfWeek.SATURDAY || d == DayOfWeek.SUNDAY) return false;
-        }
+		if (blockWeekends) {
+			DayOfWeek d = start.getDayOfWeek();
+			if (d == DayOfWeek.SATURDAY || d == DayOfWeek.SUNDAY)
+				return false;
+		}
 
-        if (enforceHours) {
-            // Evitamos reservas que crucen medianoche
-            if (!start.toLocalDate().equals(end.toLocalDate())) return false;
+		if (enforceHours) {
+			// Evitamos reservas que cambien de día (incluye cruce de medianoche)
+			if (!start.toLocalDate().equals(end.toLocalDate()))
+				return false;
 
-            LocalTime open = safeParseTime(openTimeStr, LocalTime.of(8, 0));
-            LocalTime close = safeParseTime(closeTimeStr, LocalTime.of(18, 0));
+			LocalTime open = safeParseTime(openTimeStr, LocalTime.of(8, 0));
+			LocalTime close = safeParseTime(closeTimeStr, LocalTime.of(18, 0));
 
-            LocalTime st = start.toLocalTime();
-            LocalTime en = end.toLocalTime();
+			LocalTime st = start.toLocalTime();
+			LocalTime en = end.toLocalTime();
 
-            return !st.isBefore(open) && !en.isAfter(close);
-        }
+			return !st.isBefore(open) && !en.isAfter(close);
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    private LocalTime safeParseTime(String value, LocalTime fallback) {
-        try {
-            return LocalTime.parse(value);
-        } catch (Exception ex) {
-            return fallback;
-        }
-    }
+	private LocalTime safeParseTime(String value, LocalTime fallback) {
+		try {
+			return LocalTime.parse(value);
+		} catch (Exception ex) {
+			return fallback;
+		}
+	}
 }

@@ -1,3 +1,5 @@
+// Test 500 en /dev/boom
+
 package es.prw.config.dev;
 
 import org.springframework.context.annotation.Profile;
@@ -8,8 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class DevErrorController {
 
-  @GetMapping("/dev/boom")
-  public String boom() {
-    throw new RuntimeException("Test 500 (dev)");
-  }
+	@GetMapping("/dev/boom")
+	public String boom() {
+		throw new RuntimeException("Test 500 (dev)");
+	}
 }

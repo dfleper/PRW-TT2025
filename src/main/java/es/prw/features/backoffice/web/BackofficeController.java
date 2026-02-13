@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/backoffice")
 public class BackofficeController {
 
-  @GetMapping
-  public String backoffice() {
-    return "backoffice/dashboard";
-  }
+	@GetMapping
+	public String backoffice() {
+		return "backoffice/dashboard";
+	}
 }

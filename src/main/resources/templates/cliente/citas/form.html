@@ -1,126 +1,110 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: html(pageTitle='Nueva cita', content=~{::content})}"
-      th:remove="tag">
+	th:replace="~{layout/base :: html(pageTitle='Nueva cita', content=~{::content})}" th:remove="tag">
 
 <section th:fragment="content">
 
-  <div class="row justify-content-center">
-    <div class="col-12 col-lg-8">
+	<div class="row justify-content-center">
+		<div class="col-12 col-lg-8">
 
-      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-        <h1 class="h4 mb-0">Nueva cita</h1>
+			<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+				<h1 class="h4 mb-0">Nueva cita</h1>
 
-        <a class="btn btn-outline-secondary btn-sm tt-btn-mobile" th:href="@{/cliente/servicios}">
-          Cambiar servicio
-        </a>
-      </div>
+				<a class="btn btn-outline-secondary btn-sm tt-btn-mobile" th:href="@{/cliente/servicios}">
+					Cambiar servicio
+				</a>
+			</div>
 
-      <div class="card shadow-sm border-0">
-        <div class="card-body p-4">
+			<div class="card shadow-sm border-0">
+				<div class="card-body p-4">
 
-          <div class="alert alert-danger mb-3"
-               th:if="${availabilityError}"
-               th:text="${availabilityError}">
-          </div>
+					<div class="alert alert-danger mb-3" th:if="${availabilityError}" th:text="${availabilityError}">
+					</div>
 
-          <div class="alert alert-warning mb-3"
-               th:if="${vehicles != null and #lists.isEmpty(vehicles)}">
-            No tienes vehículos registrados.
-            <a class="alert-link ms-1" th:href="@{/cliente/vehiculos/nuevo}">Crear vehículo</a>
-          </div>
+					<div class="alert alert-warning mb-3" th:if="${vehicles != null and #lists.isEmpty(vehicles)}">
+						No tienes vehículos registrados.
+						<a class="alert-link ms-1" th:href="@{/cliente/vehiculos/nuevo}">Crear vehículo</a>
+					</div>
 
-          <form th:action="@{/cliente/citas}" th:object="${appointment}" method="post" novalidate>
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+					<form th:action="@{/cliente/citas}" th:object="${appointment}" method="post" novalidate>
+						<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-            <!-- Vehículo -->
-            <div class="mb-3">
-              <div class="tt-form-row">
-                <label class="form-label mb-0" for="vehicleId">Vehículo</label>
+						<!-- Vehículo -->
+						<div class="mb-3">
+							<div class="tt-form-row">
+								<label class="form-label mb-0" for="vehicleId">Vehículo</label>
 
-                <select class="form-select tt-mobile-full"
-                        th:field="*{vehicleId}"
-                        id="vehicleId"
-                        required
-                        th:disabled="${vehicles != null and #lists.isEmpty(vehicles)}">
+								<select class="form-select tt-mobile-full" th:field="*{vehicleId}" id="vehicleId"
+									required th:disabled="${vehicles != null and #lists.isEmpty(vehicles)}">
 
-                  <option value="" disabled selected>Selecciona un vehículo…</option>
+									<option value="" disabled selected>Selecciona un vehículo…</option>
 
-                  <option th:each="v : ${vehicles}"
-                          th:value="${v.idVehicle}"
-                          th:text="${v.matricula + ' — ' + v.marca + ' ' + v.modelo}">
-                  </option>
-                </select>
+									<option th:each="v : ${vehicles}" th:value="${v.idVehicle}"
+										th:text="${v.matricula + ' — ' + v.marca + ' ' + v.modelo}">
+									</option>
+								</select>
 
-                <div class="text-danger small"
-                     th:if="${#fields.hasErrors('vehicleId')}"
-                     th:errors="*{vehicleId}">
-                </div>
-              </div>
-            </div>
+								<div class="text-danger small" th:if="${#fields.hasErrors('vehicleId')}"
+									th:errors="*{vehicleId}">
+								</div>
+							</div>
+						</div>
 
-            <!-- Servicio -->
-            <div class="mb-3">
-              <div class="tt-form-row">
-                <label class="form-label mb-0">Servicio</label>
+						<!-- Servicio -->
+						<div class="mb-3">
+							<div class="tt-form-row">
+								<label class="form-label mb-0">Servicio</label>
 
-                <select class="form-select tt-mobile-full"
-                        th:field="*{serviceId}"
-                        disabled>
-                  <option th:each="s : ${services}"
-                          th:value="${s.id}"
-                          th:selected="${s.id == appointment.serviceId}"
-                          th:text="${s.nombre + ' (' + s.minutosEstimados + ' min)'}">
-                  </option>
-                </select>
+								<select class="form-select tt-mobile-full" th:field="*{serviceId}" disabled>
+									<option th:each="s : ${services}" th:value="${s.id}"
+										th:selected="${s.id == appointment.serviceId}"
+										th:text="${s.nombre + ' (' + s.minutosEstimados + ' min)'}">
+									</option>
+								</select>
 
-                <!-- enviar igualmente el valor -->
-                <input type="hidden" th:field="*{serviceId}" />
+								<!-- enviar igualmente el valor -->
+								<input type="hidden" th:field="*{serviceId}" />
 
-                <div class="form-text">
-                  El servicio se selecciona previamente desde el catálogo.
-                </div>
-              </div>
-            </div>
+								<div class="form-text">
+									El servicio se selecciona previamente desde el catálogo.
+								</div>
+							</div>
+						</div>
 
-            <!-- Fecha / Hora -->
-            <div class="mb-3">
-              <div class="tt-form-row">
-                <label class="form-label mb-0" for="startDateTime">Fecha y hora</label>
+						<!-- Fecha / Hora -->
+						<div class="mb-3">
+							<div class="tt-form-row">
+								<label class="form-label mb-0" for="startDateTime">Fecha y hora</label>
 
-                <input type="datetime-local"
-                       class="form-control tt-mobile-full"
-                       th:field="*{startDateTime}"
-                       id="startDateTime"
-                       required />
+								<input type="datetime-local" class="form-control tt-mobile-full"
+									th:field="*{startDateTime}" id="startDateTime" required />
 
-                <div class="text-danger small"
-                     th:if="${#fields.hasErrors('startDateTime')}"
-                     th:errors="*{startDateTime}">
-                </div>
-              </div>
-            </div>
+								<div class="text-danger small" th:if="${#fields.hasErrors('startDateTime')}"
+									th:errors="*{startDateTime}">
+								</div>
+							</div>
+						</div>
 
-            <!-- Acciones -->
-            <div class="d-grid gap-2 d-sm-flex justify-content-sm-end mt-4">
-              <a class="btn btn-outline-secondary tt-btn-mobile" th:href="@{/cliente/servicios}">
-                Cancelar
-              </a>
+						<!-- Acciones -->
+						<div class="d-grid gap-2 d-sm-flex justify-content-sm-end mt-4">
+							<a class="btn btn-outline-secondary tt-btn-mobile" th:href="@{/cliente/servicios}">
+								Cancelar
+							</a>
 
-              <button class="btn btn-primary tt-btn-mobile"
-                      type="submit"
-                      th:disabled="${vehicles != null and #lists.isEmpty(vehicles)}">
-                Reservar cita
-              </button>
-            </div>
+							<button class="btn btn-primary tt-btn-mobile" type="submit"
+								th:disabled="${vehicles != null and #lists.isEmpty(vehicles)}">
+								Reservar cita
+							</button>
+						</div>
 
-          </form>
+					</form>
 
-        </div>
-      </div>
+				</div>
+			</div>
 
-    </div>
-  </div>
+		</div>
+	</div>
 
 </section>
+
 </html>

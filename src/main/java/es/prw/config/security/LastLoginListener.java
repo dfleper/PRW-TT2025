@@ -15,26 +15,25 @@ import es.prw.features.iam.repository.UserRepository;
 @Component
 public class LastLoginListener {
 
-  private final UserRepository userRepository;
+	private final UserRepository userRepository;
 
-  public LastLoginListener(UserRepository userRepository) {
-    this.userRepository = userRepository;
-  }
+	public LastLoginListener(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
 
-  @EventListener
-  @Transactional
-  public void onAuthSuccess(AuthenticationSuccessEvent event) {
-    Authentication auth = event.getAuthentication();
-    if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
-      return;
-    }
+	@EventListener
+	@Transactional
+	public void onAuthSuccess(AuthenticationSuccessEvent event) {
+		Authentication auth = event.getAuthentication();
+		if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+			return;
+		}
 
-    // Opcional: solo login de formulario (usuario/contraseña)
-    if (!(auth instanceof UsernamePasswordAuthenticationToken)) {
-      return;
-    }
+		if (!(auth instanceof UsernamePasswordAuthenticationToken)) {
+			return;
+		}
 
-    String email = auth.getName(); // en tu caso es el email
-    userRepository.updateLastLoginAtByEmail(email, LocalDateTime.now());
-  }
+		String email = auth.getName();
+		userRepository.updateLastLoginAtByEmail(email, LocalDateTime.now());
+	}
 }

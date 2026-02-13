@@ -7,12 +7,12 @@ import es.prw.features.appointments.dto.AppointmentCreateDto;
 
 public interface AppointmentService {
 
-    Long createAppointment(AppointmentCreateDto dto);
+	Long createAppointment(AppointmentCreateDto dto);
 
-    // T12: Mis citas
-    List<AppointmentEntity> listMyAppointments();
+	// Mis citas
+	List<AppointmentEntity> listMyAppointments();
 
-    AppointmentEntity getMyAppointment(Long appointmentId);
+	AppointmentEntity getMyAppointment(Long appointmentId);
 
-    void cancelMyAppointment(Long appointmentId);
+	void cancelMyAppointment(Long appointmentId);
 }

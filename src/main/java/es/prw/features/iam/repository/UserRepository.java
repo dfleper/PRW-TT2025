@@ -14,34 +14,34 @@ import es.prw.features.iam.domain.UserEntity;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
-    @Query("""
-        select distinct u
-        from UserEntity u
-        left join fetch u.roles r
-        order by u.idUser asc
-    """)
-    List<UserEntity> findAllWithRoles();
+	@Query("""
+			    select distinct u
+			    from UserEntity u
+			    left join fetch u.roles r
+			    order by u.idUser asc
+			""")
+	List<UserEntity> findAllWithRoles();
 
-    @Query("""
-        SELECT u
-        FROM UserEntity u
-        LEFT JOIN FETCH u.roles r
-        WHERE u.email = :email
-    """)
-    Optional<UserEntity> findByEmailWithRoles(@Param("email") String email);
+	@Query("""
+			    SELECT u
+			    FROM UserEntity u
+			    LEFT JOIN FETCH u.roles r
+			    WHERE u.email = :email
+			""")
+	Optional<UserEntity> findByEmailWithRoles(@Param("email") String email);
 
-    boolean existsByEmailIgnoreCase(String email);
+	boolean existsByEmailIgnoreCase(String email);
 
-    Optional<UserEntity> findByEmail(String email);
+	Optional<UserEntity> findByEmail(String email);
 
-    Optional<UserEntity> findByEmailIgnoreCase(String email);
+	Optional<UserEntity> findByEmailIgnoreCase(String email);
 
-    @Transactional
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("""
-        UPDATE UserEntity u
-        SET u.lastLoginAt = :ts
-        WHERE LOWER(u.email) = LOWER(:email)
-    """)
-    int updateLastLoginAtByEmail(@Param("email") String email, @Param("ts") LocalDateTime ts);
+	@Transactional
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Query("""
+			    UPDATE UserEntity u
+			    SET u.lastLoginAt = :ts
+			    WHERE LOWER(u.email) = LOWER(:email)
+			""")
+	int updateLastLoginAtByEmail(@Param("email") String email, @Param("ts") LocalDateTime ts);
 }

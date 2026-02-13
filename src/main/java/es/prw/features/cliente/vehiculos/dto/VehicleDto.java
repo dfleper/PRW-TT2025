@@ -8,56 +8,96 @@ import jakarta.validation.constraints.Size;
 
 public class VehicleDto {
 
-    private Long id;
+	private Long id;
 
-    @NotBlank(message = "La matrícula es obligatoria")
-    @Size(max = 12, message = "Máximo 12 caracteres")
-    @Pattern(regexp = "^[0-9]{4}[\\s-]?[A-Za-z]{3}$", message = "Formato esperado: 1234ABC")
-    private String matricula;
+	@NotBlank(message = "La matrícula es obligatoria")
+	@Size(max = 12, message = "Máximo 12 caracteres")
+	@Pattern(regexp = "^[0-9]{4}[\\s-]?[A-Za-z]{3}$", message = "Formato esperado: 1234ABC")
+	private String matricula;
 
-    @NotBlank(message = "La marca es obligatoria")
-    @Size(max = 60, message = "Máximo 60 caracteres")
-    private String marca;
+	@NotBlank(message = "La marca es obligatoria")
+	@Size(max = 60, message = "Máximo 60 caracteres")
+	private String marca;
 
-    @NotBlank(message = "El modelo es obligatorio")
-    @Size(max = 60, message = "Máximo 60 caracteres")
-    private String modelo;
+	@NotBlank(message = "El modelo es obligatorio")
+	@Size(max = 60, message = "Máximo 60 caracteres")
+	private String modelo;
 
-    @Min(value = 1900, message = "Año inválido")
-    @Max(value = 2100, message = "Año inválido")
-    private Integer anio;
+	@Min(value = 1900, message = "Año inválido")
+	@Max(value = 2100, message = "Año inválido")
+	private Integer anio;
 
-    @Size(max = 20, message = "Máximo 20 caracteres")
-    private String combustible;
+	@Size(max = 20, message = "Máximo 20 caracteres")
+	private String combustible;
 
-    // ✅ VIN (opcional)
-    @Size(max = 20, message = "Máximo 20 caracteres")
-    private String vin;
+	// VIN (opcional)
+	@Size(max = 20, message = "Máximo 20 caracteres")
+	private String vin;
 
-    @Size(max = 2000, message = "Máximo 2000 caracteres")
-    private String notas;
+	@Size(max = 2000, message = "Máximo 2000 caracteres")
+	private String notas;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+	public Long getId() {
+		return id;
+	}
 
-    public String getMatricula() { return matricula; }
-    public void setMatricula(String matricula) { this.matricula = matricula; }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public String getMarca() { return marca; }
-    public void setMarca(String marca) { this.marca = marca; }
+	public String getMatricula() {
+		return matricula;
+	}
 
-    public String getModelo() { return modelo; }
-    public void setModelo(String modelo) { this.modelo = modelo; }
+	public void setMatricula(String matricula) {
+		this.matricula = matricula;
+	}
 
-    public Integer getAnio() { return anio; }
-    public void setAnio(Integer anio) { this.anio = anio; }
+	public String getMarca() {
+		return marca;
+	}
 
-    public String getCombustible() { return combustible; }
-    public void setCombustible(String combustible) { this.combustible = combustible; }
+	public void setMarca(String marca) {
+		this.marca = marca;
+	}
 
-    public String getVin() { return vin; }
-    public void setVin(String vin) { this.vin = vin; }
+	public String getModelo() {
+		return modelo;
+	}
 
-    public String getNotas() { return notas; }
-    public void setNotas(String notas) { this.notas = notas; }
+	public void setModelo(String modelo) {
+		this.modelo = modelo;
+	}
+
+	public Integer getAnio() {
+		return anio;
+	}
+
+	public void setAnio(Integer anio) {
+		this.anio = anio;
+	}
+
+	public String getCombustible() {
+		return combustible;
+	}
+
+	public void setCombustible(String combustible) {
+		this.combustible = combustible;
+	}
+
+	public String getVin() {
+		return vin;
+	}
+
+	public void setVin(String vin) {
+		this.vin = vin;
+	}
+
+	public String getNotas() {
+		return notas;
+	}
+
+	public void setNotas(String notas) {
+		this.notas = notas;
+	}
 }

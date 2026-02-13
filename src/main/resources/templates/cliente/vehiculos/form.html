@@ -1,120 +1,114 @@
 <!DOCTYPE html>
-<html lang="es"
-      xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: html(pageTitle='Vehículo', content=~{::content})}">
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+	th:replace="~{layout/base :: html(pageTitle='Vehículo', content=~{::content})}">
 
 <section th:fragment="content">
 
-  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-    <h1 class="h4 mb-0" th:text="${mode == 'edit'} ? 'Editar vehículo' : 'Nuevo vehículo'"></h1>
-    <a class="btn btn-outline-secondary btn-sm tt-btn-mobile" th:href="@{/cliente/vehiculos}">
-      Volver
-    </a>
-  </div>
+	<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+		<h1 class="h4 mb-0" th:text="${mode == 'edit'} ? 'Editar vehículo' : 'Nuevo vehículo'"></h1>
+		<a class="btn btn-outline-secondary btn-sm tt-btn-mobile" th:href="@{/cliente/vehiculos}">
+			Volver
+		</a>
+	</div>
 
-  <div class="card shadow-sm border-0">
-    <div class="card-body p-4">
+	<div class="card shadow-sm border-0">
+		<div class="card-body p-4">
 
-      <form th:action="${mode == 'edit'} ? @{/cliente/vehiculos/{id}(id=${vehicle.id})} : @{/cliente/vehiculos}"
-            th:object="${vehicle}"
-            method="post"
-            class="d-grid gap-3"
-            novalidate>
+			<form th:action="${mode == 'edit'} ? @{/cliente/vehiculos/{id}(id=${vehicle.id})} : @{/cliente/vehiculos}"
+				th:object="${vehicle}" method="post" class="d-grid gap-3" novalidate>
 
-        <!-- CSRF robusto -->
-        <input th:if="${_csrf != null}"
-               type="hidden"
-               th:name="${_csrf.parameterName}"
-               th:value="${_csrf.token}"/>
+				<!-- CSRF robusto -->
+				<input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}"
+					th:value="${_csrf.token}" />
 
-        <div class="row g-3">
+				<div class="row g-3">
 
-          <div class="col-12 col-md-4">
-            <div class="tt-form-row">
-              <label class="form-label mb-0" for="matricula">Matrícula</label>
-              <input id="matricula" class="form-control tt-mobile-full"
-                     type="text" th:field="*{matricula}" maxlength="12">
-              <div class="text-danger small mt-1"
-                   th:if="${#fields.hasErrors('matricula')}" th:errors="*{matricula}"></div>
-            </div>
-          </div>
+					<div class="col-12 col-md-4">
+						<div class="tt-form-row">
+							<label class="form-label mb-0" for="matricula">Matrícula</label>
+							<input id="matricula" class="form-control tt-mobile-full" type="text"
+								th:field="*{matricula}" maxlength="12">
+							<div class="text-danger small mt-1" th:if="${#fields.hasErrors('matricula')}"
+								th:errors="*{matricula}"></div>
+						</div>
+					</div>
 
-          <div class="col-12 col-md-4">
-            <div class="tt-form-row">
-              <label class="form-label mb-0" for="marca">Marca</label>
-              <input id="marca" class="form-control tt-mobile-full"
-                     type="text" th:field="*{marca}" maxlength="60">
-              <div class="text-danger small mt-1"
-                   th:if="${#fields.hasErrors('marca')}" th:errors="*{marca}"></div>
-            </div>
-          </div>
+					<div class="col-12 col-md-4">
+						<div class="tt-form-row">
+							<label class="form-label mb-0" for="marca">Marca</label>
+							<input id="marca" class="form-control tt-mobile-full" type="text" th:field="*{marca}"
+								maxlength="60">
+							<div class="text-danger small mt-1" th:if="${#fields.hasErrors('marca')}"
+								th:errors="*{marca}"></div>
+						</div>
+					</div>
 
-          <div class="col-12 col-md-4">
-            <div class="tt-form-row">
-              <label class="form-label mb-0" for="modelo">Modelo</label>
-              <input id="modelo" class="form-control tt-mobile-full"
-                     type="text" th:field="*{modelo}" maxlength="60">
-              <div class="text-danger small mt-1"
-                   th:if="${#fields.hasErrors('modelo')}" th:errors="*{modelo}"></div>
-            </div>
-          </div>
+					<div class="col-12 col-md-4">
+						<div class="tt-form-row">
+							<label class="form-label mb-0" for="modelo">Modelo</label>
+							<input id="modelo" class="form-control tt-mobile-full" type="text" th:field="*{modelo}"
+								maxlength="60">
+							<div class="text-danger small mt-1" th:if="${#fields.hasErrors('modelo')}"
+								th:errors="*{modelo}"></div>
+						</div>
+					</div>
 
-          <div class="col-12 col-md-4">
-            <div class="tt-form-row">
-              <label class="form-label mb-0" for="anio">Año</label>
-              <input id="anio" class="form-control tt-mobile-full"
-                     type="number" th:field="*{anio}" min="1900" max="2100">
-              <div class="text-danger small mt-1"
-                   th:if="${#fields.hasErrors('anio')}" th:errors="*{anio}"></div>
-            </div>
-          </div>
+					<div class="col-12 col-md-4">
+						<div class="tt-form-row">
+							<label class="form-label mb-0" for="anio">Año</label>
+							<input id="anio" class="form-control tt-mobile-full" type="number" th:field="*{anio}"
+								min="1900" max="2100">
+							<div class="text-danger small mt-1" th:if="${#fields.hasErrors('anio')}"
+								th:errors="*{anio}"></div>
+						</div>
+					</div>
 
-          <div class="col-12 col-md-4">
-            <div class="tt-form-row">
-              <label class="form-label mb-0" for="combustible">Combustible</label>
-              <input id="combustible" class="form-control tt-mobile-full"
-                     type="text" th:field="*{combustible}" maxlength="20">
-              <div class="text-danger small mt-1"
-                   th:if="${#fields.hasErrors('combustible')}" th:errors="*{combustible}"></div>
-            </div>
-          </div>
+					<div class="col-12 col-md-4">
+						<div class="tt-form-row">
+							<label class="form-label mb-0" for="combustible">Combustible</label>
+							<input id="combustible" class="form-control tt-mobile-full" type="text"
+								th:field="*{combustible}" maxlength="20">
+							<div class="text-danger small mt-1" th:if="${#fields.hasErrors('combustible')}"
+								th:errors="*{combustible}"></div>
+						</div>
+					</div>
 
-          <div class="col-12 col-md-4">
-            <div class="tt-form-row">
-              <label class="form-label mb-0" for="vin">VIN (opcional)</label>
-              <input id="vin" class="form-control tt-mobile-full"
-                     type="text" th:field="*{vin}" maxlength="20"
-                     placeholder="Opcional (20 caracteres)">
-              <div class="text-danger small mt-1"
-                   th:if="${#fields.hasErrors('vin')}" th:errors="*{vin}"></div>
-            </div>
-          </div>
+					<div class="col-12 col-md-4">
+						<div class="tt-form-row">
+							<label class="form-label mb-0" for="vin">VIN (opcional)</label>
+							<input id="vin" class="form-control tt-mobile-full" type="text" th:field="*{vin}"
+								maxlength="20" placeholder="Opcional (20 caracteres)">
+							<div class="text-danger small mt-1" th:if="${#fields.hasErrors('vin')}" th:errors="*{vin}">
+							</div>
+						</div>
+					</div>
 
-          <div class="col-12">
-            <div class="tt-form-row">
-              <label class="form-label mb-0" for="notas">Notas</label>
-              <textarea id="notas" class="form-control tt-mobile-full"
-                        th:field="*{notas}" rows="3"></textarea>
-              <div class="text-danger small mt-1"
-                   th:if="${#fields.hasErrors('notas')}" th:errors="*{notas}"></div>
-            </div>
-          </div>
+					<div class="col-12">
+						<div class="tt-form-row">
+							<label class="form-label mb-0" for="notas">Notas</label>
+							<textarea id="notas" class="form-control tt-mobile-full" th:field="*{notas}"
+								rows="3"></textarea>
+							<div class="text-danger small mt-1" th:if="${#fields.hasErrors('notas')}"
+								th:errors="*{notas}"></div>
+						</div>
+					</div>
 
-        </div>
+				</div>
 
-        <div class="d-grid d-sm-flex justify-content-sm-end gap-2 mt-2">
-          <a class="btn btn-outline-secondary tt-btn-mobile" th:href="@{/cliente/vehiculos}">
-            Cancelar
-          </a>
-          <button class="btn btn-primary tt-btn-mobile" type="submit">
-            Guardar
-          </button>
-        </div>
+				<div class="d-grid d-sm-flex justify-content-sm-end gap-2 mt-2">
+					<a class="btn btn-outline-secondary tt-btn-mobile" th:href="@{/cliente/vehiculos}">
+						Cancelar
+					</a>
+					<button class="btn btn-primary tt-btn-mobile" type="submit">
+						Guardar
+					</button>
+				</div>
 
-      </form>
+			</form>
 
-    </div>
-  </div>
+		</div>
+	</div>
 
 </section>
+
 </html>

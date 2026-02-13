@@ -12,28 +12,28 @@ import es.prw.features.catalog.repository.ServiceRepository;
 @Service
 public class ServiceCatalogService {
 
-    private final ServiceRepository repo;
+	private final ServiceRepository repo;
 
-    public ServiceCatalogService(ServiceRepository repo) {
-        this.repo = repo;
-    }
+	public ServiceCatalogService(ServiceRepository repo) {
+		this.repo = repo;
+	}
 
-    public List<ServiceEntity> listActive(String q, String sort) {
-        Sort s = resolveSort(sort);
-        if (!StringUtils.hasText(q)) {
-            return repo.findByActivoTrue(s);
-        }
-        return repo.searchActive(q.trim(), s);
-    }
+	public List<ServiceEntity> listActive(String q, String sort) {
+		Sort s = resolveSort(sort);
+		if (!StringUtils.hasText(q)) {
+			return repo.findByActivoTrue(s);
+		}
+		return repo.searchActive(q.trim(), s);
+	}
 
-    private Sort resolveSort(String sort) {
-        // valores permitidos: nombre, precio, duracion
-        if ("precio".equalsIgnoreCase(sort)) {
-            return Sort.by(Sort.Direction.ASC, "precioBase");
-        }
-        if ("duracion".equalsIgnoreCase(sort)) {
-            return Sort.by(Sort.Direction.ASC, "minutosEstimados");
-        }
-        return Sort.by(Sort.Direction.ASC, "nombre");
-    }
+	private Sort resolveSort(String sort) {
+		// Valores permitidos: nombre, precio, duración
+		if ("precio".equalsIgnoreCase(sort)) {
+			return Sort.by(Sort.Direction.ASC, "precioBase");
+		}
+		if ("duracion".equalsIgnoreCase(sort)) {
+			return Sort.by(Sort.Direction.ASC, "minutosEstimados");
+		}
+		return Sort.by(Sort.Direction.ASC, "nombre");
+	}
 }

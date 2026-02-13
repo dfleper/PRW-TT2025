@@ -1,51 +1,50 @@
 <!DOCTYPE html>
-<html lang="es"
-      xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: html(pageTitle='Servicios', content=~{::content})}">
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+	th:replace="~{layout/base :: html(pageTitle='Servicios', content=~{::content})}">
 
 <section th:fragment="content">
 
-  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-    <div>
-      <h1 class="h4 mb-1">Catálogo de servicios</h1>
-      <p class="text-muted mb-0">Consulta nuestros servicios de mecánica rápida.</p>
-    </div>
+	<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+		<div>
+			<h1 class="h4 mb-1">Catálogo de servicios</h1>
+			<p class="text-muted mb-0">Consulta nuestros servicios de mecánica rápida.</p>
+		</div>
 
-    <a class="btn btn-primary tt-btn-mobile" th:href="@{/login}">
-      Reservar
-    </a>
-  </div>
+		<a class="btn btn-primary tt-btn-mobile" th:href="@{/login}">
+			Reservar
+		</a>
+	</div>
 
-  <div th:if="${#lists.isEmpty(services)}" class="alert alert-warning">
-    No hay servicios disponibles ahora mismo.
-  </div>
+	<div th:if="${#lists.isEmpty(services)}" class="alert alert-warning">
+		No hay servicios disponibles ahora mismo.
+	</div>
 
-  <div class="row g-3" th:if="${!#lists.isEmpty(services)}">
-    <div class="col-12 col-md-6 col-lg-4" th:each="s : ${services}">
-      <div class="card h-100 shadow-sm border-0">
-        <div class="card-body">
+	<div class="row g-3" th:if="${!#lists.isEmpty(services)}">
+		<div class="col-12 col-md-6 col-lg-4" th:each="s : ${services}">
+			<div class="card h-100 shadow-sm border-0">
+				<div class="card-body">
 
-          <div class="fw-semibold" th:text="${s.nombre}">Servicio</div>
-          <div class="text-muted small tt-nowrap" th:text="${s.codigo}">SRV-000</div>
+					<div class="fw-semibold" th:text="${s.nombre}">Servicio</div>
+					<div class="text-muted small tt-nowrap" th:text="${s.codigo}">SRV-000</div>
 
-          <p class="mt-2 mb-3 small text-secondary"
-             th:text="${(s.descripcion != null and !#strings.isEmpty(s.descripcion)) ? s.descripcion : 'Sin descripción.'}">
-          </p>
+					<p class="mt-2 mb-3 small text-secondary"
+						th:text="${(s.descripcion != null and !#strings.isEmpty(s.descripcion)) ? s.descripcion : 'Sin descripción.'}">
+					</p>
 
-          <div class="d-flex gap-2 flex-wrap">
-            <span class="badge text-bg-secondary tt-nowrap"
-                  th:if="${s.minutosEstimados != null}"
-                  th:text="${s.minutosEstimados} + ' min'">30 min</span>
+					<div class="d-flex gap-2 flex-wrap">
+						<span class="badge text-bg-secondary tt-nowrap" th:if="${s.minutosEstimados != null}"
+							th:text="${s.minutosEstimados} + ' min'">30 min</span>
 
-            <span class="badge text-bg-success tt-nowrap"
-                  th:if="${s.precioBase != null}"
-                  th:text="${#numbers.formatDecimal(s.precioBase, 1, 'COMMA', 2, 'POINT')} + ' €'">0,00 €</span>
-          </div>
+						<span class="badge text-bg-success tt-nowrap" th:if="${s.precioBase != null}"
+							th:text="${#numbers.formatDecimal(s.precioBase, 1, 'COMMA', 2, 'POINT')} + ' €'">0,00
+							€</span>
+					</div>
 
-        </div>
-      </div>
-    </div>
-  </div>
+				</div>
+			</div>
+		</div>
+	</div>
 
 </section>
+
 </html>

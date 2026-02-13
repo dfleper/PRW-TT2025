@@ -1,11 +1,12 @@
 package es.prw.features.parts.repository;
 
-import es.prw.features.parts.domain.PartEntity;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
+import es.prw.features.parts.domain.PartEntity;
 
 public interface PartRepository extends JpaRepository<PartEntity, Long> {
 
-    List<PartEntity> findAllByOrderByNombreAsc();
+	List<PartEntity> findAllByOrderByNombreAsc();
 }

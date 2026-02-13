@@ -1,64 +1,55 @@
 <!DOCTYPE html>
-<html lang="es"
-      xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: html(pageTitle='Login', content=~{::content})}">
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+	th:replace="~{layout/base :: html(pageTitle='Login', content=~{::content})}">
 
 <section th:fragment="content">
-  <div class="row justify-content-center">
-    <div class="col-12 col-sm-10 col-md-7 col-lg-5">
+	<div class="row justify-content-center">
+		<div class="col-12 col-sm-10 col-md-7 col-lg-5">
 
-      <div class="card shadow-sm border-0">
-        <div class="card-body p-4">
+			<div class="card shadow-sm border-0">
+				<div class="card-body p-4">
 
-          <h1 class="h4 mb-1">Iniciar sesión</h1>
-          <p class="text-muted mb-3">Accede a tu cuenta para gestionar tus citas.</p>
+					<h1 class="h4 mb-1">Iniciar sesión</h1>
+					<p class="text-muted mb-3">Accede a tu cuenta para gestionar tus citas.</p>
 
-          <div class="alert alert-danger" th:if="${param.error}">
-            Usuario o contraseña incorrectos.
-          </div>
-          <div class="alert alert-success" th:if="${param.logout}">
-            Has cerrado sesión correctamente.
-          </div>
-          <div class="alert alert-success" th:if="${param.registered}">
-            Cuenta creada. Ya puedes iniciar sesión.
-          </div>
+					<div class="alert alert-danger" th:if="${param.error}">
+						Usuario o contraseña incorrectos.
+					</div>
+					<div class="alert alert-success" th:if="${param.logout}">
+						Has cerrado sesión correctamente.
+					</div>
+					<div class="alert alert-success" th:if="${param.registered}">
+						Cuenta creada. Ya puedes iniciar sesión.
+					</div>
 
-          <form th:action="@{/login}" method="post" class="mt-3 d-grid gap-3" novalidate>
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+					<form th:action="@{/login}" method="post" class="mt-3 d-grid gap-3" novalidate>
+						<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-            <div class="tt-form-row">
-              <label class="form-label mb-0" for="username">Usuario</label>
-              <input class="form-control tt-mobile-full"
-                     id="username"
-                     name="username"
-                     type="text"
-                     autocomplete="username"
-                     required />
-            </div>
+						<div class="tt-form-row">
+							<label class="form-label mb-0" for="username">Usuario</label>
+							<input class="form-control tt-mobile-full" id="username" name="username" type="text"
+								autocomplete="username" required />
+						</div>
 
-            <div class="tt-form-row">
-              <label class="form-label mb-0" for="password">Contraseña</label>
-              <input class="form-control tt-mobile-full"
-                     id="password"
-                     name="password"
-                     type="password"
-                     autocomplete="current-password"
-                     required />
-            </div>
+						<div class="tt-form-row">
+							<label class="form-label mb-0" for="password">Contraseña</label>
+							<input class="form-control tt-mobile-full" id="password" name="password" type="password"
+								autocomplete="current-password" required />
+						</div>
 
-            <button class="btn btn-primary tt-btn-mobile" type="submit">Entrar</button>
-          </form>
+						<button class="btn btn-primary tt-btn-mobile" type="submit">Entrar</button>
+					</form>
 
-          <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-3 small">
-            <a th:href="@{/}">Volver al inicio</a>
-            <a th:href="@{/}">¿Olvidaste la contraseña?</a>
-          </div>
+					<div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-3 small">
+						<a th:href="@{/}">Volver al inicio</a>
+						<a th:href="@{/}">¿Olvidaste la contraseña?</a>
+					</div>
 
-        </div>
-      </div>
+				</div>
+			</div>
 
-    </div>
-  </div>
+		</div>
+	</div>
 </section>
 
 </html>

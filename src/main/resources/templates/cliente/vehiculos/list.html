@@ -1,170 +1,162 @@
 <!DOCTYPE html>
-<html lang="es"
-      xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: html(pageTitle='Mis vehículos', content=~{::content})}">
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+	th:replace="~{layout/base :: html(pageTitle='Mis vehículos', content=~{::content})}">
 
 <section th:fragment="content">
 
-  <!-- Encabezado -->
-  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-    <div class="me-2">
-      <h1 class="h4 mb-1">Mis vehículos</h1>
-      <div class="text-muted small">Gestiona tus vehículos asociados a tu cuenta.</div>
-    </div>
+	<!-- Encabezado -->
+	<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+		<div class="me-2">
+			<h1 class="h4 mb-1">Mis vehículos</h1>
+			<div class="text-muted small">Gestiona tus vehículos asociados a tu cuenta.</div>
+		</div>
 
-    <a class="btn btn-primary tt-btn-mobile" th:href="@{/cliente/vehiculos/nuevo}">
-      + Nuevo vehículo
-    </a>
-  </div>
+		<a class="btn btn-primary tt-btn-mobile" th:href="@{/cliente/vehiculos/nuevo}">
+			+ Nuevo vehículo
+		</a>
+	</div>
 
-  <div class="alert alert-success mb-3" th:if="${ok}" th:text="${ok}"></div>
+	<div class="alert alert-success mb-3" th:if="${ok}" th:text="${ok}"></div>
 
-  <!-- =========================
+	<!-- =========================
        MÓVIL: TARJETAS (<=576)
        ========================= -->
-  <div class="tt-show-mobile d-grid gap-2">
+	<div class="tt-show-mobile d-grid gap-2">
 
-    <div th:if="${vehicles == null or #lists.isEmpty(vehicles)}" class="card border-0 shadow-sm">
-      <div class="card-body text-center text-muted py-4">
-        Aún no tienes vehículos registrados.
-      </div>
-    </div>
+		<div th:if="${vehicles == null or #lists.isEmpty(vehicles)}" class="card border-0 shadow-sm">
+			<div class="card-body text-center text-muted py-4">
+				Aún no tienes vehículos registrados.
+			</div>
+		</div>
 
-    <div class="card shadow-sm border-0" th:each="v : ${vehicles}">
-      <div class="card-body">
+		<div class="card shadow-sm border-0" th:each="v : ${vehicles}">
+			<div class="card-body">
 
-        <div class="d-flex justify-content-between align-items-start gap-2">
-          <div>
-            <div class="fw-semibold tt-nowrap" th:text="${v.matricula}">0000AAA</div>
-            <div class="text-muted small tt-break">
-              <span th:text="${v.marca}">Marca</span>
-              <span th:if="${v.modelo != null and !#strings.isEmpty(v.modelo)}"> · </span>
-              <span th:text="${v.modelo}">Modelo</span>
-            </div>
-          </div>
-          <div class="text-muted small tt-nowrap">
-            <span th:text="${v.anio}">2020</span>
-          </div>
-        </div>
+				<div class="d-flex justify-content-between align-items-start gap-2">
+					<div>
+						<div class="fw-semibold tt-nowrap" th:text="${v.matricula}">0000AAA</div>
+						<div class="text-muted small tt-break">
+							<span th:text="${v.marca}">Marca</span>
+							<span th:if="${v.modelo != null and !#strings.isEmpty(v.modelo)}"> · </span>
+							<span th:text="${v.modelo}">Modelo</span>
+						</div>
+					</div>
+					<div class="text-muted small tt-nowrap">
+						<span th:text="${v.anio}">2020</span>
+					</div>
+				</div>
 
-        <div class="mt-2 small">
-          <div class="tt-break">
-            <span class="text-muted">Combustible:</span>
-            <span th:text="${v.combustible != null ? v.combustible : '-'}">-</span>
-          </div>
+				<div class="mt-2 small">
+					<div class="tt-break">
+						<span class="text-muted">Combustible:</span>
+						<span th:text="${v.combustible != null ? v.combustible : '-'}">-</span>
+					</div>
 
-          <div th:if="${v.vin != null and !#strings.isEmpty(v.vin)}" class="tt-break">
-            <span class="text-muted">VIN:</span>
-            <span class="tt-break" th:text="${v.vin}">VIN</span>
-          </div>
-        </div>
+					<div th:if="${v.vin != null and !#strings.isEmpty(v.vin)}" class="tt-break">
+						<span class="text-muted">VIN:</span>
+						<span class="tt-break" th:text="${v.vin}">VIN</span>
+					</div>
+				</div>
 
-        <div class="d-grid gap-2 mt-3">
-          <a class="btn btn-outline-primary tt-btn-mobile"
-             th:href="@{/cliente/vehiculos/{id}/historial(id=${v.id})}">
-            Historial
-          </a>
+				<div class="d-grid gap-2 mt-3">
+					<a class="btn btn-outline-primary tt-btn-mobile"
+						th:href="@{/cliente/vehiculos/{id}/historial(id=${v.id})}">
+						Historial
+					</a>
 
-          <a class="btn btn-outline-secondary tt-btn-mobile"
-             th:href="@{/cliente/vehiculos/{id}/editar(id=${v.id})}">
-            Editar
-          </a>
+					<a class="btn btn-outline-secondary tt-btn-mobile"
+						th:href="@{/cliente/vehiculos/{id}/editar(id=${v.id})}">
+						Editar
+					</a>
 
-          <form th:action="@{/cliente/vehiculos/{id}/eliminar(id=${v.id})}"
-                method="post"
-                class="m-0"
-                onsubmit="return confirm('¿Eliminar vehículo?');">
+					<form th:action="@{/cliente/vehiculos/{id}/eliminar(id=${v.id})}" method="post" class="m-0"
+						onsubmit="return confirm('¿Eliminar vehículo?');">
 
-            <!-- CSRF robusto: evita 500 si _csrf viniera null -->
-            <input th:if="${_csrf != null}"
-                   type="hidden"
-                   th:name="${_csrf.parameterName}"
-                   th:value="${_csrf.token}"/>
+						<!-- CSRF robusto: evita 500 si _csrf viniera null -->
+						<input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}"
+							th:value="${_csrf.token}" />
 
-            <button class="btn btn-outline-danger tt-btn-mobile" type="submit">
-              Eliminar
-            </button>
-          </form>
-        </div>
+						<button class="btn btn-outline-danger tt-btn-mobile" type="submit">
+							Eliminar
+						</button>
+					</form>
+				</div>
 
-      </div>
-    </div>
-  </div>
+			</div>
+		</div>
+	</div>
 
-  <!-- =========================
+	<!-- =========================
        TABLET/DESKTOP: TABLA (>=577)
        ========================= -->
-  <div class="card shadow-sm border-0 tt-hide-mobile">
-    <div class="card-body p-0">
+	<div class="card shadow-sm border-0 tt-hide-mobile">
+		<div class="card-body p-0">
 
-      <!-- Usa tu wrapper para scroll controlado -->
-      <div class="tt-table-scroll">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
-          <tr>
-            <th class="tt-nowrap">Matrícula</th>
-            <th>Marca</th>
-            <th>Modelo</th>
-            <th class="tt-nowrap">Año</th>
-            <th>Combustible</th>
-            <th class="tt-nowrap">VIN</th>
-            <th class="text-end tt-nowrap">Acciones</th>
-          </tr>
-          </thead>
+			<!-- Usa tu wrapper para scroll controlado -->
+			<div class="tt-table-scroll">
+				<table class="table table-hover align-middle mb-0">
+					<thead class="table-light">
+						<tr>
+							<th class="tt-nowrap">Matrícula</th>
+							<th>Marca</th>
+							<th>Modelo</th>
+							<th class="tt-nowrap">Año</th>
+							<th>Combustible</th>
+							<th class="tt-nowrap">VIN</th>
+							<th class="text-end tt-nowrap">Acciones</th>
+						</tr>
+					</thead>
 
-          <tbody>
-          <tr th:if="${vehicles == null or #lists.isEmpty(vehicles)}">
-            <td colspan="7" class="text-center text-muted py-4">
-              Aún no tienes vehículos registrados.
-            </td>
-          </tr>
+					<tbody>
+						<tr th:if="${vehicles == null or #lists.isEmpty(vehicles)}">
+							<td colspan="7" class="text-center text-muted py-4">
+								Aún no tienes vehículos registrados.
+							</td>
+						</tr>
 
-          <tr th:each="v : ${vehicles}">
-            <td class="fw-semibold tt-nowrap" th:text="${v.matricula}"></td>
-            <td th:text="${v.marca}"></td>
-            <td th:text="${v.modelo}"></td>
-            <td class="tt-nowrap" th:text="${v.anio}"></td>
-            <td th:text="${v.combustible}"></td>
-            <td class="tt-break" th:text="${v.vin}"></td>
+						<tr th:each="v : ${vehicles}">
+							<td class="fw-semibold tt-nowrap" th:text="${v.matricula}"></td>
+							<td th:text="${v.marca}"></td>
+							<td th:text="${v.modelo}"></td>
+							<td class="tt-nowrap" th:text="${v.anio}"></td>
+							<td th:text="${v.combustible}"></td>
+							<td class="tt-break" th:text="${v.vin}"></td>
 
-            <td class="text-end">
-              <div class="d-inline-flex gap-2">
+							<td class="text-end">
+								<div class="d-inline-flex gap-2">
 
-                <a class="btn btn-outline-primary btn-sm"
-                   th:href="@{/cliente/vehiculos/{id}/historial(id=${v.id})}">
-                  Historial
-                </a>
+									<a class="btn btn-outline-primary btn-sm"
+										th:href="@{/cliente/vehiculos/{id}/historial(id=${v.id})}">
+										Historial
+									</a>
 
-                <a class="btn btn-outline-secondary btn-sm"
-                   th:href="@{/cliente/vehiculos/{id}/editar(id=${v.id})}">
-                  Editar
-                </a>
+									<a class="btn btn-outline-secondary btn-sm"
+										th:href="@{/cliente/vehiculos/{id}/editar(id=${v.id})}">
+										Editar
+									</a>
 
-                <form th:action="@{/cliente/vehiculos/{id}/eliminar(id=${v.id})}"
-                      method="post"
-                      class="m-0"
-                      onsubmit="return confirm('¿Eliminar vehículo?');">
+									<form th:action="@{/cliente/vehiculos/{id}/eliminar(id=${v.id})}" method="post"
+										class="m-0" onsubmit="return confirm('¿Eliminar vehículo?');">
 
-                  <input th:if="${_csrf != null}"
-                         type="hidden"
-                         th:name="${_csrf.parameterName}"
-                         th:value="${_csrf.token}"/>
+										<input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}"
+											th:value="${_csrf.token}" />
 
-                  <button class="btn btn-outline-danger btn-sm" type="submit">
-                    Eliminar
-                  </button>
-                </form>
+										<button class="btn btn-outline-danger btn-sm" type="submit">
+											Eliminar
+										</button>
+									</form>
 
-              </div>
-            </td>
-          </tr>
-          </tbody>
+								</div>
+							</td>
+						</tr>
+					</tbody>
 
-        </table>
-      </div>
+				</table>
+			</div>
 
-    </div>
-  </div>
+		</div>
+	</div>
 
 </section>
+
 </html>
