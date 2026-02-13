@@ -77,11 +77,20 @@
           <a class="btn btn-primary btn-sm tt-btn-mobile" th:href="@{/register}">Registro</a>
         </div>
 
+        <!-- AUTH: Usuario + Logout -->
         <form sec:authorize="isAuthenticated()"
               th:action="@{/logout}"
               method="post"
-              class="m-0 tt-auth-actions">
+              class="m-0 tt-auth-actions tt-auth-logged d-flex align-items-center gap-2 flex-wrap">
+
+          <!-- Usuario: + username -->
+          <div class="tt-user-chip" aria-label="Usuario logueado">
+            <span class="tt-user-label">Usuario:</span>
+            <span class="tt-user-text" sec:authentication="name">cliente@tt2025.local</span>
+          </div>
+
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
           <button type="submit" class="btn btn-primary btn-sm tt-btn-mobile">Logout</button>
         </form>
 

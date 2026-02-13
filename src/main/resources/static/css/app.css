@@ -323,6 +323,11 @@ main.container {
   .tt-nav-actions .btn {
     width: 100%;
   }
+
+  /* NUEVO: cuando está logueado, centrar el “Usuario” encima del Logout */
+  .tt-auth-logged {
+    align-items: stretch !important;
+  }
 }
 
 /* =========================================================
@@ -352,5 +357,77 @@ main.container {
 @media (max-width: 576px) {
   .tt-card-kv {
     grid-template-columns: 100px 1fr;
+  }
+}
+
+/* =========================================================
+   NUEVO: Usuario logueado (chip)
+   - Misma altura visual que el botón Logout (btn-sm)
+   - Desktop: en línea con Logout
+   - Tablet/Móvil: chip encima y centrado del Logout
+   ========================================================= */
+
+/* Contenedor del bloque auth logueado (form) */
+.tt-auth-logged {
+  /* ya tiene d-flex y gap del HTML */
+}
+
+/* Chip */
+.tt-user-chip {
+  /* Altura equivalente a btn-sm (Bootstrap): padding .25rem .5rem, font-size .875rem */
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+
+  padding: .25rem .5rem;
+  font-size: .875rem;
+  font-weight: 600;
+  line-height: 1.5;
+
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.22);
+  background: rgba(255,255,255,.92);
+  color: #0b1220;
+
+  box-shadow: 0 .25rem .75rem rgba(0,0,0,.08);
+
+  /* Para no crecer infinito en desktop */
+  max-width: 360px;
+}
+
+/* “Usuario:” */
+.tt-user-label {
+  opacity: .85;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* texto usuario (email) */
+.tt-user-text {
+  display: inline-block;
+  max-width: 230px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+/* Tablet + móvil: chip centrado encima del Logout */
+@media (max-width: 991.98px) {
+  .tt-user-chip {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    max-width: 100%;
+  }
+
+  /* el botón ya ocupa 100% por tus reglas */
+}
+
+/* Desktop: que chip y botón queden iguales en “alto” y alineados */
+@media (min-width: 992px) {
+  .tt-user-chip {
+    /* ajustito para que “calce” con el alto del btn-sm */
+    padding: .25rem .6rem;
   }
 }
