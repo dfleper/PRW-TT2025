@@ -3,6 +3,7 @@ package es.prw.features.appointments.service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,181 +33,198 @@ import es.prw.features.notifications.service.EmailService;
 @Transactional
 public class AppointmentServiceImpl implements AppointmentService {
 
-	private static final Logger log = LoggerFactory.getLogger(AppointmentServiceImpl.class);
+  private static final Logger log = LoggerFactory.getLogger(AppointmentServiceImpl.class);
 
-	private final VehicleRepository vehicleRepository;
-	private final UserRepository userRepository;
-	private final CustomerRepository customerRepository;
-	private final ServiceRepository serviceRepository;
-	private final AvailabilityService availabilityService;
-	private final AppointmentRepository appointmentRepository;
-	private final EmailService emailService;
+  private final VehicleRepository vehicleRepository;
+  private final UserRepository userRepository;
+  private final CustomerRepository customerRepository;
+  private final ServiceRepository serviceRepository;
+  private final AvailabilityService availabilityService;
+  private final AppointmentRepository appointmentRepository;
 
-	public AppointmentServiceImpl(VehicleRepository vehicleRepository, UserRepository userRepository,
-			CustomerRepository customerRepository, ServiceRepository serviceRepository,
-			AvailabilityService availabilityService, AppointmentRepository appointmentRepository,
-			EmailService emailService) {
-		this.vehicleRepository = vehicleRepository;
-		this.userRepository = userRepository;
-		this.customerRepository = customerRepository;
-		this.serviceRepository = serviceRepository;
-		this.availabilityService = availabilityService;
-		this.appointmentRepository = appointmentRepository;
-		this.emailService = emailService;
-	}
+  // EmailService es opcional: en PROD puede estar deshabilitado (app.mail.enabled=false)
+  private final Optional<EmailService> emailService;
 
-	// =========================
-	// Crear cita, mail confirmación
-	// =========================
-	@Override
-	public Long createAppointment(AppointmentCreateDto dto) {
+  public AppointmentServiceImpl(
+      VehicleRepository vehicleRepository,
+      UserRepository userRepository,
+      CustomerRepository customerRepository,
+      ServiceRepository serviceRepository,
+      AvailabilityService availabilityService,
+      AppointmentRepository appointmentRepository,
+      Optional<EmailService> emailService
+  ) {
+    this.vehicleRepository = vehicleRepository;
+    this.userRepository = userRepository;
+    this.customerRepository = customerRepository;
+    this.serviceRepository = serviceRepository;
+    this.availabilityService = availabilityService;
+    this.appointmentRepository = appointmentRepository;
+    this.emailService = emailService;
+  }
 
-		if (dto == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Solicitud inválida");
-		}
+  // =========================
+  // Crear cita, mail confirmación
+  // =========================
+  @Override
+  public Long createAppointment(AppointmentCreateDto dto) {
 
-		if (dto.getVehicleId() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes seleccionar un vehículo");
-		}
-		if (dto.getServiceId() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes seleccionar un servicio");
-		}
-		if (dto.getStartDateTime() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes indicar fecha y hora");
-		}
+    if (dto == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Solicitud inválida");
+    }
 
-		Long customerId = getCurrentCustomerIdOrThrow();
+    if (dto.getVehicleId() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes seleccionar un vehículo");
+    }
+    if (dto.getServiceId() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes seleccionar un servicio");
+    }
+    if (dto.getStartDateTime() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes indicar fecha y hora");
+    }
 
-		VehicleEntity vehicle = vehicleRepository.findById(dto.getVehicleId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehículo no encontrado"));
+    Long customerId = getCurrentCustomerIdOrThrow();
 
-		Long vehicleCustomerId = (vehicle.getCustomer() != null) ? vehicle.getCustomer().getIdCustomer() : null;
+    VehicleEntity vehicle = vehicleRepository.findById(dto.getVehicleId())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehículo no encontrado"));
 
-		if (vehicleCustomerId == null || !vehicleCustomerId.equals(customerId)) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "El vehículo no pertenece al cliente");
-		}
+    Long vehicleCustomerId = (vehicle.getCustomer() != null) ? vehicle.getCustomer().getIdCustomer() : null;
 
-		ServiceEntity service = serviceRepository.findById(dto.getServiceId())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Servicio no encontrado"));
+    if (vehicleCustomerId == null || !vehicleCustomerId.equals(customerId)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "El vehículo no pertenece al cliente");
+    }
 
-		if (!service.isActivo()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El servicio no está activo");
-		}
+    ServiceEntity service = serviceRepository.findById(dto.getServiceId())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Servicio no encontrado"));
 
-		long durationMinutes = 60L;
-		Short minutosEstimados = service.getMinutosEstimados();
-		if (minutosEstimados != null && minutosEstimados > 0) {
-			durationMinutes = minutosEstimados.longValue();
-		}
+    if (!service.isActivo()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El servicio no está activo");
+    }
 
-		LocalDateTime startDateTime = dto.getStartDateTime();
-		LocalDateTime endDateTime = startDateTime.plusMinutes(durationMinutes);
+    long durationMinutes = 60L;
+    Short minutosEstimados = service.getMinutosEstimados();
+    if (minutosEstimados != null && minutosEstimados > 0) {
+      durationMinutes = minutosEstimados.longValue();
+    }
 
-		boolean available = availabilityService.isAvailable(startDateTime, endDateTime);
-		if (!available) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT, "No hay disponibilidad para esa franja horaria");
-		}
+    LocalDateTime startDateTime = dto.getStartDateTime();
+    LocalDateTime endDateTime = startDateTime.plusMinutes(durationMinutes);
 
-		AppointmentEntity appointment = new AppointmentEntity();
-		appointment.setCustomer(vehicle.getCustomer());
-		appointment.setVehicle(vehicle);
-		appointment.setService(service);
-		appointment.setInicio(startDateTime);
-		appointment.setFin(endDateTime);
-		appointment.setEstado(AppointmentStatus.PENDIENTE);
+    boolean available = availabilityService.isAvailable(startDateTime, endDateTime);
+    if (!available) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "No hay disponibilidad para esa franja horaria");
+    }
 
-		// 1) Guardar SIEMPRE primero
-		AppointmentEntity saved = appointmentRepository.save(appointment);
+    AppointmentEntity appointment = new AppointmentEntity();
+    appointment.setCustomer(vehicle.getCustomer());
+    appointment.setVehicle(vehicle);
+    appointment.setService(service);
+    appointment.setInicio(startDateTime);
+    appointment.setFin(endDateTime);
+    appointment.setEstado(AppointmentStatus.PENDIENTE);
 
-		// 2) Intentar enviar email (best-effort). Si falla, NO bloquea la reserva.
-		try {
-			String to = saved.getCustomer().getUser().getEmail();
-			String customerName = saved.getCustomer().getUser().getNombre();
+    // 1) Guardar SIEMPRE primero
+    AppointmentEntity saved = appointmentRepository.save(appointment);
 
-			String serviceName = (saved.getService() != null) ? saved.getService().getNombre() : null;
-			String plate = (saved.getVehicle() != null) ? saved.getVehicle().getMatricula() : null;
+    // 2) Email best-effort y opcional: si no hay EmailService, no se envía.
+    if (emailService.isPresent()) {
+      try {
+        String to = saved.getCustomer().getUser().getEmail();
+        String customerName = saved.getCustomer().getUser().getNombre();
 
-			String dtText = saved.getInicio().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        String serviceName = (saved.getService() != null) ? saved.getService().getNombre() : null;
+        String plate = (saved.getVehicle() != null) ? saved.getVehicle().getMatricula() : null;
 
-			var mailData = new AppointmentMailData(saved.getId(), customerName, serviceName, plate, dtText,
-					saved.getEstado().name());
+        String dtText = saved.getInicio().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
 
-			emailService.sendAppointmentConfirmation(to, mailData);
+        var mailData = new AppointmentMailData(
+            saved.getId(),
+            customerName,
+            serviceName,
+            plate,
+            dtText,
+            saved.getEstado().name()
+        );
 
-		} catch (Exception ex) {
-			// No imprimir stacktrace: aviso corto y seguimos
-			log.warn("[APPOINTMENT] Cita {} creada, pero fallo enviando email de confirmación: {}", saved.getId(),
-					ex.getMessage());
-		}
+        emailService.get().sendAppointmentConfirmation(to, mailData);
 
-		return saved.getId();
-	}
+      } catch (Exception ex) {
+        log.warn("[APPOINTMENT] Cita {} creada, pero fallo enviando email de confirmación: {}",
+            saved.getId(), ex.getMessage());
+      }
+    } else {
+      // Útil para entender en logs por qué no se envía en PROD
+      log.debug("[APPOINTMENT] EmailService no disponible (app.mail.enabled=false). No se envía confirmación.");
+    }
 
-	// =========================
-	// Listado Mis Citas
-	// =========================
-	@Override
-	@Transactional(readOnly = true)
-	public List<AppointmentEntity> listMyAppointments() {
-		Long customerId = getCurrentCustomerIdOrThrow();
-		return appointmentRepository.findByCustomer_IdCustomerOrderByInicioDesc(customerId);
-	}
+    return saved.getId();
+  }
 
-	// =========================
-	// Mis Citas Detalle
-	// =========================
-	@Override
-	@Transactional(readOnly = true)
-	public AppointmentEntity getMyAppointment(Long appointmentId) {
-		if (appointmentId == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id de cita inválido");
-		}
+  // =========================
+  // Listado Mis Citas
+  // =========================
+  @Override
+  @Transactional(readOnly = true)
+  public List<AppointmentEntity> listMyAppointments() {
+    Long customerId = getCurrentCustomerIdOrThrow();
+    return appointmentRepository.findByCustomer_IdCustomerOrderByInicioDesc(customerId);
+  }
 
-		Long customerId = getCurrentCustomerIdOrThrow();
+  // =========================
+  // Mis Citas Detalle
+  // =========================
+  @Override
+  @Transactional(readOnly = true)
+  public AppointmentEntity getMyAppointment(Long appointmentId) {
+    if (appointmentId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id de cita inválido");
+    }
 
-		return appointmentRepository.findDetailByIdAndCustomer(appointmentId, customerId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cita no encontrada"));
-	}
+    Long customerId = getCurrentCustomerIdOrThrow();
 
-	// =========================
-	// Mis Citas Cancelar
-	// =========================
-	@Override
-	public void cancelMyAppointment(Long appointmentId) {
-		AppointmentEntity a = getMyAppointment(appointmentId);
+    return appointmentRepository.findDetailByIdAndCustomer(appointmentId, customerId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cita no encontrada"));
+  }
 
-		if (a.getEstado() == AppointmentStatus.FINALIZADA) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT, "No se puede cancelar una cita finalizada");
-		}
-		if (a.getEstado() == AppointmentStatus.EN_CURSO) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT, "No se puede cancelar una cita en curso");
-		}
-		if (a.getEstado() == AppointmentStatus.CANCELADA) {
-			return;
-		}
+  // =========================
+  // Mis Citas Cancelar
+  // =========================
+  @Override
+  public void cancelMyAppointment(Long appointmentId) {
+    AppointmentEntity a = getMyAppointment(appointmentId);
 
-		a.setEstado(AppointmentStatus.CANCELADA);
-		appointmentRepository.save(a);
-	}
+    if (a.getEstado() == AppointmentStatus.FINALIZADA) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "No se puede cancelar una cita finalizada");
+    }
+    if (a.getEstado() == AppointmentStatus.EN_CURSO) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "No se puede cancelar una cita en curso");
+    }
+    if (a.getEstado() == AppointmentStatus.CANCELADA) {
+      return;
+    }
 
-	// =========================
-	// helper: Cliente Logueado
-	// =========================
-	private Long getCurrentCustomerIdOrThrow() {
+    a.setEstado(AppointmentStatus.CANCELADA);
+    appointmentRepository.save(a);
+  }
 
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No autenticado");
-		}
+  // =========================
+  // helper: Cliente Logueado
+  // =========================
+  private Long getCurrentCustomerIdOrThrow() {
 
-		String email = auth.getName();
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No autenticado");
+    }
 
-		UserEntity user = userRepository.findByEmail(email)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no válido"));
+    String email = auth.getName();
 
-		CustomerEntity customer = customerRepository.findByUser_IdUser(user.getIdUser())
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "El usuario no es cliente"));
+    UserEntity user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no válido"));
 
-		return customer.getIdCustomer();
-	}
+    CustomerEntity customer = customerRepository.findByUser_IdUser(user.getIdUser())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "El usuario no es cliente"));
+
+    return customer.getIdCustomer();
+  }
 }
