@@ -48,6 +48,3 @@ Desktop.ini
 
 # Ficheros locales con secretos (no se suben)
 application-dev.properties
-
-# .gitignore para las ramas main y develop
-.gitignore_main_develop 
