@@ -1,15 +1,41 @@
+# ===== Build output =====
 target/
+out/
+build/
+
+# ===== VCS =====
 .git/
+
+# ===== IDE =====
 .idea/
 .vscode/
 .settings/
 .classpath
 .project
 *.iml
+
+# ===== Logs =====
 *.log
 logs/
+
+# ===== OS =====
 .DS_Store
 Thumbs.db
+
+# ===== Docs / entregas / artefactos pesados =====
 *.md
 docs/
+documentacion/
+memoria/
+entregas/
+screenshots/
+diagrams/
+
+*.pdf
+*.odt
+*.docx
+*.pptx
+*.xlsx
 *.zip
+*.7z
+*.rar
