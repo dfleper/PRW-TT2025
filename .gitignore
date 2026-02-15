@@ -1,3 +1,12 @@
+# ============================================================
+# TT2025 - .gitignore (deploy)
+# ------------------------------------------------------------
+# Objetivo:
+# - Ignorar artefactos/IDE/OS
+# - NO versionar secretos (.env, *.local, etc.)
+# - PERMITIR versionar application-prod.properties (limpio, sin secretos)
+# ============================================================
+
 # ===== Java / Maven =====
 /target/
 *.class
@@ -16,7 +25,7 @@
 .factorypath
 .springBeans
 
-# ===== IntelliJ IDEA (por si acaso) =====
+# ===== IntelliJ IDEA =====
 .idea/
 *.iml
 out/
@@ -36,5 +45,9 @@ Desktop.ini
 # ===== Env / Secrets =====
 .env
 *.local
+
+# Ficheros locales con secretos (no se suben)
 application-dev.properties
-application-prod.properties
+
+# .gitignore para las ramas main y develop
+.gitignore_main_develop 
