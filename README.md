@@ -443,12 +443,12 @@ mvn test
 
 ## Documentación
 
-- Véase 📄 **[Plan de Proyecto](./docs/A0_PLAN DE PROYECTO.pdf).**
-- Véase 📄 **[Documento de Alance](./docs/A1_DOCUMENTO DE ALCANCE.pdf).**
-- Véase 📄 **[Diagrama de Casos de Uso](./docs/A2_DIAGRAMA DE CASOS DE USO.pdf).**
-- Véase 📄 **[Diagrama Entidad Relación](./docs/A3_DIAGRAMA ENTIDAD RELACIÓN.pdf).**
-- Véase 📄 **[Documeto Técnico](./docs/A4_DOCUMENTO TÉCNICO.pdf).**
-- Véase 📄 **[Documento de Despliegue](./docs/A5_DOCUMENTO DE DESPLIEGUE.pdf).**
+- Véase 📄 **[Plan de Proyecto](./docs/A0_PLAN%20DE%20PROYECTO.pdf).**
+- Véase 📄 **[Documento de Alcance](./docs/A1_DOCUMENTO%20DE%20ALCANCE.pdf).**
+- Véase 📄 **[Diagrama de Casos de Uso](./docs/A2_DIAGRAMA%20DE%20CASOS%20DE%20USO.pdf).**
+- Véase 📄 **[Diagrama Entidad Relación](./docs/A3_DIAGRAMA%20ENTIDAD%20RELACIÓN.pdf).**
+- Véase 📄 **[Documento Técnico](./docs/A4_DOCUMENTO%20TÉCNICO.pdf).**
+- Véase 📄 **[Documento de Despliegue](./docs/A5_DOCUMENTO%20DE%20DESPLIEGUE.pdf).**
 
 ## Legal
 - Véase 📄 **[AVISO.md](AVISO.md).** Todos los derechos reservados.
