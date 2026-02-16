@@ -1,3 +1,6 @@
+![GitHub repo size](https://img.shields.io/github/repo-size/dfleper/PRW-TT2025?logo=github)
+![GitHub last commit](https://img.shields.io/github/last-commit/dfleper/PRW-TT2025?color=blue&label=last-commit&logo=github&logoColor=white)
+
 # TT2025 — Turbo Taller
 
 Turbo Taller (TT2025) digitaliza la gestión de un taller de mecánica rápida. Permite a los clientes registrarse, añadir sus vehículos y reservar citas online seleccionando servicio, fecha y franja horaria. En el backoffice, el personal del taller puede gestionar la agenda, asignar trabajos, actualizar estados (pendiente/en curso/finalizada/cancelada), registrar intervenciones y piezas, y consultar el historial por cliente y vehículo. El objetivo es reducir errores, evitar solapamientos y mejorar la experiencia del cliente con un sistema centralizado y accesible desde cualquier dispositivo.
@@ -436,6 +439,16 @@ Ejecutar tests dev:
 ```bash
 mvn test
 ```
+---
+
+## Documentación
+
+- Véase 📄 **[Plan de Proyecto](./docs/A0_PLAN DE PROYECTO.pdf).**
+- Véase 📄 **[Documento de Alance](./docs/A1_DOCUMENTO DE ALCANCE.pdf).**
+- Véase 📄 **[Diagrama de Casos de Uso](./docs/A2_DIAGRAMA DE CASOS DE USO.pdf).**
+- Véase 📄 **[Diagrama Entidad Relación](./docs/A3_DIAGRAMA ENTIDAD RELACIÓN.pdf).**
+- Véase 📄 **[Documeto Técnico](./docs/A4_DOCUMENTO TÉCNICO.pdf).**
+- Véase 📄 **[Documento de Despliegue](./docs/A5_DOCUMENTO DE DESPLIEGUE.pdf).**
 
 ## Legal
 - Véase 📄 **[AVISO.md](AVISO.md).** Todos los derechos reservados.
