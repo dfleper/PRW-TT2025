@@ -1,3 +1,10 @@
+![GitHub repo size](https://img.shields.io/github/repo-size/dfleper/PRW-TT2025?logo=github)
+![GitHub last commit](https://img.shields.io/github/last-commit/dfleper/PRW-TT2025?color=blue&label=last-commit&logo=github&logoColor=white)
+
+<div style="display: flex; align-items: center; gap: 12px;">
+  <img src="./screenshots/logo.png" alt="TT2025 Logo" width="60">
+</div>
+
 # DEPLOY TT2025 — Turbo Taller 
 
 ## Deploy (Render + Docker + MariaDB Cloud 11.8 LTS)
