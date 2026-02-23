@@ -1,7 +1,10 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/dfleper/PRW-TT2025?logo=github)
 ![GitHub last commit](https://img.shields.io/github/last-commit/dfleper/PRW-TT2025?color=blue&label=last-commit&logo=github&logoColor=white)
 
-# TT2025 — Turbo Taller
+<div style="display: flex; align-items: center; gap: 12px;">
+  <img src="./screenshots/logo.png" alt="TT2025 Logo" width="60">
+  <span style="font-size: 2.0rem; font-weight: 600;">TT2025 - Turbo Taller</span>
+</div>
 
 Turbo Taller (TT2025) digitaliza la gestión de un taller de mecánica rápida. Permite a los clientes registrarse, añadir sus vehículos y reservar citas online seleccionando servicio, fecha y franja horaria. En el backoffice, el personal del taller puede gestionar la agenda, asignar trabajos, actualizar estados (pendiente/en curso/finalizada/cancelada), registrar intervenciones y piezas, y consultar el historial por cliente y vehículo. El objetivo es reducir errores, evitar solapamientos y mejorar la experiencia del cliente con un sistema centralizado y accesible desde cualquier dispositivo.
 
@@ -441,6 +444,41 @@ mvn test
 ```
 ---
 
+## Screenshots
+
+### Vista Móvil
+
+<div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 12px;">
+  <img src="./screenshots/src_movil_001.png" width="30%">
+  <img src="./screenshots/src_movil_002.png" width="30%">
+  <img src="./screenshots/src_movil_003.png" width="30%">
+</div>
+
+<div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 12px;">
+  <img src="./screenshots/src_movil_004.png" width="30%">
+  <img src="./screenshots/src_movil_005.png" width="30%">
+  <img src="./screenshots/src_movil_006.png" width="30%">
+</div>
+
+<div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 12px;">
+  <img src="./screenshots/src_movil_007.png" width="30%">
+</div>
+
+---
+
+### Vista escritorio
+
+<div style="display: flex; gap: 16px; justify-content: center; margin-bottom: 12px;">
+  <img src="./screenshots/src_mac_001.png" width="50%">
+  <img src="./screenshots/src_mac_002.png" width="50%">
+</div>
+
+<div style="display: flex; gap: 16px; justify-content: center; margin-bottom: 24px;">
+  <img src="./screenshots/src_mac_003.png" width="50%">
+  <img src="./screenshots/src_mac_004.png" width="50%">
+</div>
+
+---
 ## Documentación
 
 - Véase 📄 **[Plan de Proyecto](./docs/A0_PLAN%20DE%20PROYECTO.pdf).**
