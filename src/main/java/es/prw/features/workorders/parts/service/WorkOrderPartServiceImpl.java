@@ -5,10 +5,14 @@ import java.math.RoundingMode;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import es.prw.features.iam.domain.UserEntity;
+import es.prw.features.iam.repository.UserRepository;
 import es.prw.features.parts.repository.PartRepository;
 import es.prw.features.workorders.domain.WorkOrderEntity;
 import es.prw.features.workorders.domain.WorkOrderStatus;
@@ -24,21 +28,20 @@ public class WorkOrderPartServiceImpl implements WorkOrderPartService {
 	private final WorkOrderPartRepository workOrderPartRepository;
 	private final WorkOrderRepository workOrderRepository;
 	private final PartRepository partRepository;
+	private final UserRepository userRepository;
 
 	public WorkOrderPartServiceImpl(WorkOrderPartRepository workOrderPartRepository,
-			WorkOrderRepository workOrderRepository, PartRepository partRepository) {
+			WorkOrderRepository workOrderRepository, PartRepository partRepository, UserRepository userRepository) {
 		this.workOrderPartRepository = workOrderPartRepository;
 		this.workOrderRepository = workOrderRepository;
 		this.partRepository = partRepository;
+		this.userRepository = userRepository;
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public List<WorkOrderPartEntity> listByWorkOrder(Long workOrderId) {
-
-		if (workOrderId == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Orden de trabajo no válida");
-		}
+		if (workOrderId == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Orden de trabajo no válida");
 
 		workOrderRepository.findById(workOrderId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden de trabajo no encontrada"));
@@ -53,6 +56,11 @@ public class WorkOrderPartServiceImpl implements WorkOrderPartService {
 
 		WorkOrderPartEntity line = new WorkOrderPartEntity();
 		line.setWorkOrder(wo);
+		UserEntity actor = getCurrentUserOrNull();
+		if (actor != null) {
+			line.setCreatedByUser(actor);
+			line.setUpdatedByUser(actor);
+		}
 
 		applyDto(line, dto);
 
@@ -74,12 +82,15 @@ public class WorkOrderPartServiceImpl implements WorkOrderPartService {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "Pieza sin orden de trabajo asociada");
 		}
 
-		// Regla si OT está cerrada => no cambios
 		if (wo.getEstado() == WorkOrderStatus.cerrada) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "OT cerrada: no se permiten cambios");
 		}
 
 		applyDto(existing, dto);
+		UserEntity actor = getCurrentUserOrNull();
+		if (actor != null) {
+			existing.setUpdatedByUser(actor);
+		}
 
 		return workOrderPartRepository.save(existing);
 	}
@@ -99,15 +110,12 @@ public class WorkOrderPartServiceImpl implements WorkOrderPartService {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "Pieza sin orden de trabajo asociada");
 		}
 
-		// ✅ Regla Si OT está cerrada => no cambios
 		if (wo.getEstado() == WorkOrderStatus.cerrada) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "OT cerrada: no se permiten cambios");
 		}
 
 		workOrderPartRepository.delete(existing);
 	}
-
-	// ===================== Helpers =====================
 
 	private WorkOrderEntity requireNotClosedWorkOrder(Long workOrderId) {
 
@@ -125,53 +133,28 @@ public class WorkOrderPartServiceImpl implements WorkOrderPartService {
 		return wo;
 	}
 
-	/**
-	 * applyDto: - Valida entrada - Lee precio desde catálogo (parts.precio_unit) -
-	 * Valida decimales solo si parts.allows_decimal = 1 - Copia unitPrice
-	 * (snapshot) y calcula total - Aplica quantity y notes
-	 */
 	private void applyDto(WorkOrderPartEntity target, WorkOrderPartDto dto) {
 
-		if (dto == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Datos de pieza no válidos");
-		}
-
-		if (dto.getPartId() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe seleccionar una pieza");
-		}
+		if (dto == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Datos de pieza no válidos");
+		if (dto.getPartId() == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe seleccionar una pieza");
 
 		var part = partRepository.findById(dto.getPartId())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pieza no válida"));
 
-		// ---- cantidad (BigDecimal para permitir 3.5)
 		BigDecimal qty = dto.getQuantity();
-		if (qty == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cantidad es obligatoria");
-		}
-		if (qty.signum() <= 0) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cantidad debe ser > 0");
-		}
-		// limitamos a 2 decimales como máximo
-		if (qty.scale() > 2) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cantidad admite como máximo 2 decimales");
-		}
+		if (qty == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cantidad es obligatoria");
+		if (qty.signum() <= 0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cantidad debe ser > 0");
+		if (qty.scale() > 2) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cantidad admite como máximo 2 decimales");
 
 		boolean allowsDecimal = Boolean.TRUE.equals(part.getAllowsDecimal());
-		// Si NO permite decimales => debe ser entero exacto
 		if (!allowsDecimal && qty.stripTrailingZeros().scale() > 0) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Esta pieza no admite decimales");
 		}
 
-		// ---- precio desde catálogo (snapshot)
 		BigDecimal unitPrice = part.getPrecioUnit();
-		if (unitPrice == null) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT, "La pieza no tiene precio configurado");
-		}
-		if (unitPrice.signum() < 0) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT, "La pieza tiene precio inválido en catálogo");
-		}
+		if (unitPrice == null) throw new ResponseStatusException(HttpStatus.CONFLICT, "La pieza no tiene precio configurado");
+		if (unitPrice.signum() < 0) throw new ResponseStatusException(HttpStatus.CONFLICT, "La pieza tiene precio inválido en catálogo");
 
-		// ---- aplicar
 		target.setPartId(part.getId());
 		target.setQuantity(qty);
 		target.setUnitPrice(unitPrice);
@@ -184,5 +167,19 @@ public class WorkOrderPartServiceImpl implements WorkOrderPartService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Notas máximo 255 caracteres");
 		}
 		target.setNotes(notes);
+	}
+
+	private UserEntity getCurrentUserOrNull() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+			return null;
+		}
+
+		String email = auth.getName();
+		if (email == null || email.isBlank()) {
+			return null;
+		}
+
+		return userRepository.findByEmail(email).orElse(null);
 	}
 }

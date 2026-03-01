@@ -58,7 +58,6 @@ public class ClienteAppointmentController {
 		this.appointmentRepository = appointmentRepository;
 	}
 
-	// ========= LISTADO =========
 	@GetMapping
 	public String listado(Model model) {
 		Long customerId = getCurrentCustomerIdOrThrow();
@@ -79,13 +78,11 @@ public class ClienteAppointmentController {
 		return "cliente/citas/list";
 	}
 
-	// ========= FORM NUEVA CITA =========
 	@GetMapping("/nueva")
 	public String nuevaCitaForm(Model model, HttpSession session, RedirectAttributes ra) {
 
 		Long selectedServiceId = (Long) session.getAttribute(SESSION_SELECTED_SERVICE);
 
-		// No permitir crear cita sin servicio seleccionado
 		if (selectedServiceId == null) {
 			ra.addFlashAttribute("info", "Debes seleccionar un servicio antes de reservar una cita.");
 			return "redirect:/cliente/servicios";
@@ -94,13 +91,12 @@ public class ClienteAppointmentController {
 		reloadFormLists(model);
 
 		AppointmentCreateDto dto = new AppointmentCreateDto();
-		dto.setServiceId(selectedServiceId); // preselección
+		dto.setServiceId(selectedServiceId);
 		model.addAttribute("appointment", dto);
 
 		return "cliente/citas/form";
 	}
 
-	// ========= CREAR CITA =========
 	@PostMapping
 	public String crearCita(@Valid @ModelAttribute("appointment") AppointmentCreateDto appointment,
 			BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes, HttpSession session) {
@@ -113,7 +109,6 @@ public class ClienteAppointmentController {
 		try {
 			Long appointmentId = appointmentService.createAppointment(appointment);
 
-			// LIMPIAR SERVICIO SELECCIONADO (ya usado)
 			session.removeAttribute(SESSION_SELECTED_SERVICE);
 
 			redirectAttributes.addFlashAttribute("success", "Cita creada correctamente");
@@ -121,7 +116,7 @@ public class ClienteAppointmentController {
 
 		} catch (ResponseStatusException ex) {
 
-			if (ex.getStatusCode() == HttpStatus.CONFLICT) {
+			if (ex.getStatusCode() == HttpStatus.CONFLICT || ex.getStatusCode() == HttpStatus.BAD_REQUEST) {
 				model.addAttribute("availabilityError",
 						ex.getReason() != null ? ex.getReason() : "No hay disponibilidad para esa franja horaria.");
 				reloadFormLists(model);
@@ -132,7 +127,6 @@ public class ClienteAppointmentController {
 		}
 	}
 
-	// ========= DETALLE =========
 	@GetMapping("/{id}")
 	public String detalleCita(@PathVariable Long id, Model model) {
 
@@ -151,43 +145,49 @@ public class ClienteAppointmentController {
 		return "cliente/citas/detail";
 	}
 
-	// ========= CANCELAR =========
 	@PostMapping("/{id}/cancelar")
 	public String cancelarCita(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+		try {
+			Long customerId = getCurrentCustomerIdOrThrow();
 
-		Long customerId = getCurrentCustomerIdOrThrow();
+			AppointmentEntity appointment = appointmentRepository.findDetailByIdAndCustomer(id, customerId)
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cita no encontrada"));
 
-		AppointmentEntity appointment = appointmentRepository.findDetailByIdAndCustomer(id, customerId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cita no encontrada"));
-
-		if (appointment.getEstado() == AppointmentStatus.FINALIZADA) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT, "No se puede cancelar una cita finalizada");
-		}
-		if (appointment.getEstado() == AppointmentStatus.EN_CURSO) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT, "No se puede cancelar una cita en curso");
-		}
-		if (appointment.getEstado() == AppointmentStatus.CANCELADA) {
-			redirectAttributes.addFlashAttribute("info", "La cita ya estaba cancelada");
-			return "redirect:/cliente/citas/" + id;
-		}
-
-		LocalDateTime inicio = appointment.getInicio();
-		if (inicio != null) {
-			Duration d = Duration.between(LocalDateTime.now(), inicio);
-			if (!d.isNegative() && d.toHours() < 24) {
-				throw new ResponseStatusException(HttpStatus.CONFLICT,
-						"No se puede cancelar una cita con menos de 24h de antelación");
+			if (appointment.getEstado() == AppointmentStatus.FINALIZADA) {
+				throw new ResponseStatusException(HttpStatus.CONFLICT, "No se puede cancelar una cita finalizada");
 			}
+			if (appointment.getEstado() == AppointmentStatus.EN_CURSO) {
+				throw new ResponseStatusException(HttpStatus.CONFLICT, "No se puede cancelar una cita en curso");
+			}
+			if (appointment.getEstado() == AppointmentStatus.CANCELADA) {
+				redirectAttributes.addFlashAttribute("info", "La cita ya estaba cancelada");
+				return "redirect:/cliente/citas/" + id;
+			}
+
+			LocalDateTime inicio = appointment.getInicio();
+			if (inicio != null) {
+				Duration d = Duration.between(LocalDateTime.now(), inicio);
+				if (!d.isNegative() && d.toHours() < 24) {
+					throw new ResponseStatusException(HttpStatus.CONFLICT,
+							"No se puede cancelar una cita con menos de 24h de antelación");
+				}
+			}
+
+			appointment.setEstado(AppointmentStatus.CANCELADA);
+			appointmentRepository.save(appointment);
+
+			redirectAttributes.addFlashAttribute("success", "Cita cancelada correctamente");
+			return "redirect:/cliente/citas/" + id;
+		} catch (ResponseStatusException ex) {
+			if (ex.getStatusCode() == HttpStatus.CONFLICT || ex.getStatusCode() == HttpStatus.NOT_FOUND) {
+				redirectAttributes.addFlashAttribute("error",
+						ex.getReason() != null ? ex.getReason() : "No se pudo cancelar la cita");
+				return "redirect:/cliente/citas/" + id;
+			}
+			throw ex;
 		}
-
-		appointment.setEstado(AppointmentStatus.CANCELADA);
-		appointmentRepository.save(appointment);
-
-		redirectAttributes.addFlashAttribute("success", "Cita cancelada correctamente");
-		return "redirect:/cliente/citas/" + id;
 	}
 
-	// ========= HELPERS =========
 	private void reloadFormLists(Model model) {
 
 		Long customerId = getCurrentCustomerIdOrThrow();

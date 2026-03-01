@@ -1,6 +1,8 @@
 package es.prw.features.auth.service;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +36,6 @@ public class RegisterService {
 
 		String email = req.getEmail().trim().toLowerCase();
 
-		// Doble seguridad (además de @UniqueEmail)
 		if (userRepository.existsByEmailIgnoreCase(email)) {
 			throw new IllegalArgumentException("EMAIL_EXISTS");
 		}
@@ -53,25 +54,42 @@ public class RegisterService {
 		u.setPasswordHash(passwordEncoder.encode(req.getPassword()));
 		u.setActivo(true);
 
-		// NO setear auditoría: lo gestiona la BD (DEFAULT CURRENT_TIMESTAMP)
-		// u.setCreatedAt(...)
-		// u.setUpdatedAt(...)
+		UserEntity actor = getCurrentUserOrNull();
+		if (actor != null) {
+			u.setCreatedByUser(actor);
+			u.setUpdatedByUser(actor);
+		}
 
 		u.getRoles().add(roleCliente);
 
 		try {
 			UserEntity savedUser = userRepository.save(u);
+			if (savedUser.getCreatedByUser() == null) {
+				savedUser.setCreatedByUser(savedUser);
+				savedUser.setUpdatedByUser(savedUser);
+				savedUser = userRepository.save(savedUser);
+			}
 
-			// Crear perfil customer asociado
-			// Evita 403 futuros en módulos que dependen de CustomerEntity (vehículos,
-			// citas, etc.)
 			CustomerEntity c = new CustomerEntity();
 			c.setUser(savedUser);
 			customerRepository.save(c);
 
 		} catch (DataIntegrityViolationException ex) {
-			// Por si cuelan un email duplicado por carrera/condición
 			throw new IllegalArgumentException("EMAIL_EXISTS");
 		}
+	}
+
+	private UserEntity getCurrentUserOrNull() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+			return null;
+		}
+
+		String email = auth.getName();
+		if (email == null || email.isBlank()) {
+			return null;
+		}
+
+		return userRepository.findByEmail(email).orElse(null);
 	}
 }

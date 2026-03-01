@@ -1,6 +1,8 @@
 package es.prw.features.auth.service;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,17 +34,14 @@ public class UserService {
 	@Transactional
 	public void registerClient(RegisterRequest req) {
 
-		// 1) Verificar email no existente (normalizado)
 		String email = req.getEmail().trim().toLowerCase();
 		if (userRepository.existsByEmailIgnoreCase(email)) {
 			throw new IllegalArgumentException("EMAIL_EXISTS");
 		}
 
-		// 2) Cargar rol CLIENTE (debe existir por Flyway seed)
 		RoleEntity clienteRole = roleRepository.findByNombre("CLIENTE")
 				.orElseThrow(() -> new IllegalStateException("Rol CLIENTE no existe en BD"));
 
-		// 3) Crear usuario
 		UserEntity u = new UserEntity();
 		u.setEmail(email);
 		u.setNombre(req.getNombre().trim());
@@ -53,27 +52,43 @@ public class UserService {
 
 		u.setActivo(true);
 
-		// NO setear created_at / updated_at: lo gestiona la BD (DEFAULT/ON UPDATE)
-		// NO setear created_by_user / updated_by_user: deben poder ser NULL
+		UserEntity actor = getCurrentUserOrNull();
+		if (actor != null) {
+			u.setCreatedByUser(actor);
+			u.setUpdatedByUser(actor);
+		}
 
-		// 4) Encriptar password con BCrypt
 		u.setPasswordHash(passwordEncoder.encode(req.getPassword()));
-
-		// 5) Asignar rol CLIENTE
 		u.getRoles().add(clienteRole);
 
-		// 6) Guardar en BD + crear perfil customer asociado
 		try {
 			UserEntity savedUser = userRepository.save(u);
+			if (savedUser.getCreatedByUser() == null) {
+				savedUser.setCreatedByUser(savedUser);
+				savedUser.setUpdatedByUser(savedUser);
+				savedUser = userRepository.save(savedUser);
+			}
 
-			// Crear fila en customers para evitar 403 en área cliente
 			CustomerEntity c = new CustomerEntity();
 			c.setUser(savedUser);
 			customerRepository.save(c);
 
 		} catch (DataIntegrityViolationException ex) {
-			// Si hay condición de carrera con el UNIQUE(email)
 			throw new IllegalArgumentException("EMAIL_EXISTS");
 		}
+	}
+
+	private UserEntity getCurrentUserOrNull() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+			return null;
+		}
+
+		String email = auth.getName();
+		if (email == null || email.isBlank()) {
+			return null;
+		}
+
+		return userRepository.findByEmail(email).orElse(null);
 	}
 }
