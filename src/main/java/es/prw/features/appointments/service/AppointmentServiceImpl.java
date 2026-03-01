@@ -42,7 +42,6 @@ public class AppointmentServiceImpl implements AppointmentService {
   private final AvailabilityService availabilityService;
   private final AppointmentRepository appointmentRepository;
 
-  // EmailService es opcional: en PROD puede estar deshabilitado (app.mail.enabled=false)
   private final Optional<EmailService> emailService;
 
   public AppointmentServiceImpl(
@@ -63,33 +62,20 @@ public class AppointmentServiceImpl implements AppointmentService {
     this.emailService = emailService;
   }
 
-  // =========================
-  // Crear cita, mail confirmación
-  // =========================
   @Override
   public Long createAppointment(AppointmentCreateDto dto) {
+    if (dto == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Solicitud inválida");
+    if (dto.getVehicleId() == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes seleccionar un vehículo");
+    if (dto.getServiceId() == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes seleccionar un servicio");
+    if (dto.getStartDateTime() == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes indicar fecha y hora");
 
-    if (dto == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Solicitud inválida");
-    }
-
-    if (dto.getVehicleId() == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes seleccionar un vehículo");
-    }
-    if (dto.getServiceId() == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes seleccionar un servicio");
-    }
-    if (dto.getStartDateTime() == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes indicar fecha y hora");
-    }
-
-    Long customerId = getCurrentCustomerIdOrThrow();
+    UserEntity actor = getCurrentUserOrThrow();
+    Long customerId = getCurrentCustomerIdOrThrow(actor);
 
     VehicleEntity vehicle = vehicleRepository.findById(dto.getVehicleId())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehículo no encontrado"));
 
     Long vehicleCustomerId = (vehicle.getCustomer() != null) ? vehicle.getCustomer().getIdCustomer() : null;
-
     if (vehicleCustomerId == null || !vehicleCustomerId.equals(customerId)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "El vehículo no pertenece al cliente");
     }
@@ -127,11 +113,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     appointment.setInicio(startDateTime);
     appointment.setFin(endDateTime);
     appointment.setEstado(AppointmentStatus.PENDIENTE);
+    appointment.setCreatedByUser(actor);
+    appointment.setUpdatedByUser(actor);
 
-    // 1) Guardar SIEMPRE primero
     AppointmentEntity saved = appointmentRepository.save(appointment);
 
-    // 2) Email best-effort y opcional: si no hay EmailService, no se envía.
     if (emailService.isPresent()) {
       try {
         String to = saved.getCustomer().getUser().getEmail();
@@ -158,26 +144,19 @@ public class AppointmentServiceImpl implements AppointmentService {
             saved.getId(), ex.getMessage());
       }
     } else {
-      // Útil para entender en logs por qué no se envía en PROD
       log.debug("[APPOINTMENT] EmailService no disponible (app.mail.enabled=false). No se envía confirmación.");
     }
 
     return saved.getId();
   }
 
-  // =========================
-  // Listado Mis Citas
-  // =========================
   @Override
   @Transactional(readOnly = true)
   public List<AppointmentEntity> listMyAppointments() {
-    Long customerId = getCurrentCustomerIdOrThrow();
+    Long customerId = getCurrentCustomerIdOrThrow(getCurrentUserOrThrow());
     return appointmentRepository.findByCustomer_IdCustomerOrderByInicioDesc(customerId);
   }
 
-  // =========================
-  // Mis Citas Detalle
-  // =========================
   @Override
   @Transactional(readOnly = true)
   public AppointmentEntity getMyAppointment(Long appointmentId) {
@@ -185,17 +164,15 @@ public class AppointmentServiceImpl implements AppointmentService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id de cita inválido");
     }
 
-    Long customerId = getCurrentCustomerIdOrThrow();
+    Long customerId = getCurrentCustomerIdOrThrow(getCurrentUserOrThrow());
 
     return appointmentRepository.findDetailByIdAndCustomer(appointmentId, customerId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cita no encontrada"));
   }
 
-  // =========================
-  // Mis Citas Cancelar
-  // =========================
   @Override
   public void cancelMyAppointment(Long appointmentId) {
+    UserEntity actor = getCurrentUserOrThrow();
     AppointmentEntity a = getMyAppointment(appointmentId);
 
     if (a.getEstado() == AppointmentStatus.FINALIZADA) {
@@ -209,14 +186,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     a.setEstado(AppointmentStatus.CANCELADA);
+    a.setUpdatedByUser(actor);
     appointmentRepository.save(a);
   }
 
-  // =========================
-  // helper: Cliente Logueado
-  // =========================
-  private Long getCurrentCustomerIdOrThrow() {
-
+  private UserEntity getCurrentUserOrThrow() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No autenticado");
@@ -224,8 +198,14 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     String email = auth.getName();
 
-    UserEntity user = userRepository.findByEmail(email)
+    return userRepository.findByEmail(email)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no válido"));
+  }
+
+  private Long getCurrentCustomerIdOrThrow(UserEntity user) {
+    if (user == null || user.getIdUser() == null) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no válido");
+    }
 
     CustomerEntity customer = customerRepository.findByUser_IdUser(user.getIdUser())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "El usuario no es cliente"));

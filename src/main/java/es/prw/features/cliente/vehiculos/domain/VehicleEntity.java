@@ -51,17 +51,16 @@ public class VehicleEntity {
 	@Column(name = "activo", nullable = false)
 	private Boolean activo = true;
 
-	// Auditoría
 	@Column(name = "created_at", nullable = false, insertable = false, updatable = false)
 	private LocalDateTime createdAt;
 
 	@Column(name = "updated_at", nullable = false, insertable = false, updatable = false)
 	private LocalDateTime updatedAt;
 
-	@Column(name = "created_by_user", insertable = false, updatable = false)
+	@Column(name = "created_by_user")
 	private Long createdByUser;
 
-	@Column(name = "updated_by_user", insertable = false, updatable = false)
+	@Column(name = "updated_by_user")
 	private Long updatedByUser;
 
 	public Long getIdVehicle() {
@@ -156,7 +155,15 @@ public class VehicleEntity {
 		return createdByUser;
 	}
 
+	public void setCreatedByUser(Long createdByUser) {
+		this.createdByUser = createdByUser;
+	}
+
 	public Long getUpdatedByUser() {
 		return updatedByUser;
+	}
+
+	public void setUpdatedByUser(Long updatedByUser) {
+		this.updatedByUser = updatedByUser;
 	}
 }

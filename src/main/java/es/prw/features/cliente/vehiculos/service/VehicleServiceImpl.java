@@ -55,6 +55,9 @@ public class VehicleServiceImpl implements VehicleService {
 
 	@Override
 	public void create(String userEmail, VehicleDto dto) {
+		UserEntity actor = userRepository.findByEmail(userEmail)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
 		CustomerEntity customer = getOrCreateCustomerByEmail(userEmail);
 
 		String matriculaNorm = normalizeMatricula(dto.getMatricula());
@@ -77,12 +80,17 @@ public class VehicleServiceImpl implements VehicleService {
 		v.setVin(vinNorm);
 		v.setNotas(trimToNull(dto.getNotas()));
 		v.setActivo(true);
+		v.setCreatedByUser(actor.getIdUser());
+		v.setUpdatedByUser(actor.getIdUser());
 
 		vehicleRepository.save(v);
 	}
 
 	@Override
 	public void update(String userEmail, Long idVehicle, VehicleDto dto) {
+		UserEntity actor = userRepository.findByEmail(userEmail)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
 		CustomerEntity customer = getOrCreateCustomerByEmail(userEmail);
 
 		VehicleEntity v = vehicleRepository.findByIdVehicleAndCustomer_IdCustomer(idVehicle, customer.getIdCustomer())
@@ -105,26 +113,26 @@ public class VehicleServiceImpl implements VehicleService {
 		v.setCombustible(trimToNull(dto.getCombustible()));
 		v.setVin(vinNorm);
 		v.setNotas(trimToNull(dto.getNotas()));
+		v.setUpdatedByUser(actor.getIdUser());
 
 		vehicleRepository.save(v);
 	}
 
 	@Override
 	public void delete(String userEmail, Long idVehicle) {
+		UserEntity actor = userRepository.findByEmail(userEmail)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
 		CustomerEntity customer = getOrCreateCustomerByEmail(userEmail);
 
 		VehicleEntity v = vehicleRepository.findByIdVehicleAndCustomer_IdCustomer(idVehicle, customer.getIdCustomer())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
 		v.setActivo(false);
+		v.setUpdatedByUser(actor.getIdUser());
 		vehicleRepository.save(v);
 	}
 
-	// ---------- helpers ----------
-	/**
-	 * Si el usuario existe pero todavía no tiene fila en customers, la crea
-	 * automáticamente. Evita 403 falsos en el área cliente.
-	 */
 	private CustomerEntity getOrCreateCustomerByEmail(String email) {
 		UserEntity user = userRepository.findByEmailWithRoles(email)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
