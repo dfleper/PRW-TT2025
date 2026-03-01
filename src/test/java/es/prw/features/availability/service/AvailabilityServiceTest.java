@@ -89,4 +89,5 @@ class AvailabilityServiceTest {
 		verify(appointmentRepository).existsOverlap(eq(start), eq(start.plusMinutes(30)),
 				eq(AppointmentStatus.CANCELADA));
 	}
+
 }

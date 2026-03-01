@@ -121,7 +121,7 @@ public class ClienteAppointmentController {
 
 		} catch (ResponseStatusException ex) {
 
-			if (ex.getStatusCode() == HttpStatus.CONFLICT) {
+			if (ex.getStatusCode() == HttpStatus.CONFLICT || ex.getStatusCode() == HttpStatus.BAD_REQUEST) {
 				model.addAttribute("availabilityError",
 						ex.getReason() != null ? ex.getReason() : "No hay disponibilidad para esa franja horaria.");
 				reloadFormLists(model);

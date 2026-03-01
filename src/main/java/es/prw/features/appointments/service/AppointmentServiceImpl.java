@@ -108,6 +108,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     LocalDateTime startDateTime = dto.getStartDateTime();
+    LocalDateTime now = LocalDateTime.now();
+    if (!startDateTime.isAfter(now)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La cita debe ser en una fecha futura");
+    }
+
     LocalDateTime endDateTime = startDateTime.plusMinutes(durationMinutes);
 
     boolean available = availabilityService.isAvailable(startDateTime, endDateTime);
