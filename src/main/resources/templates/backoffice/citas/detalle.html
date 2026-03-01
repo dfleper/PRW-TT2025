@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head th:replace="fragments/head :: head('Backoffice · Detalle cita')"></head>
 
@@ -122,7 +122,8 @@
 								<div class="text-muted small">No hay OT asociada.</div>
 
 								<form class="mt-2" method="post"
-									th:action="@{/backoffice/citas/{id}/workorder(id=${appt.id})}">
+									th:action="@{/backoffice/citas/{id}/workorder(id=${appt.id})}"
+									sec:authorize="hasAnyAuthority('RECEPCION','ROLE_RECEPCION','JEFE_TALLER','ROLE_JEFE_TALLER','ADMIN','ROLE_ADMIN')">
 									<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
 										th:value="${_csrf.token}" />
 
@@ -205,8 +206,8 @@
 
 							<!-- Mensaje opcional cuando está bloqueado -->
 							<div class="alert alert-info mb-3" th:if="${woLocked}">
-								La OT está <strong>CERRADA</strong>. No se permite cambiar estado ni reasignar mecánico
-								desde esta pantalla.
+								La OT está <strong>CERRADA</strong>. Solo se permite finalizar la cita si está en <strong>EN CURSO</strong>;
+								no se permite reasignar mecánico desde esta pantalla.
 							</div>
 
 							<div class="alert alert-warning"
@@ -220,7 +221,8 @@
 								<!-- Cambiar estado -->
 								<div class="col-12 col-xl-6 d-flex">
 									<form class="d-flex flex-column flex-grow-1 h-100" method="post"
-										th:action="@{/backoffice/citas/{id}/estado(id=${appt.id})}">
+										th:action="@{/backoffice/citas/{id}/estado(id=${appt.id})}"
+										sec:authorize="hasAnyAuthority('RECEPCION','ROLE_RECEPCION','JEFE_TALLER','ROLE_JEFE_TALLER','ADMIN','ROLE_ADMIN')">
 
 										<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
 											th:value="${_csrf.token}" />
@@ -228,7 +230,7 @@
 										<div>
 											<label for="newStatus" class="form-label mb-1">Cambiar estado</label>
 											<select id="newStatus" name="newStatus" class="form-select tt-mobile-full"
-												th:disabled="${woLocked}">
+												th:disabled="${woLocked and !canFinalize}">
 												<option
 													th:each="s : ${T(es.prw.features.appointments.domain.AppointmentStatus).values()}"
 													th:if="${s != T(es.prw.features.appointments.domain.AppointmentStatus).FINALIZADA
@@ -246,7 +248,7 @@
 										</div>
 
 										<button type="submit" class="btn btn-primary tt-btn-mobile mt-auto"
-											th:disabled="${woLocked}">
+											th:disabled="${woLocked and !canFinalize}">
 											Guardar
 										</button>
 									</form>
@@ -255,7 +257,8 @@
 								<!-- Asignar mecánico -->
 								<div class="col-12 col-xl-6 d-flex">
 									<form class="d-flex flex-column flex-grow-1 h-100" method="post"
-										th:action="@{/backoffice/citas/{id}/asignar(id=${appt.id})}">
+										th:action="@{/backoffice/citas/{id}/asignar(id=${appt.id})}"
+										sec:authorize="hasAnyAuthority('RECEPCION','ROLE_RECEPCION','JEFE_TALLER','ROLE_JEFE_TALLER','ADMIN','ROLE_ADMIN')">
 
 										<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
 											th:value="${_csrf.token}" />

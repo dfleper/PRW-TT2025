@@ -70,7 +70,7 @@ public class BackofficeAppointmentServiceImpl implements BackofficeAppointmentSe
 
 		// Regla actual: finalizar solo si está EN_CURSO
 		if (newStatus == AppointmentStatus.FINALIZADA && current != AppointmentStatus.EN_CURSO) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT, "Solo se puede finalizar si está EN_CURSO");
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Solo se puede finalizar si está EN CURSO");
 		}
 
 		// NO permitir finalizar si no hay OT cerrada

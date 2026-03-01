@@ -1,6 +1,7 @@
 package es.prw.features.backoffice.citas.web;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,10 +51,14 @@ public class BackofficeCitasController {
 	@PreAuthorize("hasAnyRole('RECEPCION','MECANICO','JEFE_TALLER','ADMIN')")
 	@PostMapping("/{id}/estado")
 	public String cambiarEstado(@PathVariable Long id, @RequestParam("newStatus") AppointmentStatus newStatus,
-			org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+			Authentication authentication, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+		if (hasMechanicRole(authentication)) {
+			ra.addFlashAttribute("error", "No tienes permisos para cambiar el estado de la cita.");
+			return "redirect:/backoffice/citas/" + id;
+		}
 		try {
 			service.changeStatus(id, newStatus);
-			ra.addFlashAttribute("ok", "Estado actualizado a " + newStatus);
+			ra.addFlashAttribute("ok", "Estado actualizado a " + formatStatus(newStatus));
 		} catch (org.springframework.web.server.ResponseStatusException ex) {
 			ra.addFlashAttribute("error", ex.getReason());
 		}
@@ -63,8 +68,12 @@ public class BackofficeCitasController {
 	// Endpoint “limpio” para finalizar
 	@PreAuthorize("hasAnyRole('RECEPCION','MECANICO','JEFE_TALLER','ADMIN')")
 	@PostMapping("/{id}/finalize")
-	public String finalizarCita(@PathVariable Long id,
+	public String finalizarCita(@PathVariable Long id, Authentication authentication,
 			org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+		if (hasMechanicRole(authentication)) {
+			ra.addFlashAttribute("error", "No tienes permisos para finalizar la cita.");
+			return "redirect:/backoffice/citas/" + id;
+		}
 		try {
 			service.changeStatus(id, AppointmentStatus.FINALIZADA);
 			ra.addFlashAttribute("ok", "Cita finalizada correctamente");
@@ -78,7 +87,11 @@ public class BackofficeCitasController {
 	@PreAuthorize("hasAnyRole('RECEPCION','MECANICO','JEFE_TALLER','ADMIN')")
 	@PostMapping("/{id}/asignar")
 	public String asignarMecanico(@PathVariable Long id, @RequestParam("mechanicId") Long mechanicId,
-			org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+			Authentication authentication, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+		if (hasMechanicRole(authentication)) {
+			ra.addFlashAttribute("error", "No tienes permisos para asignar mecánico.");
+			return "redirect:/backoffice/citas/" + id;
+		}
 		try {
 			service.assignMechanic(id, mechanicId);
 			ra.addFlashAttribute("ok", "Mecánico asignado correctamente");
@@ -86,5 +99,14 @@ public class BackofficeCitasController {
 			ra.addFlashAttribute("error", ex.getReason());
 		}
 		return "redirect:/backoffice/citas/" + id;
+	}
+
+	private boolean hasMechanicRole(Authentication authentication) {
+		return authentication != null && authentication.getAuthorities().stream().anyMatch(
+				a -> "MECANICO".equals(a.getAuthority()) || "ROLE_MECANICO".equals(a.getAuthority()));
+	}
+
+	private String formatStatus(AppointmentStatus status) {
+		return status == null ? "" : status.name().replace('_', ' ');
 	}
 }

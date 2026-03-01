@@ -67,7 +67,8 @@
 							<hr class="my-3" />
 
 							<!-- Roles -->
-							<form method="post" th:action="@{/admin/users/{id}/roles(id=${u.idUser})}">
+							<form method="post" th:action="@{/admin/users/{id}/roles(id=${u.idUser})}"
+								sec:authorize="hasAnyAuthority('ADMIN','ROLE_ADMIN')">
 
 								<input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
 									th:value="${_csrf.token}" />
@@ -155,7 +156,8 @@
 									<!-- Roles (sin botón) -->
 									<td>
 										<form method="post" th:id="${'rolesForm_' + u.idUser}"
-											th:action="@{/admin/users/{id}/roles(id=${u.idUser})}">
+											th:action="@{/admin/users/{id}/roles(id=${u.idUser})}"
+											sec:authorize="hasAnyAuthority('ADMIN','ROLE_ADMIN')">
 
 											<input type="hidden" th:if="${_csrf != null}"
 												th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
@@ -182,7 +184,8 @@
 
 											<!-- ✅ Guardar roles (envía el form de roles por id) -->
 											<button type="submit" class="btn btn-sm btn-primary"
-												th:attr="form=${'rolesForm_' + u.idUser}">
+												th:attr="form=${'rolesForm_' + u.idUser}"
+												sec:authorize="hasAnyAuthority('ADMIN','ROLE_ADMIN')">
 												Guardar roles
 											</button>
 

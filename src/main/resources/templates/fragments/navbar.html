@@ -25,17 +25,17 @@
 					</li>
 
 					<!-- CLIENTE -> /cliente/servicios -->
-					<li class="nav-item" sec:authorize="hasAnyAuthority('CLIENTE','ROLE_CLIENTE')">
+					<li class="nav-item" sec:authorize="hasAnyAuthority('CLIENTE','ROLE_CLIENTE') and !hasAnyAuthority('MECANICO','ROLE_MECANICO')">
 						<a class="nav-link tt-navlink" th:href="@{/cliente/servicios}">Servicios</a>
 					</li>
 
 					<!-- NO CLIENTE -> /servicios -->
-					<li class="nav-item" sec:authorize="!hasAnyAuthority('CLIENTE','ROLE_CLIENTE')">
+					<li class="nav-item" sec:authorize="!hasAnyAuthority('CLIENTE','ROLE_CLIENTE') or hasAnyAuthority('MECANICO','ROLE_MECANICO')">
 						<a class="nav-link tt-navlink" th:href="@{/servicios}">Servicios</a>
 					</li>
 
 					<!-- CLIENTE -->
-					<li class="nav-item" sec:authorize="hasAnyAuthority('CLIENTE','ROLE_CLIENTE')">
+					<li class="nav-item" sec:authorize="hasAnyAuthority('CLIENTE','ROLE_CLIENTE') and !hasAnyAuthority('MECANICO','ROLE_MECANICO')">
 						<a class="nav-link tt-navlink" th:href="@{/cliente}">Cliente</a>
 					</li>
 

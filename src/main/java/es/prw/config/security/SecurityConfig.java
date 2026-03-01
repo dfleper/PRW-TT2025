@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 
 @Configuration
 @EnableWebSecurity
@@ -19,6 +20,10 @@ public class SecurityConfig {
 
 		http.authorizeHttpRequests(
 				auth -> auth.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+
+						// Edición de roles -> SOLO ADMIN
+						.requestMatchers(HttpMethod.POST, "/admin/users/*/roles")
+						.hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
 						// Swagger / OpenAPI -> SOLO ADMIN
 						.requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
@@ -41,10 +46,14 @@ public class SecurityConfig {
 						.requestMatchers("/api/availability").permitAll()
 
 						// Mis citas -> SOLO CLIENTE
-						.requestMatchers("/cliente/citas/**").hasAnyAuthority("CLIENTE", "ROLE_CLIENTE")
+						.requestMatchers("/cliente/citas/**")
+						.access(new WebExpressionAuthorizationManager(
+								"hasAnyAuthority('CLIENTE','ROLE_CLIENTE') and !hasAnyAuthority('MECANICO','ROLE_MECANICO')"))
 
 						// Zona cliente
-						.requestMatchers("/cliente/**").hasAnyAuthority("CLIENTE", "ROLE_CLIENTE")
+						.requestMatchers("/cliente/**")
+						.access(new WebExpressionAuthorizationManager(
+								"hasAnyAuthority('CLIENTE','ROLE_CLIENTE') and !hasAnyAuthority('MECANICO','ROLE_MECANICO')"))
 
 						// ============================================================
 						// Restricción real MECÁNICO
@@ -70,6 +79,13 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, "/backoffice/citas/*/workorder")
 						.hasAnyAuthority("RECEPCION", "ROLE_RECEPCION", "JEFE_TALLER", "ROLE_JEFE_TALLER", "ADMIN",
 								"ROLE_ADMIN")
+
+						// --- Gestión de cita (estado/asignación/finalizar): solo recepción/jefe/admin ---
+						.requestMatchers(HttpMethod.POST, "/backoffice/citas/*/estado", "/backoffice/citas/*/asignar",
+								"/backoffice/citas/*/finalize")
+						.hasAnyAuthority("RECEPCION", "ROLE_RECEPCION", "JEFE_TALLER", "ROLE_JEFE_TALLER", "ADMIN",
+								"ROLE_ADMIN")
+
 
 						// Backoffice general (sin mecánico)
 						.requestMatchers("/backoffice/**")

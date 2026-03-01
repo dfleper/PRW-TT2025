@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -64,7 +65,16 @@ public class BackofficeWorkOrderController {
 	}
 
 	@PostMapping("/citas/{id}/workorder")
-	public String openFromAppointment(@PathVariable("id") Long appointmentId) {
+	public String openFromAppointment(@PathVariable("id") Long appointmentId, Authentication authentication,
+			RedirectAttributes ra) {
+		boolean isMechanic = authentication != null && authentication.getAuthorities().stream().anyMatch(
+				a -> "MECANICO".equals(a.getAuthority()) || "ROLE_MECANICO".equals(a.getAuthority()));
+
+		if (isMechanic) {
+			ra.addFlashAttribute("error", "No tienes permisos para abrir una OT.");
+			return "redirect:/backoffice/citas/" + appointmentId;
+		}
+
 		var wo = workOrderService.getOrCreateForAppointment(appointmentId);
 		return "redirect:/backoffice/workorders/" + wo.getId();
 	}
